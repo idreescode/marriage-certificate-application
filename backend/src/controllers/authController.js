@@ -71,17 +71,13 @@ const forgotPassword = async (req, res) => {
   try {
     const { email, type } = req.body; // type: 'applicant' or 'admin'
 
-    let table = 'applications';
-    let emailField = 'portal_email';
+    // Unified logic: Everyone is in 'users' table
+    const table = 'users';
     
-    if (type === 'admin') {
-      table = 'users';
-      emailField = 'email';
-    }
-
+    // Check if user exists
     const [rows] = await pool.execute(
-      `SELECT * FROM ${table} WHERE ${emailField} = ?`,
-      [email]
+      'SELECT * FROM users WHERE email = ?',
+      [email.toLowerCase()]
     );
 
     if (rows.length === 0) {
@@ -102,15 +98,19 @@ const forgotPassword = async (req, res) => {
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
     await pool.execute(
-      `UPDATE ${table} SET reset_token = ?, reset_token_expiry = ? WHERE id = ?`,
+      'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?',
       [hashedToken, resetTokenExpiry, user.id]
     );
 
     // Send Email with UNHASHED token
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    // User type in link path if needed, or query param
-    const userTypePath = type === 'admin' ? '/admin' : '/applicant';
-    const resetLink = `${frontendUrl}${userTypePath}/reset-password?token=${resetToken}`;
+    
+    // We can default to /reset-password path, no need for user type?
+    // Frontend route is likely generic now? Let's assume generic or default to auth route.
+    // Looking at previous patterns, user might be redirected to specific portals.
+    // However, since login is unified, reset could be unified too.
+    // Let's keep one link.
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
 
     await sendPasswordResetEmail(email, resetLink);
 
@@ -134,18 +134,10 @@ const resetPassword = async (req, res) => {
   try {
     const { token, newPassword, type } = req.body;
 
-    let table = 'applications';
-    let passwordField = 'portal_password';
-    
-    if (type === 'admin') {
-      table = 'users';
-      passwordField = 'password';
-    }
-
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const [rows] = await pool.execute(
-      `SELECT * FROM ${table} WHERE reset_token = ? AND reset_token_expiry > NOW()`,
+      'SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()',
       [hashedToken]
     );
 
@@ -163,7 +155,7 @@ const resetPassword = async (req, res) => {
 
     // Update password and clear token
     await pool.execute(
-      `UPDATE ${table} SET ${passwordField} = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?`,
+      'UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
       [hashedPassword, user.id]
     );
 
