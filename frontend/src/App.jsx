@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Home from './pages/Home';
+// import Home from './pages/Home';
 import ApplicationPage from './pages/ApplicationPage';
 import LoginPage from './pages/LoginPage';
 // import ApplicantLogin from './pages/ApplicantLogin';
@@ -47,8 +47,8 @@ function App() {
         }}
       />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/apply" element={<ApplicationPage />} />
+        <Route path="/" element={<ApplicationPage />} />
+
         <Route path="/login" element={<LoginPage />} />
         {/* <Route path="/applicant/login" element={<ApplicantLogin />} /> */}
         <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />

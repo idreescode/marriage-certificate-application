@@ -84,10 +84,7 @@ export default function Navbar() {
           {/* Navigation */}
           <ul className="nav-links" style={{ alignItems: 'center' }}>
             <li>
-              <Link to="/" className={isActive('/')} style={{ color: 'white' }}>Home</Link>
-            </li>
-            <li>
-              <Link to="/apply" className={isActive('/apply')} style={{ color: 'white' }}>Apply Online</Link>
+              <Link to="/" className={isActive('/')} style={{ color: 'white' }}>Application</Link>
             </li>
             <li style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', height: '24px', margin: '0 4px' }}></li>
             <li>
