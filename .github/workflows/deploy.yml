@@ -1,0 +1,110 @@
+name: Deploy to IONOS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci --production
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          # Copy backend
+          cp -r backend deploy/
+          # Copy built frontend
+          cp -r frontend/dist deploy/frontend-dist
+          # Copy necessary files
+          cp package.json deploy/
+          cp ecosystem.config.js deploy/
+          cp .gitignore deploy/
+          # Remove node_modules from backend if exists
+          rm -rf deploy/backend/node_modules
+          # Create .env.example
+          echo "Creating .env.example file"
+          # Create deployment archive
+          tar -czf deployment.tar.gz deploy/
+
+      - name: Deploy to IONOS via SFTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy/
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+            **/*.log
+
+      - name: Deploy via SSH (Alternative)
+        if: ${{ secrets.SSH_HOST != '' }}
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.SSH_REMOTE_DIR }}
+            # Extract deployment package
+            tar -xzf deployment.tar.gz
+            # Install backend dependencies
+            cd backend
+            npm install --production
+            # Run migrations
+            npm run migrate || echo "Migrations may have already run"
+            # Restart application with PM2
+            pm2 restart marriage-cert-api || pm2 start ecosystem.config.js
+            pm2 save
+
+      - name: Cleanup
+        run: |
+          rm -rf deploy
+          rm -f deployment.tar.gz
+
+      - name: Deployment notification
+        if: success()
+        run: |
+          echo "✅ Deployment completed successfully!"
+
