@@ -1,6 +1,7 @@
 const { pool } = require('../config/database');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { sendPaymentVerifiedEmail } = require('../services/emailService');
+const { createNotification } = require('./notificationController');
 
 // Create Payment Intent
 // Create Checkout Session
@@ -93,26 +94,44 @@ const confirmPayment = async (req, res) => {
       }
     }
 
-    await pool.execute(
-      `UPDATE applications 
-       SET payment_status = 'verified',
-           status = 'payment_verified',
-           payment_receipt_url = ?,
-           payment_verified_at = NOW()
-       WHERE id = ?`,
-      [receiptUrl || 'stripe_checkout_paid', applicationId]
-    );
+    if (session.payment_status === 'paid') {
+      await pool.execute(
+        `UPDATE applications 
+         SET payment_status = 'verified',
+             status = 'payment_verified',
+             payment_receipt_url = ?,
+             payment_verified_at = NOW()
+         WHERE id = ?`,
+        [receiptUrl || 'stripe_checkout_paid', applicationId]
+      );
 
-    // Send email
-    const [appRows] = await pool.execute('SELECT * FROM applications WHERE id = ?', [applicationId]);
-    if (appRows.length > 0) {
-       await sendPaymentVerifiedEmail(appRows[0]);
+      // Get application details for email/notification
+      const [appRows] = await pool.execute('SELECT * FROM applications WHERE id = ?', [applicationId]);
+      if(appRows.length > 0) {
+         const app = appRows[0];
+         await sendPaymentVerifiedEmail(app);
+
+         // Notify Applicant
+         await createNotification({
+            applicationId,
+            role: 'applicant',
+            type: 'payment_verified',
+            title: 'Payment Verified',
+            message: 'Your payment has been successfully verified. Please wait for appointment scheduling.'
+         });
+
+         // Notify Admin
+         await createNotification({
+            applicationId,
+            role: 'admin',
+            type: 'payment_received',
+            title: 'Payment Received',
+            message: `Payment received for Application #${app.application_number}`
+         });
+      }
+      
+      return res.json({ success: true, message: 'Payment verified successfully' });
     }
-
-    res.json({
-      success: true,
-      message: 'Payment verified successfully'
-    });
 
   } catch (error) {
     console.error('Error verifying payment:', error);

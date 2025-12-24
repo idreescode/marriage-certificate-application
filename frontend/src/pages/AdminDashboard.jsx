@@ -5,6 +5,7 @@ import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import { getAllApplications, setDepositAmount as setDepositAPI, verifyPayment as verifyPaymentAPI, scheduleAppointment as scheduleAPI, generateCertificate as generateCertAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import NotificationBell from '../components/NotificationBell';
 import { Search, Filter, LogOut, CheckCircle, Clock, Banknote, Calendar } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -155,9 +156,12 @@ export default function AdminDashboard() {
             <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--brand-900)' }}>Admin Dashboard</h1>
             <p className="text-slate-500" style={{ margin: 0, fontSize: '1.1rem' }}>Manage marriage applications</p>
           </div>
-          <button onClick={handleLogout} className="btn btn-primary">
-            <LogOut size={16} /> Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <button onClick={handleLogout} className="btn btn-primary">
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
 
         <div className="card" style={{ padding: '0', borderTop: '4px solid var(--brand-600)' }}>

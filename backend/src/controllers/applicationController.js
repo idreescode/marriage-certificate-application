@@ -2,6 +2,7 @@ const { pool } = require('../config/database');
 const bcrypt = require('bcryptjs');
 const { generateApplicationNumber, generatePassword } = require('../utils/helpers');
 const { sendApplicationConfirmation, sendAdminNewApplicationEmail } = require('../services/emailService');
+const { createNotification } = require('./notificationController');
 const { body, validationResult } = require('express-validator');
 
 // Submit New Application
@@ -65,6 +66,15 @@ const submitApplication = async (req, res) => {
       sendApplicationConfirmation(applicationData),
       sendAdminNewApplicationEmail(applicationData)
     ]);
+
+    // Create In-App Notification for Admin
+    await createNotification({
+      applicationId,
+      role: 'admin',
+      type: 'new_application',
+      title: 'New Application Received',
+      message: `New marriage application #${applicationNumber} from ${groomFullName} & ${brideFullName}`
+    });
     
     // -----------------------------------------------------
     // DEVELOPMENT LOG: Credentials for testing since email might fail

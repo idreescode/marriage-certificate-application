@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Loader from '../components/Loader';
 import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession } from '../services/api';
 import toast from 'react-hot-toast';
+import NotificationBell from '../components/NotificationBell';
 import { FileText, Calendar, CreditCard, Download, Upload, CheckCircle, LogOut, Landmark } from 'lucide-react';
 
 // Stripe imports removed
@@ -142,9 +143,12 @@ export default function ApplicantDashboard() {
             <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--brand-900)' }}>Dashboard</h1>
             <p className="text-slate-500" style={{ margin: 0, fontSize: '1.1rem' }}>Welcome back, {app.groom_full_name}</p>
           </div>
-          <button onClick={handleLogout} className="btn btn-primary">
-            <LogOut size={16} /> Logout
-          </button>
+          <div className="flex items-center gap-4">
+             <NotificationBell />
+             <button onClick={handleLogout} className="btn btn-primary">
+               <LogOut size={16} /> Logout
+             </button>
+          </div>
         </div>
 
         <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>

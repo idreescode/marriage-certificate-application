@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const { sendReceiptUploadedNotification, sendBankDetailsRequestEmail } = require('../services/emailService');
+const { createNotification } = require('./notificationController');
 
 // Request Bank Details
 const requestBankDetails = async (req, res) => {
@@ -178,7 +179,17 @@ const uploadReceipt = async (req, res) => {
 
     // Send notification to admin
     if (rows.length > 0) {
-      await sendReceiptUploadedNotification(rows[0]);
+      const app = rows[0];
+      await sendReceiptUploadedNotification(app);
+
+      // Notify Admin
+      await createNotification({
+        applicationId,
+        role: 'admin',
+        type: 'receipt_uploaded',
+        title: 'Payment Receipt Uploaded',
+        message: `Applicant for #${app.application_number} has uploaded a payment receipt.`
+      });
     }
 
     res.json({
