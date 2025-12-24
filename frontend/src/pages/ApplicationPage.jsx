@@ -56,7 +56,7 @@ export default function ApplicationPage() {
       <div className="container" style={{ maxWidth: '98%', marginTop: '2rem' }}>
         <div className="card">
           <div className="text-center mb-6">
-            <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Marriage Certificate Application</h1>
+            <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Nikkah Application Form</h1>
             <p className="text-slate-500">Please fill out the form accurately. ID cards will be verified at the appointment.</p>
           </div>
 
@@ -121,6 +121,13 @@ export default function ApplicationPage() {
                   <input className="form-input" name="brideAddress" value={formData.brideAddress} onChange={handleChange} required />
                 </div>
               </div>
+              <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-900 text-sm" style={{ background: '#fffbeb', borderLeft: '4px solid #f59e0b', color: '#78350f', padding: '1rem', marginTop: '1rem' }}>
+                <strong>Document Requirements for Previously Married Applicants:</strong>
+                <ul className="list-disc pl-5 mt-2 space-y-1" style={{ marginTop: '0.5rem', marginLeft: '1.25rem' }}>
+                  <li>For Islamic Divorce: Original <strong>Talaq Nama</strong> or <strong>Khula Decree</strong> is required.</li>
+                  <li>For Civil Marriage (UK/Abroad): An official <strong>Decree Absolute</strong> or Court Divorce Certificate is mandatory.</li>
+                </ul>
+              </div>
             </div>
 
             {/* Witnesses Section */}
@@ -170,6 +177,9 @@ export default function ApplicationPage() {
               <div className="form-group">
                 <label className="form-label">Preferred Date</label>
                 <input type="date" className="form-input" name="preferredDate" value={formData.preferredDate} onChange={handleChange} />
+                <p className="text-xs text-slate-500 mt-1" style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                  Note: This is a requested date. Jamiyat staff will contact you to discuss availability and confirm the final date and time.
+                </p>
               </div>
               <div className="form-group">
                 <label className="form-label">Special Requests</label>

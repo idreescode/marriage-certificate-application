@@ -7,11 +7,11 @@ const { createNotification } = require('./notificationController');
 // Create Checkout Session
 const createPaymentIntent = async (req, res) => {
   try {
-    const applicationId = req.user.id;
+    const userId = req.user.id; // Correct: users.id
 
     const [rows] = await pool.execute(
-      'SELECT deposit_amount, status FROM applications WHERE id = ?',
-      [applicationId]
+      'SELECT id, deposit_amount, status FROM applications WHERE user_id = ?',
+      [userId]
     );
 
     if (rows.length === 0) {
@@ -19,6 +19,7 @@ const createPaymentIntent = async (req, res) => {
     }
 
     const application = rows[0];
+    const applicationId = application.id;
 
     if (!application.deposit_amount || application.deposit_amount <= 0) {
       return res.status(400).json({ success: false, message: 'Deposit amount is not set' });
@@ -67,7 +68,15 @@ const createPaymentIntent = async (req, res) => {
 // Verify Session / Confirm Payment
 const confirmPayment = async (req, res) => {
   try {
-    const applicationId = req.user.id;
+    const userId = req.user.id;
+    // We need key application details to verify ownership?
+    // Actually, we can just get the application ID from the user's record to compare.
+    const [appRows] = await pool.execute('SELECT id FROM applications WHERE user_id = ?', [userId]);
+    
+    if (appRows.length === 0) {
+        return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+    const applicationId = appRows[0].id;
     const { sessionId } = req.body;
 
     if (!sessionId) {

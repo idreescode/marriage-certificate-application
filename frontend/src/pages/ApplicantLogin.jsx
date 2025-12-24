@@ -62,7 +62,7 @@ export default function ApplicantLogin() {
 
           <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-               <img src="/logo.png" alt="Official Logo" style={{ height: '140px', width: 'auto' }} />
+               <img src="/logo.svg" alt="Official Logo" style={{ height: '140px', width: 'auto' }} />
             </div>
             <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: 'var(--slate-900)', textAlign: 'center' }}>Applicant Login</h2>
             <p className="text-slate-500" style={{ textAlign: 'center' }}>Enter your credentials to access your portal</p>

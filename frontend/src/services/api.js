@@ -37,9 +37,13 @@ api.interceptors.response.use(
 // Application APIs
 export const submitApplication = (data) => api.post('/applications', data);
 
+// Auth APIs
+export const login = (credentials) => api.post('/auth/login', credentials);
+
 // Applicant APIs
-export const applicantLogin = (credentials) => api.post('/applicants/login', credentials);
+// export const applicantLogin = (credentials) => api.post('/applicants/login', credentials); // DEPRECATED
 export const getApplicantDashboard = () => api.get('/applicants/dashboard');
+
 export const uploadReceipt = (formData) => api.post('/applicants/upload-receipt', formData, {
   headers: { 'Content-Type': 'multipart/form-data' }
 });
@@ -47,7 +51,7 @@ export const requestBankDetails = () => api.post('/applicants/request-bank-detai
 export const getCertificate = () => api.get('/applicants/certificate');
 
 // Admin APIs
-export const adminLogin = (credentials) => api.post('/admin/login', credentials);
+// export const adminLogin = (credentials) => api.post('/admin/login', credentials); // DEPRECATED
 export const getAllApplications = (params) => api.get('/admin/applications', { params });
 export const getApplicationById = (id) => api.get(`/admin/applications/${id}`);
 export const setDepositAmount = (id, data) => api.put(`/admin/applications/${id}/set-deposit`, data);

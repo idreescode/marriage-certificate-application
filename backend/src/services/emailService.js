@@ -50,9 +50,10 @@ const sendApplicationConfirmation = async (applicationData) => {
           
           <h3 style="color: #16a34a;">Next Steps:</h3>
           <ol style="color: #374151;">
-            <li>Our admin team will review your application</li>
-            <li>You will receive an email when the payment amount is set</li>
-            <li>Log into your portal to track your application status</li>
+            <li><strong>Jamiyat staff will contact you</strong> by email or telephone to discuss the availability of the date and time of nikah.</li>
+            <li>A deposit by a bank transfer will be required to confirm the date and time.</li>
+            <li>You will receive an email when the payment amount is set.</li>
+            <li>Log into your portal to track your application status.</li>
           </ol>
           
           <div style="text-align: center; margin-top: 30px;">
@@ -112,10 +113,10 @@ const sendDepositAmountEmail = async (applicationData) => {
           
           <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h4 style="margin-top: 0;">Bank Transfer Details:</h4>
-            <p><strong>Bank Name:</strong> Meezan Bank</p>
-            <p><strong>Account Title:</strong> Jamiyat Organization</p>
-            <p><strong>Account Number:</strong> 0123456789012</p>
-            <p><strong>IBAN:</strong> PK12MEZN0000000123456789</p>
+            <p><strong>Bank Name:</strong> Jamiyat Tabligh-ul-Islam</p>
+            <p><strong>Sort Code:</strong> 30 63 55</p>
+            <p><strong>Account No:</strong> 77990060</p>
+            <p><strong>Reference:</strong> Name of the Bride or Groom</p>
           </div>
           
           <div style="background-color: #fef3c7; padding: 20px; border-left: 4px solid #f59e0b; margin: 20px 0;">

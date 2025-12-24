@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { forgotPassword, resetPassword } = require('../controllers/authController');
+const { login, forgotPassword, resetPassword } = require('../controllers/authController');
+
+// POST /api/auth/login - Unified login
+router.post('/login', login);
 
 // POST /api/auth/forgot-password
 router.post('/forgot-password', forgotPassword);

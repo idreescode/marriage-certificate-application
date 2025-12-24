@@ -5,44 +5,7 @@ const path = require('path');
 const { sendReceiptUploadedNotification, sendBankDetailsRequestEmail } = require('../services/emailService');
 const { createNotification } = require('./notificationController');
 
-// Request Bank Details
-const requestBankDetails = async (req, res) => {
-  try {
-    const applicationId = req.user.id;
 
-    const [rows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
-      [applicationId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Application not found'
-      });
-    }
-
-    // Update status to indicate manual payment request? 
-    // Or just send email without changing status yet?
-    // User said "mail jay gi admin k pass".
-    // I will log it via email.
-    
-    await sendBankDetailsRequestEmail(rows[0]);
-
-    res.json({
-      success: true,
-      message: 'Bank details requested successfully'
-    });
-
-  } catch (error) {
-    console.error('Error requesting bank details:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to request bank details',
-      error: error.message
-    });
-  }
-};
 
 
 // Applicant Login
@@ -107,18 +70,18 @@ const applicantLogin = async (req, res) => {
 // Get Applicant Dashboard Data
 const getDashboard = async (req, res) => {
   try {
-    const applicationId = req.user.id;
+    const userId = req.user.id; // This is now the USER ID from users table
 
-    // Get application details
+    // Get application details by user_id
     const [applications] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
-      [applicationId]
+      'SELECT * FROM applications WHERE user_id = ?',
+      [userId]
     );
 
     if (applications.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: 'No application found for this account'
       });
     }
 
@@ -127,16 +90,13 @@ const getDashboard = async (req, res) => {
     // Get witnesses
     const [witnesses] = await pool.execute(
       'SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order',
-      [applicationId]
+      [application.id]
     );
 
     res.json({
       success: true,
       data: {
-        application: {
-          ...application,
-          portal_password: undefined // Don't send password
-        },
+        application: application,
         witnesses
       }
     });
@@ -154,7 +114,7 @@ const getDashboard = async (req, res) => {
 // Upload Payment Receipt
 const uploadReceipt = async (req, res) => {
   try {
-    const applicationId = req.user.id;
+    const userId = req.user.id; // User ID
 
     if (!req.file) {
       return res.status(400).json({
@@ -163,6 +123,18 @@ const uploadReceipt = async (req, res) => {
       });
     }
 
+    // Find application first
+    const [rows] = await pool.execute(
+      'SELECT id, application_number FROM applications WHERE user_id = ?',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
+    const app = rows[0];
+    const applicationId = app.id;
     const receiptUrl = `/uploads/receipts/${req.file.filename}`;
 
     // Update application with receipt
@@ -171,26 +143,16 @@ const uploadReceipt = async (req, res) => {
       [receiptUrl, applicationId]
     );
 
-    // Get application data for email
-    const [rows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
-      [applicationId]
-    );
+    // Send notification
+    await sendReceiptUploadedNotification(app);
 
-    // Send notification to admin
-    if (rows.length > 0) {
-      const app = rows[0];
-      await sendReceiptUploadedNotification(app);
-
-      // Notify Admin
-      await createNotification({
-        applicationId,
-        role: 'admin',
-        type: 'receipt_uploaded',
-        title: 'Payment Receipt Uploaded',
-        message: `Applicant for #${app.application_number} has uploaded a payment receipt.`
-      });
-    }
+    await createNotification({
+      applicationId,
+      role: 'admin',
+      type: 'receipt_uploaded',
+      title: 'Payment Receipt Uploaded',
+      message: `Applicant for #${app.application_number} has uploaded a payment receipt.`
+    });
 
     res.json({
       success: true,
@@ -211,11 +173,11 @@ const uploadReceipt = async (req, res) => {
 // Download Certificate
 const downloadCertificate = async (req, res) => {
   try {
-    const applicationId = req.user.id;
+    const userId = req.user.id;
 
     const [rows] = await pool.execute(
-      'SELECT certificate_url, status FROM applications WHERE id = ?',
-      [applicationId]
+      'SELECT certificate_url, status FROM applications WHERE user_id = ?',
+      [userId]
     );
 
     if (rows.length === 0) {
@@ -251,8 +213,24 @@ const downloadCertificate = async (req, res) => {
   }
 };
 
+// Request Bank Details (Placeholder logic)
+const requestBankDetails = async (req, res) => {
+    try {
+      const userId = req.user.id;
+      // Fetch application by user_id to confirm existence
+      const [rows] = await pool.execute('SELECT * FROM applications WHERE user_id = ?', [userId]);
+
+      if (rows.length === 0) return res.status(404).json({ success: false, message: 'Application not found' });
+      
+      await sendBankDetailsRequestEmail(rows[0]);
+      res.json({ success: true, message: 'Bank details requested successfully' });
+    } catch (error) {
+       console.error(error);
+       res.status(500).json({ success: false, message: 'Failed to request details' });
+    }
+};
+
 module.exports = {
-  applicantLogin,
   getDashboard,
   uploadReceipt,
   downloadCertificate,

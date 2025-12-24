@@ -36,7 +36,7 @@ const verifyAdmin = (req, res, next) => {
 
 // Middleware to verify applicant
 const verifyApplicant = (req, res, next) => {
-  if (!req.user || req.user.type !== 'applicant') {
+  if (!req.user || req.user.role !== 'applicant') {
     return res.status(403).json({ 
       success: false, 
       message: 'Access denied - Applicant access only' 

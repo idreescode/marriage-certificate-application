@@ -2,12 +2,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import ApplicationPage from './pages/ApplicationPage';
-import ApplicantLogin from './pages/ApplicantLogin';
+import LoginPage from './pages/LoginPage';
+// import ApplicantLogin from './pages/ApplicantLogin';
 import ApplicantDashboard from './pages/ApplicantDashboard';
-import AdminLogin from './pages/AdminLogin';
+// import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import AdminLayout from './layouts/AdminLayout';
+import AdminApplications from './pages/AdminApplications';
 
 function App() {
   return (
@@ -46,19 +49,25 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/apply" element={<ApplicationPage />} />
-        <Route path="/applicant/login" element={<ApplicantLogin />} />
+        <Route path="/login" element={<LoginPage />} />
+        {/* <Route path="/applicant/login" element={<ApplicantLogin />} /> */}
         <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
         
         {/* Applicant Auth */}
         <Route path="/applicant/forgot-password" element={<ForgotPassword type="applicant" />} />
         <Route path="/applicant/reset-password" element={<ResetPassword type="applicant" />} />
 
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-        {/* Admin Auth */}
-        <Route path="/admin/forgot-password" element={<ForgotPassword type="admin" />} />
-        <Route path="/admin/reset-password" element={<ResetPassword type="admin" />} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+           <Route path="dashboard" element={<AdminDashboard />} />
+           <Route path="applications" element={<AdminApplications />} />
+           {/* Fallback for now */}
+           <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />
+           <Route path="settings" element={<div className="p-8 text-center text-slate-500">Settings Module Coming Soon</div>} />
+        </Route>
+        
+        {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
+        <Route path="/admin/login" element={<LoginPage />} /> {/* Redirect old admin link to new login */}
       </Routes>
     </BrowserRouter>
   );

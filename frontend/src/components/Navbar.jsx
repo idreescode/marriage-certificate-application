@@ -9,12 +9,12 @@ export default function Navbar() {
   // 1. Admin Navbar
   if (path.startsWith('/admin')) {
     return (
-      <nav className="navbar" style={{ background: 'var(--brand-600)', borderBottom: 'none' }}>
+      <nav className="navbar" style={{ background: 'var(--brand-900)', borderBottom: 'none' }}>
         <div className="container">
           <div className="flex justify-between items-center w-full">
             <Link to="/admin/dashboard" className="nav-brand" style={{ color: 'white' }}>
               <div style={{ background: 'white', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', marginRight: '8px' }}>
-                 <img src="/logo.png" alt="Logo" style={{ height: '32px', width: 'auto' }} />
+                 <img src="/logo.svg" alt="Logo" style={{ height: '40px', width: 'auto' }} />
               </div>
               <span>Admin Portal</span>
             </Link>
@@ -40,7 +40,7 @@ export default function Navbar() {
   // 2. Applicant Navbar
   if (path.startsWith('/applicant')) {
     return (
-      <nav className="navbar" style={{ background: 'var(--brand-600)', borderBottom: 'none' }}>
+      <nav className="navbar" style={{ background: 'var(--brand-900)', borderBottom: 'none' }}>
         <div className="container">
           <div className="flex justify-between items-center w-full">
             <Link to="/applicant/dashboard" className="nav-brand" style={{ color: 'white' }}>
@@ -70,7 +70,7 @@ export default function Navbar() {
 
   // 3. Public Navbar (Default)
   return (
-    <nav className="navbar" style={{ background: 'var(--brand-600)', borderBottom: 'none' }}>
+    <nav className="navbar" style={{ background: 'var(--brand-900)', borderBottom: 'none' }}>
       <div className="container">
         <div className="flex justify-between items-center w-full">
           {/* Brand */}
@@ -91,15 +91,11 @@ export default function Navbar() {
             </li>
             <li style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', height: '24px', margin: '0 4px' }}></li>
             <li>
-              <Link to="/applicant/login" className="btn btn-sm" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}>
-                <LogIn size={16} /> Applicant Login
+              <Link to="/login" className="btn btn-sm" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}>
+                <LogIn size={16} /> Login
               </Link>
             </li>
-            <li>
-              <Link to="/admin/login" className="btn btn-sm" style={{ background: 'white', color: 'var(--brand-600)' }}>
-                <Shield size={16} /> Admin Portal
-              </Link>
-            </li>
+
           </ul>
         </div>
       </div>

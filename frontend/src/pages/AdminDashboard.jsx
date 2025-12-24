@@ -1,331 +1,214 @@
+
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import Loader from '../components/Loader';
-import Modal from '../components/Modal';
-import { getAllApplications, setDepositAmount as setDepositAPI, verifyPayment as verifyPaymentAPI, scheduleAppointment as scheduleAPI, generateCertificate as generateCertAPI } from '../services/api';
-import toast from 'react-hot-toast';
-import NotificationBell from '../components/NotificationBell';
-import { Search, Filter, LogOut, CheckCircle, Clock, Banknote, Calendar } from 'lucide-react';
+import { getAllApplications } from '../services/api';
+import { Users, CreditCard, Calendar, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [applications, setApplications] = useState([]);
-  
-  // Modal States
-  const [activeModal, setActiveModal] = useState(null); // 'deposit', 'verify', 'schedule'
-  const [selectedAppId, setSelectedAppId] = useState(null);
-  
-  // Form States
-  const [depositAmount, setDepositAmount] = useState('');
-  const [appointmentData, setAppointmentData] = useState({ date: '', time: '', location: '' });
+  const [stats, setStats] = useState({
+    total: 0,
+    new: 0,
+    pendingPayment: 0,
+    scheduled: 0,
+    completed: 0,
+    totalRevenue: 0
+  });
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-    fetchApplications();
+    fetchStats();
   }, []);
 
-  const fetchApplications = async () => {
+  const fetchStats = async () => {
     try {
       const response = await getAllApplications();
-      setApplications(response.data.data.applications);
+      const apps = response.data.data.applications;
+      
+      const newApps = apps.filter(a => a.status === 'admin_review').length;
+      const pending = apps.filter(a => a.status === 'payment_pending').length;
+      const scheduled = apps.filter(a => a.status === 'appointment_scheduled').length;
+      const completed = apps.filter(a => a.status === 'completed').length;
+      
+      const revenue = apps.reduce((acc, curr) => {
+         if ((curr.status === 'payment_verified' || curr.status === 'appointment_scheduled' || curr.status === 'completed') && curr.deposit_amount) {
+            return acc + Number(curr.deposit_amount);
+         }
+         return acc;
+      }, 0);
+
+      // Process Chart Data (Last 6 Months)
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const today = new Date();
+      const last6Months = [];
+      
+      for (let i = 5; i >= 0; i--) {
+         const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+         last6Months.push({
+            name: months[d.getMonth()],
+            monthIndex: d.getMonth(),
+            year: d.getFullYear(),
+            applications: 0
+         });
+      }
+
+      apps.forEach(app => {
+         const d = new Date(app.created_at);
+         const monthIndex = d.getMonth();
+         const year = d.getFullYear();
+         
+         const period = last6Months.find(p => p.monthIndex === monthIndex && p.year === year);
+         if (period) {
+            period.applications += 1;
+         }
+      });
+
+      setChartData(last6Months);
+
+      setStats({
+        total: apps.length,
+        new: newApps,
+        pendingPayment: pending,
+        scheduled: scheduled,
+        completed: completed,
+        totalRevenue: revenue
+      });
     } catch (error) {
-      toast.error('Failed to load applications');
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Open Handlers
-  const openSetDeposit = (id) => {
-    setSelectedAppId(id);
-    setDepositAmount('');
-    setActiveModal('deposit');
-  };
-
-  const openVerifyPayment = (id) => {
-    setSelectedAppId(id);
-    setActiveModal('verify');
-  };
-
-  const openSchedule = (id) => {
-    setSelectedAppId(id);
-    setAppointmentData({ date: '', time: '', location: '' });
-    setActiveModal('schedule');
-  };
-
-  const closeModal = () => {
-    setActiveModal(null);
-    setSelectedAppId(null);
-  };
-
-  // Action Handlers
-  const handleSetDeposit = async (e) => {
-    e.preventDefault();
-    if (!depositAmount) return;
-
-    const toastId = toast.loading('Setting deposit...');
-    try {
-      await setDepositAPI(selectedAppId, { depositAmount: parseFloat(depositAmount) });
-      toast.success('Deposit amount set successfully!', { id: toastId });
-      closeModal();
-      fetchApplications();
-    } catch (error) {
-      toast.error('Failed to set deposit amount', { id: toastId });
-    }
-  };
-
-  const handleVerifyPayment = async () => {
-    const toastId = toast.loading('Verifying payment...');
-    try {
-      await verifyPaymentAPI(selectedAppId);
-      toast.success('Payment verified successfully!', { id: toastId });
-      closeModal();
-      fetchApplications();
-    } catch (error) {
-      toast.error('Failed to verify payment', { id: toastId });
-    }
-  };
-
-  const handleScheduleAppointment = async (e) => {
-    e.preventDefault();
-    const { date, time, location } = appointmentData;
-    if (!date || !time || !location) return;
-
-    const toastId = toast.loading('Scheduling appointment...');
-    try {
-      await scheduleAPI(selectedAppId, { 
-        appointmentDate: date, 
-        appointmentTime: time, 
-        appointmentLocation: location 
-      });
-      toast.success('Appointment scheduled successfully!', { id: toastId });
-      closeModal();
-      fetchApplications();
-    } catch (error) {
-      toast.error('Failed to schedule appointment', { id: toastId });
-    }
-  };
-
-  const handleGenerateCertificate = async (appId) => {
-    const toastId = toast.loading('Generating certificate...');
-    try {
-      await generateCertAPI(appId);
-      toast.success('Certificate generated successfully!', { id: toastId });
-      fetchApplications();
-    } catch (error) {
-      toast.error('Failed to generate certificate', { id: toastId });
-    }
-  };
-
-  const StatusBadge = ({ status }) => {
-    const styles = {
-      submitted: 'badge-info',
-      admin_review: 'badge-warning',
-      payment_pending: 'badge-warning',
-      payment_verified: 'badge-info',
-      appointment_scheduled: 'badge-info',
-      completed: 'badge-success'
-    };
-    return (
-      <span className={`badge ${styles[status] || 'badge-info'}`}>
-        {status.replace('_', ' ')}
-      </span>
-    );
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userType');
-    navigate('/');
-  };
+  const StatCard = ({ title, value, icon: Icon, color, bg }) => (
+    <div className="stat-card">
+      <div>
+        <p style={{ color: 'var(--slate-500)', fontSize: '0.9rem', fontWeight: 500, marginBottom: '0.25rem' }}>{title}</p>
+        <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--slate-800)', margin: 0 }}>{value}</h3>
+      </div>
+      <div className="stat-icon" style={{ backgroundColor: bg }}>
+        <Icon size={24} className={color} style={{ color: color }} />
+      </div>
+    </div>
+  );
 
   if (loading) return <Loader fullscreen />;
 
   return (
-    <div style={{ paddingBottom: '4rem' }}>
-      <Navbar />
-      <div className="container" style={{ marginTop: '2rem' }}>
-        <div className="flex justify-between items-center mb-6" style={{ marginBottom: '2rem' }}>
-          <div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem', color: 'var(--brand-900)' }}>Admin Dashboard</h1>
-            <p className="text-slate-500" style={{ margin: 0, fontSize: '1.1rem' }}>Manage marriage applications</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <NotificationBell />
-            <button onClick={handleLogout} className="btn btn-primary">
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
-        </div>
+    <div>
+      <div className="mb-6">
+        <h1 style={{ fontSize: '2rem', margin: 0 }}>Dashboard Overview</h1>
+        <p className="text-muted">Welcome back, Administrator. Here's what's happening today.</p>
+      </div>
 
-        <div className="card" style={{ padding: '0', borderTop: '4px solid var(--brand-600)' }}>
-          <div className="card-header" style={{ padding: '1.5rem', marginBottom: '0' }}>
-            <div className="flex justify-between items-center">
-              <h2 style={{ fontSize: '1.1rem', margin: '0' }}>Recent Applications</h2>
-              <div className="flex gap-2">
-                <button className="btn btn-sm btn-secondary"><Filter size={14} /> Filter</button>
-                <div style={{ position: 'relative' }}>
-                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--slate-400)' }} />
-                  <input className="form-input" placeholder="Search..." style={{ padding: '0.4rem 0.5rem 0.4rem 2rem', fontSize: '0.875rem' }} />
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <StatCard 
+          title="Total Applications" 
+          value={stats.total} 
+          icon={Users} 
+          color="#2563eb" 
+          bg="#eff6ff" 
+        />
+        <StatCard 
+          title="New Requests" 
+          value={stats.new} 
+          icon={AlertCircle} 
+          color="#ea580c" 
+          bg="#fff7ed" 
+        />
+        <StatCard 
+          title="Pending Payments" 
+          value={stats.pendingPayment} 
+          icon={CreditCard} 
+          color="#9333ea" 
+          bg="#faf5ff" 
+        />
+        <StatCard 
+          title="Scheduled Nikkahs" 
+          value={stats.scheduled} 
+          icon={Calendar} 
+          color="#059669" 
+          bg="#ecfdf5" 
+        />
+      </div>
 
-          <div className="table-container" style={{ border: 'none', borderRadius: '0' }}>
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: '120px' }}>Ref #</th>
-                  <th>Groom / Bride</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.map(app => (
-                  <tr key={app.id}>
-                    <td>
-                      <span className="text-slate-500 text-sm font-mono">{app.application_number}</span>
-                    </td>
-                    <td>
-                      <div className="font-medium text-slate-900">{app.groom_full_name}</div>
-                      <div className="text-xs text-slate-500">{app.bride_full_name}</div>
-                    </td>
-                    <td><StatusBadge status={app.status} /></td>
-                    <td>
-                      {app.deposit_amount ? (
-                        <div className="text-sm">
-                          <span className="font-medium">PKR {app.deposit_amount}</span>
-                          {app.payment_receipt_url && !app.payment_verified_at && (
-                            <span className="block text-xs text-brand-600 mt-1 flex items-center gap-1">
-                              <CheckCircle size={10} /> Receipt
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 text-xs">-</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="flex gap-2 flex-wrap">
-                        {app.status === 'admin_review' && (
-                          <button onClick={() => openSetDeposit(app.id)} className="btn btn-sm btn-primary">
-                            <Banknote size={14} /> Set Deposit
-                          </button>
-                        )}
-                        {app.status === 'payment_pending' && app.payment_receipt_url && (
-                          <button onClick={() => openVerifyPayment(app.id)} className="btn btn-sm btn-primary">
-                            <CheckCircle size={14} /> Verify
-                          </button>
-                        )}
-                        {app.status === 'payment_verified' && (
-                          <button onClick={() => openSchedule(app.id)} className="btn btn-sm btn-secondary">
-                            <Calendar size={14} /> Schedule
-                          </button>
-                        )}
-                        {app.status === 'appointment_scheduled' && (
-                          <button onClick={() => handleGenerateCertificate(app.id)} className="btn btn-sm btn-success text-white" style={{ background: 'var(--success)', color: 'white', border: 'none' }}>
-                            <CheckCircle size={14} /> Finish
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      {/* Revenue Section */}
+      <div className="revenue-section">
+         {/* Main Chart Area */}
+         <div className="card" style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
+             <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>Applications Overview</h3>
+             <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
+               <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                   <XAxis 
+                     dataKey="name" 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tick={{ fill: '#64748b', fontSize: 12 }} 
+                     dy={10}
+                   />
+                   <YAxis 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tick={{ fill: '#64748b', fontSize: 12 }} 
+                   />
+                   <Tooltip 
+                     contentStyle={{ 
+                        backgroundColor: '#1e293b', 
+                        border: 'none', 
+                        borderRadius: '8px', 
+                        color: 'white',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                     }}
+                     itemStyle={{ color: 'white' }}
+                     cursor={{ fill: '#f1f5f9' }}
+                   />
+                   <Bar 
+                     dataKey="applications" 
+                     fill="var(--brand-600)" 
+                     radius={[4, 4, 0, 0]} 
+                     barSize={40}
+                   />
+                 </BarChart>
+               </ResponsiveContainer>
+             </div>
+         </div>
 
-        {/* Modals */}
-        <Modal 
-          isOpen={activeModal === 'deposit'} 
-          onClose={closeModal} 
-          title="Set Deposit Amount"
-        >
-          <form onSubmit={handleSetDeposit}>
-            <div className="form-group">
-              <label className="form-label">Amount (PKR)</label>
-              <input 
-                type="number" 
-                className="form-input" 
-                value={depositAmount} 
-                onChange={(e) => setDepositAmount(e.target.value)} 
-                placeholder="e.g. 5000"
-                required
-              />
+         {/* Side Stats */}
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="card">
+               <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Total Revenue</h3>
+               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--brand-900)' }}>PKR {stats.totalRevenue.toLocaleString()}</span>
+               </div>
+               <p style={{ marginTop: '0.5rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}>
+                  <TrendingUp size={14} /> +12% from last month
+               </p>
             </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={closeModal} className="btn btn-secondary">Cancel</button>
-              <button type="submit" className="btn btn-primary">Set Amount</button>
-            </div>
-          </form>
-        </Modal>
 
-        <Modal 
-          isOpen={activeModal === 'verify'} 
-          onClose={closeModal} 
-          title="Verify Payment"
-        >
-          <p className="text-slate-600 mb-6">Are you sure you want to verify the payment receipt for this application? This will confirm the payment and allow scheduling.</p>
-          <div className="flex justify-end gap-2">
-            <button onClick={closeModal} className="btn btn-secondary">Cancel</button>
-            <button onClick={handleVerifyPayment} className="btn btn-primary">Confirm Verification</button>
-          </div>
-        </Modal>
-
-        <Modal 
-          isOpen={activeModal === 'schedule'} 
-          onClose={closeModal} 
-          title="Schedule Appointment"
-        >
-          <form onSubmit={handleScheduleAppointment}>
-            <div className="form-group">
-              <label className="form-label">Date</label>
-              <input 
-                type="date" 
-                className="form-input" 
-                value={appointmentData.date} 
-                onChange={(e) => setAppointmentData({...appointmentData, date: e.target.value})} 
-                required
-              />
+            <div className="card">
+               <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Urgent Actions</h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {stats.new > 0 ? (
+                     <div style={{ padding: '0.75rem', background: '#fff7ed', color: '#c2410c', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <AlertCircle size={16} />
+                        <span>{stats.new} new applications to review</span>
+                     </div>
+                  ) : (
+                     <p className="text-muted text-sm">No pending reviews.</p>
+                  )}
+                  {stats.pendingPayment > 0 && (
+                     <div style={{ padding: '0.75rem', background: '#eff6ff', color: '#1d4ed8', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Clock size={16} />
+                        <span>{stats.pendingPayment} payments pending</span>
+                     </div>
+                  )}
+               </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Time</label>
-              <input 
-                type="time" 
-                className="form-input" 
-                value={appointmentData.time} 
-                onChange={(e) => setAppointmentData({...appointmentData, time: e.target.value})} 
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Location</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={appointmentData.location} 
-                onChange={(e) => setAppointmentData({...appointmentData, location: e.target.value})} 
-                placeholder="e.g. Main Hall, Jamiyat Center"
-                required
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={closeModal} className="btn btn-secondary">Cancel</button>
-              <button type="submit" className="btn btn-primary">Schedule Event</button>
-            </div>
-          </form>
-        </Modal>
-
+         </div>
       </div>
     </div>
   );

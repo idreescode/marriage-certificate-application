@@ -3,15 +3,13 @@ const router = express.Router();
 const { verifyToken, verifyApplicant } = require('../middleware/auth');
 const { uploadReceipt } = require('../middleware/upload');
 const {
-  applicantLogin,
   getDashboard,
   uploadReceipt: uploadReceiptController,
   downloadCertificate,
   requestBankDetails
 } = require('../controllers/applicantController');
 
-// POST /api/applicants/login - Applicant login
-router.post('/login', applicantLogin);
+// POST /api/applicants/login - REMOVED (Use /api/auth/login)
 
 // Protected routes (requires authentication)
 router.use(verifyToken);

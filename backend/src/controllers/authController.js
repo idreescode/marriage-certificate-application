@@ -4,6 +4,68 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../services/emailService');
 
+// Unified Login (Admin & Applicant)
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check users table (now holds both admins and applicants)
+    const [rows] = await pool.execute(
+      'SELECT * FROM users WHERE email = ?',
+      [email.toLowerCase()]
+    );
+
+    if (rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    const user = rows[0];
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Generate Token
+    const token = jwt.sign(
+      { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.full_name,
+          role: user.role
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in unified login:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed',
+      error: error.message
+    });
+  }
+};
+
 // Forgot Password
 const forgotPassword = async (req, res) => {
   try {
@@ -121,6 +183,7 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
+  login,
   forgotPassword,
   resetPassword
 };
