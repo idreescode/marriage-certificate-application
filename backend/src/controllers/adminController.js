@@ -394,7 +394,10 @@ const generateCertificate = async (req, res) => {
 
     // Send email to applicant
     const [updatedRows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      `SELECT a.*, u.email 
+       FROM applications a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.id = ?`,
       [id]
     );
 

@@ -8,64 +8,7 @@ const { createNotification } = require('./notificationController');
 
 
 
-// Applicant Login
-const applicantLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
 
-    const [rows] = await pool.execute(
-      'SELECT * FROM applications WHERE portal_email = ?',
-      [email.toLowerCase()]
-    );
-
-    if (rows.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
-
-    const application = rows[0];
-    const isValidPassword = await bcrypt.compare(password, application.portal_password);
-
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { 
-        id: application.id, 
-        email: application.portal_email, 
-        type: 'applicant',
-        applicationNumber: application.application_number
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        token,
-        applicationNumber: application.application_number,
-        status: application.status
-      }
-    });
-
-  } catch (error) {
-    console.error('Error in applicant login:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Login failed',
-      error: error.message
-    });
-  }
-};
 
 // Get Applicant Dashboard Data
 const getDashboard = async (req, res) => {
