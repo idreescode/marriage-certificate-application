@@ -1,7 +1,7 @@
 const { pool } = require('../config/database');
 const bcrypt = require('bcryptjs');
 const { generateApplicationNumber, generatePassword } = require('../utils/helpers');
-const { sendApplicationConfirmation } = require('../services/emailService');
+const { sendApplicationConfirmation, sendAdminNewApplicationEmail } = require('../services/emailService');
 const { body, validationResult } = require('express-validator');
 
 // Submit New Application
@@ -57,10 +57,14 @@ const submitApplication = async (req, res) => {
       groom_full_name: groomFullName,
       bride_full_name: brideFullName,
       portal_email: portalEmail,
-      portalPassword: portalPassword // Send plain password in email
+      portalPassword: portalPassword
     };
     
-    await sendApplicationConfirmation(applicationData);
+    // Send emails in parallel
+    await Promise.all([
+      sendApplicationConfirmation(applicationData),
+      sendAdminNewApplicationEmail(applicationData)
+    ]);
     
     // -----------------------------------------------------
     // DEVELOPMENT LOG: Credentials for testing since email might fail

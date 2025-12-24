@@ -94,7 +94,10 @@ export default function AdminLogin() {
             </div>
 
             <div className="form-group" style={{ marginBottom: '2rem' }}>
-              <label className="form-label">Password</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="form-label">Password</label>
+                <Link to="/admin/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--brand-600)', textDecoration: 'none', fontWeight: 500 }}>Forgot password?</Link>
+              </div>
               <div style={{ position: 'relative' }}>
                 <Lock size={18} className="text-slate-400" style={{ position: 'absolute', left: '16px', top: '19px', color: 'var(--slate-400)' }} />
                 <input 

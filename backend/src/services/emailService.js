@@ -357,6 +357,72 @@ const sendBankDetailsRequestEmail = async (applicationData, adminEmail = 'admin@
   }
 };
 
+// 8. Admin New Application Notification
+const sendAdminNewApplicationEmail = async (applicationData, adminEmail = 'admin@jamiyat.org') => {
+  const { application_number, groom_full_name, bride_full_name, id } = applicationData;
+
+  const mailOptions = {
+    from: `"Jamiyat.org System" <${process.env.EMAIL_USER}>`,
+    to: adminEmail,
+    subject: `New Application Received - #${application_number}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #3b82f6; padding: 15px; border-radius: 8px 8px 0 0; text-align: center;">
+          <h2 style="color: white; margin: 0;">🆕 New Application</h2>
+        </div>
+        <div style="border: 1px solid #e5e7eb; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
+          <p><strong>Application:</strong> ${application_number}</p>
+          <p><strong>Applicants:</strong> ${groom_full_name} & ${bride_full_name}</p>
+          <p>A new marriage certificate application has been submitted.</p>
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="${process.env.FRONTEND_URL}/admin/applications/${id}" 
+               style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              View Application
+            </a>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Admin notification sent for new application');
+  } catch (error) {
+    console.error('❌ Error sending admin notification:', error);
+  }
+};
+
+// 9. Password Reset Email
+const sendPasswordResetEmail = async (email, resetLink) => {
+  const mailOptions = {
+    from: `"Jamiyat.org Security" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Reset Your Password`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #dc2626;">Reset Your Password</h2>
+        <p>You requested a password reset. Click the link below to set a new password:</p>
+        <p style="margin: 20px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #dc2626; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            Reset Password
+          </a>
+        </p>
+        <p style="font-size: 14px; color: #6b7280;">This link will expire in 1 hour.</p>
+        <p style="font-size: 14px; color: #6b7280;">If you didn't request this, please ignore this email.</p>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Password reset email sent to:', email);
+  } catch (error) {
+    console.error('❌ Error sending password reset email:', error);
+  }
+};
+
 module.exports = {
   sendApplicationConfirmation,
   sendDepositAmountEmail,
@@ -364,5 +430,7 @@ module.exports = {
   sendPaymentVerifiedEmail,
   sendAppointmentEmail,
   sendCertificateReadyEmail,
-  sendBankDetailsRequestEmail
+  sendBankDetailsRequestEmail,
+  sendAdminNewApplicationEmail,
+  sendPasswordResetEmail
 };

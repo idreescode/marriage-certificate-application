@@ -30,6 +30,7 @@ app.use('/api/applications', applicationsRoutes);
 app.use('/api/applicants', applicantsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/auth', require('./routes/auth'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

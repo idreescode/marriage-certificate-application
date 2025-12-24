@@ -6,6 +6,8 @@ import ApplicantLogin from './pages/ApplicantLogin';
 import ApplicantDashboard from './pages/ApplicantDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -46,8 +48,17 @@ function App() {
         <Route path="/apply" element={<ApplicationPage />} />
         <Route path="/applicant/login" element={<ApplicantLogin />} />
         <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
+        
+        {/* Applicant Auth */}
+        <Route path="/applicant/forgot-password" element={<ForgotPassword type="applicant" />} />
+        <Route path="/applicant/reset-password" element={<ResetPassword type="applicant" />} />
+
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+        {/* Admin Auth */}
+        <Route path="/admin/forgot-password" element={<ForgotPassword type="admin" />} />
+        <Route path="/admin/reset-password" element={<ResetPassword type="admin" />} />
       </Routes>
     </BrowserRouter>
   );
