@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Loader from '../components/Loader';
-import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI } from '../services/api';
+import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession } from '../services/api';
 import toast from 'react-hot-toast';
 import { FileText, Calendar, CreditCard, Download, Upload, CheckCircle, LogOut, Landmark } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import PaymentForm from '../components/PaymentForm';
 
-// Initialize Stripe outside of component
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+// Stripe imports removed
 
 export default function ApplicantDashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
@@ -26,7 +23,29 @@ export default function ApplicantDashboard() {
       return;
     }
     fetchDashboard();
+    checkPaymentStatus();
   }, []);
+
+  const checkPaymentStatus = async () => {
+      const success = searchParams.get('payment_success');
+      const sessionId = searchParams.get('session_id');
+      const cancelled = searchParams.get('payment_cancelled');
+
+      if (success && sessionId) {
+        setSearchParams({}); // Clear params
+        const toastId = toast.loading('Verifying payment...');
+        try {
+          await verifySession(sessionId);
+          toast.success('Payment verified successfully!', { id: toastId });
+          fetchDashboard(); // Refresh data
+        } catch (error) {
+          toast.error('Payment verification failed: ' + (error.response?.data?.message || error.message), { id: toastId });
+        }
+      } else if (cancelled) {
+          setSearchParams({});
+          toast.error('Payment cancelled');
+      }
+  };
 
   const fetchDashboard = async () => {
     try {
@@ -74,6 +93,18 @@ export default function ApplicantDashboard() {
       } catch (error) {
         toast.error('Failed to request bank details', { id: toastId });
       }
+  };
+
+  const handleOnlinePayment = async () => {
+    const toastId = toast.loading('Redirecting to checkout...');
+    try {
+        const response = await createCheckoutSession();
+        if(response.data.url) {
+            window.location.href = response.data.url;
+        }
+    } catch (error) {
+        toast.error('Failed to initiate payment: ' + (error.response?.data?.message || 'Server Error'), { id: toastId });
+    }
   };
 
   const handleLogout = () => {
@@ -184,9 +215,10 @@ export default function ApplicantDashboard() {
                            <h4 className="font-semibold text-slate-700 m-0">Pay Online</h4>
                            <button onClick={() => setPaymentMethod(null)} className="text-xs text-brand-600 hover:underline">Change Method</button>
                         </div>
-                        <Elements stripe={stripePromise}>
-                          <PaymentForm onSuccess={fetchDashboard} />
-                        </Elements>
+                        <p className="text-sm text-slate-600 mb-4">You will be redirected to a secure payment page.</p>
+                        <button onClick={handleOnlinePayment} className="btn btn-primary w-full flex items-center justify-center gap-2">
+                            <CreditCard size={18} /> Proceed to Pay
+                        </button>
                       </div>
                     )}
 
@@ -216,7 +248,8 @@ export default function ApplicantDashboard() {
                 
                 {app.payment_receipt_url && (
                   <div className="flex items-center gap-2 text-sm text-brand-600 bg-brand-50 p-3 rounded" style={{ background: 'var(--brand-50)', color: 'var(--brand-700)', padding: '0.75rem', borderRadius: '6px' }}>
-                    <CheckCircle size={16} /> Receipt uploaded successfully
+                    <CheckCircle size={16} /> 
+                    {app.status === 'payment_verified' ? 'Payment Verified' : 'Receipt uploaded successfully'}
                   </div>
                 )}
               </div>

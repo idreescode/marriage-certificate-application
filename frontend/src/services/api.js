@@ -56,4 +56,8 @@ export const scheduleAppointment = (id, data) => api.put(`/admin/applications/${
 export const markComplete = (id) => api.put(`/admin/applications/${id}/complete`);
 export const generateCertificate = (id) => api.post(`/admin/applications/${id}/generate-certificate`);
 
+// Payment APIs
+export const createCheckoutSession = () => api.post('/payment/create-checkout-session');
+export const verifySession = (sessionId) => api.post('/payment/verify-session', { sessionId });
+
 export default api;
