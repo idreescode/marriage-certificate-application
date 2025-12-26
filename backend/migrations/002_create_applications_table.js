@@ -9,6 +9,7 @@ module.exports = {
       CREATE TABLE IF NOT EXISTS applications (
         id INT PRIMARY KEY AUTO_INCREMENT,
         application_number VARCHAR(50) UNIQUE NOT NULL,
+        user_id INT NOT NULL,
         
         groom_full_name VARCHAR(255) NOT NULL,
         groom_date_of_birth DATE NOT NULL,
@@ -51,6 +52,7 @@ module.exports = {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         
+        FOREIGN KEY (user_id) REFERENCES users(id),
         FOREIGN KEY (deposit_amount_set_by) REFERENCES users(id),
         FOREIGN KEY (payment_verified_by) REFERENCES users(id)
       )

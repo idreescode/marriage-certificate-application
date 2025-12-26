@@ -8,18 +8,94 @@ const { body, validationResult } = require('express-validator');
 // Submit New Application
 const submitApplication = async (req, res) => {
   try {
-    const {
-      groomFullName, groomDateOfBirth, groomAddress, groomPhone, groomEmail, groomIdNumber,
-      brideFullName, brideDateOfBirth, brideAddress, bridePhone, brideEmail, brideIdNumber,
-      witnesses, preferredDate, specialRequests
-    } = req.body;
+    // DEBUG: See what frontend is actually sending
+    console.log('===== COMPLETE REQUEST BODY =====');
+    console.log(JSON.stringify(req.body, null, 2));
+    console.log('=================================');
+    
+    // Convert array format to object format
+    // Frontend sends: { data: [{ name: "groomName", value: "..." }, ...] }
+    // We need: { groomName: "...", ... }
+    let formData = {};
+    if (req.body.data && Array.isArray(req.body.data)) {
+      req.body.data.forEach(item => {
+        formData[item.name] = item.value || null;
+      });
+    } else {
+      // If data is already in object format, use it directly
+      formData = req.body;
+    }
+    
+    console.log('===== CONVERTED FORM DATA =====');
+    console.log(JSON.stringify(formData, null, 2));
+    console.log('=================================');
+    
+    // Extract data from converted formData object
+    // Groom
+    const groomName = formData.groomName || null;
+    const groomFatherName = formData.groomFatherName || null;
+    const groomDateOfBirth = formData.groomDateOfBirth || null;
+    const groomPlaceOfBirth = formData.groomPlaceOfBirth || null;
+    const groomAddress = formData.groomAddress || null;
+    const groomConfirm = formData.groomConfirm || false;
+    const groomPersonally = formData.groomPersonally || false;
+    const groomRepresentative = formData.groomRepresentative || false;
+    
+    // Groom Representative
+    const groomRepName = formData.groomRepName || null;
+    const groomRepFatherName = formData.groomRepFatherName || null;
+    const groomRepDateOfBirth = formData.groomRepDateOfBirth || null;
+    const groomRepPlaceOfBirth = formData.groomRepPlaceOfBirth || null;
+    const groomRepAddress = formData.groomRepAddress || null;
+    
+    // Bride
+    const brideName = formData.brideName || null;
+    const brideFatherName = formData.brideFatherName || null;
+    const brideDateOfBirth = formData.brideDateOfBirth || null;
+    const bridePlaceOfBirth = formData.bridePlaceOfBirth || null;
+    const brideAddress = formData.brideAddress || null;
+    const brideConfirm = formData.brideConfirm || false;
+    const bridePersonally = formData.bridePersonally || false;
+    const brideRepresentative = formData.brideRepresentative || false;
+    
+    // Bride Representative
+    const brideRepName = formData.brideRepName || null;
+    const brideRepFatherName = formData.brideRepFatherName || null;
+    const brideRepDateOfBirth = formData.brideRepDateOfBirth || null;
+    const brideRepPlaceOfBirth = formData.brideRepPlaceOfBirth || null;
+    const brideRepAddress = formData.brideRepAddress || null;
+    
+    // Witness 1
+    const witness1Name = formData.witness1Name || null;
+    const witness1FatherName = formData.witness1FatherName || null;
+    const witness1DateOfBirth = formData.witness1DateOfBirth || null;
+    const witness1PlaceOfBirth = formData.witness1PlaceOfBirth || null;
+    const witness1Address = formData.witness1Address || null;
+    
+    // Witness 2
+    const witness2Name = formData.witness2Name || null;
+    const witness2FatherName = formData.witness2FatherName || null;
+    const witness2DateOfBirth = formData.witness2DateOfBirth || null;
+    const witness2PlaceOfBirth = formData.witness2PlaceOfBirth || null;
+    const witness2Address = formData.witness2Address || null;
+    
+    // Mahr
+    const mahrAmount = formData.mahrAmount || null;
+    const mahrType = formData.mahrType || null;
+    
+    // Solemnised
+    const solemnisedDate = formData.solemnisedDate || null;
+    const solemnisedPlace = formData.solemnisedPlace || null;
+    const solemnisedAddress = formData.solemnisedAddress || null;
+
+    // DEBUG: Log received data
+
 
     // Generate unique application number
     const applicationNumber = generateApplicationNumber();
     
-    // Generate portal credentials
-    const portalEmail = groomEmail.toLowerCase();
-    
+    // TEMPORARILY DISABLED: User creation for testing (no email collection in current form)
+    /*
     // Check if user already exists
     const [existingUsers] = await pool.execute('SELECT id FROM users WHERE email = ?', [portalEmail]);
     if (existingUsers.length > 0) {
@@ -31,48 +107,85 @@ const submitApplication = async (req, res) => {
 
     const portalPassword = generatePassword();
     const hashedPassword = await bcrypt.hash(portalPassword, 10);
+    */
 
     // GET CONNECTION FOR TRANSACTION
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     try {
+      // TEMPORARILY DISABLED: User creation
+      /*
       // 1. Create User
       console.log('Attempting to create user:', portalEmail);
       const [userResult] = await connection.execute(
         'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
-        [portalEmail, hashedPassword, groomFullName]
+        [portalEmail, hashedPassword, groomName || groomFullName]
       );
       const userId = userResult.insertId;
       console.log('User created with ID:', userId);
+      */
+      
+      // Using admin user ID for testing (ID: 1)
+      const userId = 1;
+      console.log('Using test user ID:', userId);
 
       // 2. Insert Application (linked to user_id)
       console.log('Attempting to insert application for user_id:', userId);
       const [result] = await connection.execute(
         `INSERT INTO applications (
           application_number, user_id,
-          groom_full_name, groom_date_of_birth, groom_address, groom_phone, groom_email, groom_id_number,
-          bride_full_name, bride_date_of_birth, bride_address, bride_phone, bride_email, bride_id_number,
-          preferred_date, special_requests, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'admin_review')`,
+          groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
+          groom_address,
+          groom_confirm, groom_personally, groom_representative,
+          groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
+          groom_rep_place_of_birth, groom_rep_address,
+          bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
+          bride_address,
+          bride_confirm, bride_personally, bride_representative,
+          bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
+          bride_rep_place_of_birth, bride_rep_address,
+          mahr_amount, mahr_type,
+          solemnised_date, solemnised_place, solemnised_address,
+          status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber, userId,
-          groomFullName, groomDateOfBirth, groomAddress, groomPhone, groomEmail, groomIdNumber,
-          brideFullName, brideDateOfBirth, brideAddress, bridePhone, brideEmail, brideIdNumber,
-          preferredDate, specialRequests
+          groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
+          groomAddress || null,
+          groomConfirm || false, groomPersonally || false, groomRepresentative || false,
+          groomRepName || null, groomRepFatherName || null, groomRepDateOfBirth || null,
+          groomRepPlaceOfBirth || null, groomRepAddress || null,
+          brideName || null, brideFatherName || null, brideDateOfBirth || null, bridePlaceOfBirth || null,
+          brideAddress || null,
+          brideConfirm || false, bridePersonally || false, brideRepresentative || false,
+          brideRepName || null, brideRepFatherName || null, brideRepDateOfBirth || null,
+          brideRepPlaceOfBirth || null, brideRepAddress || null,
+          mahrAmount || null, mahrType || null,
+          solemnisedDate || null, solemnisedPlace || null, solemnisedAddress || null,
+          'admin_review'
         ]
       );
 
       const applicationId = result.insertId;
       console.log('Application created with ID:', applicationId);
 
-      // Insert witnesses
-      if (witnesses && witnesses.length > 0) {
-        for (let i = 0; i < witnesses.length; i++) {
-          const witness = witnesses[i];
+      // Insert witnesses with extended fields
+      const witnessesData = [
+        { name: witness1Name, fatherName: witness1FatherName, dob: witness1DateOfBirth, pob: witness1PlaceOfBirth, address: witness1Address },
+        { name: witness2Name, fatherName: witness2FatherName, dob: witness2DateOfBirth, pob: witness2PlaceOfBirth, address: witness2Address }
+      ];
+
+      for (let i = 0; i < witnessesData.length; i++) {
+        const w = witnessesData[i];
+        if (w.name) { // Only insert if witness name is provided
           await connection.execute(
-            'INSERT INTO witnesses (application_id, witness_name, witness_phone, witness_email, witness_order) VALUES (?, ?, ?, ?, ?)',
-            [applicationId, witness.name, witness.phone, witness.email, i + 1]
+            `INSERT INTO witnesses (
+              application_id, witness_name, witness_father_name, 
+              witness_date_of_birth, witness_place_of_birth, witness_address, 
+              witness_order
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [applicationId, w.name, w.fatherName, w.dob, w.pob, w.address, i + 1]
           );
         }
       }
@@ -81,52 +194,50 @@ const submitApplication = async (req, res) => {
       await connection.commit();
       console.log('Transaction Committed');
 
-      // Send confirmation email (Outside transaction so it doesn't block or rollback DB if email fails)
-      // Note: If email fails, the application is still saved. This is preferred.
+      // Send confirmation email (DISABLED - no email collection in form)
+      /*
       const applicationData = {
         id: applicationId,
         application_number: applicationNumber,
-        groom_full_name: groomFullName,
-        bride_full_name: brideFullName,
+        groom_full_name: groomName,
+        bride_full_name: brideName,
         portal_email: portalEmail,
-        portalPassword: portalPassword
+        // portalPassword: portalPassword
       };
       
       // Send emails in parallel
       Promise.all([
         sendApplicationConfirmation(applicationData),
         sendAdminNewApplicationEmail(applicationData)
-      ]).catch(err => console.error('Background Email Error:', err)); // Don't crash request
+      ]).catch(err => console.error('Background Email Error:', err));
+      */
 
-      // Create In-App Notification (Also outside strict transaction or inside? Better inside, but keeping it simple for now)
-      // Actually notifications should probably be in transaction logs? 
-      // Let's call it here.
+      // Create In-App Notification
       try {
         await createNotification({
             applicationId,
             role: 'admin',
             type: 'new_application',
             title: 'New Application Received',
-            message: `New marriage application #${applicationNumber} from ${groomFullName} & ${brideFullName}`
+            message: `New marriage application #${applicationNumber} from ${groomName} & ${brideName}`
         });
       } catch (notifErr) {
         console.error('Notification Error:', notifErr);
       }
 
-      // -----------------------------------------------------
-      // DEVELOPMENT LOG
+      // DEVELOPMENT LOG - DISABLED (no user creation in testing mode)
+      /*
       console.log('\nExample Credentials for Last Submission:');
       console.log('Email:', portalEmail);
       console.log('Password:', portalPassword);
       console.log('-----------------------------------------------------\n');
-      // -----------------------------------------------------
+      */
 
       res.status(201).json({
         success: true,
         message: 'Application submitted successfully',
         data: {
           applicationNumber,
-          portalEmail,
           applicationId
         }
       });
@@ -134,7 +245,7 @@ const submitApplication = async (req, res) => {
     } catch (transactionError) {
       await connection.rollback();
       console.error('Transaction Rolled Back due to:', transactionError);
-      throw transactionError; // Re-throw to be caught by outer catch
+      throw transactionError;
     } finally {
       connection.release();
     }
