@@ -105,8 +105,12 @@ export default function ApplicationPage() {
       };
 
       const response = await submitApplication(payload);
+      const applicationId = response.data.data.applicationId;
+      
       toast.success(`Application submitted successfully!\nRef: ${response.data.data.applicationNumber}`, { duration: 5000 });
-      navigate('/');
+      
+      // Redirect to dashboard (or login if not authenticated, but currently just showing success)
+      navigate('/login');
     } catch (error) {
       console.error('Full error object:', error);
       console.error('Error response:', error.response);

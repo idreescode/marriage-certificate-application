@@ -11,6 +11,7 @@ const applicationsRoutes = require('./routes/applications');
 const applicantsRoutes = require('./routes/applicants');
 const adminRoutes = require('./routes/admin');
 
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -32,6 +33,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/auth', require('./routes/auth'));
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {

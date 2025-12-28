@@ -118,6 +118,9 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       
       boxY += 15;
       doc.text(`DOB: ${new Date(applicationData.groom_date_of_birth).toLocaleDateString()}`, leftColX, boxY, { width: colWidth - 20, align: 'center' });
+      
+      boxY += 15;
+      doc.fontSize(9).text(applicationData.groom_address || '', leftColX, boxY, { width: colWidth - 20, align: 'center' });
 
       // BRIDE Box
       doc.rect(rightColX - 10, y - 10, colWidth, 120)
@@ -136,6 +139,9 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       
       boxY += 15;
       doc.text(`DOB: ${new Date(applicationData.bride_date_of_birth).toLocaleDateString()}`, rightColX, boxY, { width: colWidth - 20, align: 'center' });
+
+      boxY += 15;
+      doc.fontSize(9).text(applicationData.bride_address || '', rightColX, boxY, { width: colWidth - 20, align: 'center' });
 
 
       y += 140;

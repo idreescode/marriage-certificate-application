@@ -89,46 +89,36 @@ const submitApplication = async (req, res) => {
     const solemnisedAddress = formData.solemnisedAddress || null;
 
     // DEBUG: Log received data
-
+    console.log('Received form data:', {
+      groomName,
+      brideName,
+      witness1Name,
+      witness2Name,
+      mahrAmount,
+      solemnisedDate
+    });
 
     // Generate unique application number
     const applicationNumber = generateApplicationNumber();
     
-    // TEMPORARILY DISABLED: User creation for testing (no email collection in current form)
-    /*
-    // Check if user already exists
-    const [existingUsers] = await pool.execute('SELECT id FROM users WHERE email = ?', [portalEmail]);
-    if (existingUsers.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'An account with this email already exists. Please login to apply.'
-      });
-    }
-
+    // Generate portal credentials (auto-create user for testing)
+    const portalEmail = `app${applicationNumber}@marriage.test`; // Auto-generate email
     const portalPassword = generatePassword();
     const hashedPassword = await bcrypt.hash(portalPassword, 10);
-    */
 
     // GET CONNECTION FOR TRANSACTION
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     try {
-      // TEMPORARILY DISABLED: User creation
-      /*
       // 1. Create User
-      console.log('Attempting to create user:', portalEmail);
+      console.log('Creating user with email:', portalEmail);
       const [userResult] = await connection.execute(
         'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
-        [portalEmail, hashedPassword, groomName || groomFullName]
+        [portalEmail, hashedPassword, groomName || 'Applicant']
       );
       const userId = userResult.insertId;
       console.log('User created with ID:', userId);
-      */
-      
-      // Using admin user ID for testing (ID: 1)
-      const userId = 1;
-      console.log('Using test user ID:', userId);
 
       // 2. Insert Application (linked to user_id)
       console.log('Attempting to insert application for user_id:', userId);
@@ -225,13 +215,14 @@ const submitApplication = async (req, res) => {
         console.error('Notification Error:', notifErr);
       }
 
-      // DEVELOPMENT LOG - DISABLED (no user creation in testing mode)
-      /*
-      console.log('\nExample Credentials for Last Submission:');
-      console.log('Email:', portalEmail);
-      console.log('Password:', portalPassword);
-      console.log('-----------------------------------------------------\n');
-      */
+      // DEVELOPMENT LOG - Display generated credentials for testing
+      console.log('\n' + '='.repeat(60));
+      console.log('🔑 APPLICANT DASHBOARD CREDENTIALS (For Testing)');
+      console.log('='.repeat(60));
+      console.log('📧 Email:', portalEmail);
+      console.log('🔐 Password:', portalPassword);
+      console.log('🔗 Application Number:', applicationNumber);
+      console.log('='.repeat(60) + '\n');
 
       res.status(201).json({
         success: true,

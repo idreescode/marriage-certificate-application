@@ -6,6 +6,7 @@ import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDe
 import toast from 'react-hot-toast';
 import { FileText, Calendar, CreditCard, Download, Upload, CheckCircle, LogOut, Landmark, AlertCircle, Clock } from 'lucide-react';
 
+
 export default function ApplicantDashboard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +14,7 @@ export default function ApplicantDashboard() {
   const [data, setData] = useState(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null); // 'online' | 'bank'
+  const [currentView, setCurrentView] = useState('dashboard');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -80,6 +82,9 @@ export default function ApplicantDashboard() {
   };
 
   const handleOnlinePayment = async () => {
+    // Check if documents are uploaded and verified
+
+    
     const toastId = toast.loading('Redirecting to checkout...');
     try {
         const response = await createCheckoutSession();
@@ -89,6 +94,13 @@ export default function ApplicantDashboard() {
     } catch (error) {
         toast.error('Failed to initiate payment: ' + (error.response?.data?.message || 'Server Error'), { id: toastId });
     }
+  };
+  
+  const handleBankTransferClick = () => {
+    // Check if documents are uploaded and verified
+
+    
+    setPaymentMethod('bank');
   };
 
   if (loading) return <Loader fullscreen />;
@@ -131,6 +143,7 @@ export default function ApplicantDashboard() {
            <h1 style={{ fontSize: '2rem', margin: 0 }}>My Application</h1>
            <p className="text-muted">Tracking Application #{app.application_number}</p>
         </div>
+
 
         <div className="stats-grid">
            {/* Application Status Card */}
@@ -196,9 +209,12 @@ export default function ApplicantDashboard() {
            
            {/* Left Column: Details & Actions */}
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              
-              {/* Urgent Action Card (Payment) */}
-              {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && (
+               
+               {/* Document Upload Action Card */}
+
+               
+               {/* Urgent Action Card (Payment) */}
+               {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && (
                  <div className="card" style={{ border: '1px solid #fcd34d', backgroundColor: '#fffbeb' }}>
                     <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
                        <AlertCircle size={20} /> Action Required: Payment
@@ -207,16 +223,16 @@ export default function ApplicantDashboard() {
                        Please complete the payment of <strong>PKR {app.deposit_amount}</strong> to proceed with your application.
                     </p>
                     
-                    {!paymentMethod && (
-                       <div className="d-flex gap-3">
-                          <button onClick={() => setPaymentMethod('online')} className="btn btn-primary" style={{ flex: 1 }}>
-                             Pay Online Now
-                          </button>
-                          <button onClick={() => setPaymentMethod('bank')} className="btn btn-secondary" style={{ flex: 1, backgroundColor: 'white' }}>
-                             Bank Transfer
-                          </button>
-                       </div>
-                    )}
+                     {!paymentMethod && (
+                        <div className="d-flex gap-3">
+                           <button onClick={handleOnlinePayment} className="btn btn-primary" style={{ flex: 1 }}>
+                              Pay Online Now
+                           </button>
+                           <button onClick={handleBankTransferClick} className="btn btn-secondary" style={{ flex: 1, backgroundColor: 'white' }}>
+                              Bank Transfer
+                           </button>
+                        </div>
+                     )}
 
                     {paymentMethod === 'online' && (
                        <div className="bg-white p-4 rounded border border-warning">
@@ -323,6 +339,7 @@ export default function ApplicantDashboard() {
            </div>
 
         </div>
+
       </main>
     </div>
   );
