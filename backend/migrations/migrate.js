@@ -16,6 +16,7 @@ const migrations = [
   require('./011_add_extended_witness_fields'),
   require('./012_make_date_fields_nullable'),
   require('./015_drop_documents_table'),
+  require('./016_add_document_path_columns'),
 ];
 
 // Run migrations

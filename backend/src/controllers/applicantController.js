@@ -158,24 +158,103 @@ const downloadCertificate = async (req, res) => {
 
 // Request Bank Details (Placeholder logic)
 const requestBankDetails = async (req, res) => {
-    try {
-      const userId = req.user.id;
-      // Fetch application by user_id to confirm existence
-      const [rows] = await pool.execute('SELECT * FROM applications WHERE user_id = ?', [userId]);
+  try {
+    const userId = req.user.id;
+    // Fetch application by user_id to confirm existence
+    const [rows] = await pool.execute('SELECT * FROM applications WHERE user_id = ?', [userId]);
 
-      if (rows.length === 0) return res.status(404).json({ success: false, message: 'Application not found' });
-      
-      await sendBankDetailsRequestEmail(rows[0]);
-      res.json({ success: true, message: 'Bank details requested successfully' });
-    } catch (error) {
-       console.error(error);
-       res.status(500).json({ success: false, message: 'Failed to request details' });
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'Application not found' });
+
+    await sendBankDetailsRequestEmail(rows[0]);
+    res.json({ success: true, message: 'Bank details requested successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Failed to request details' });
+  }
+};
+
+
+
+// Upload Documents
+const uploadDocuments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const files = req.files;
+
+    if (!files || Object.keys(files).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No files uploaded'
+      });
     }
+
+    // Find application first
+    const [rows] = await pool.execute(
+      'SELECT id FROM applications WHERE user_id = ?',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
+    const applicationId = rows[0].id;
+
+    // Prepare update query dynamically based on uploaded files
+    const fileFields = {
+      groomId: 'groom_id_path',
+      brideId: 'bride_id_path',
+      witness1Id: 'witness1_id_path',
+      witness2Id: 'witness2_id_path',
+      mahrDeclaration: 'mahr_declaration_path',
+      civilDivorceDoc: 'civil_divorce_doc_path',
+      islamicDivorceDoc: 'islamic_divorce_doc_path',
+      groomConversionCert: 'groom_conversion_cert_path',
+      brideConversionCert: 'bride_conversion_cert_path',
+      statutoryDeclaration: 'statutory_declaration_path'
+    };
+
+    let updateFields = [];
+    let queryParams = [];
+
+    for (const [fieldName, dbColumn] of Object.entries(fileFields)) {
+      if (files[fieldName] && files[fieldName][0]) {
+        updateFields.push(`${dbColumn} = ?`);
+        // Store relative path
+        queryParams.push(`/uploads/documents/${files[fieldName][0].filename}`);
+      }
+    }
+
+    if (updateFields.length === 0) {
+      return res.json({ success: true, message: 'No valid document fields to update' });
+    }
+
+    queryParams.push(applicationId);
+
+    const query = `UPDATE applications SET ${updateFields.join(', ')} WHERE id = ?`;
+
+    await pool.execute(query, queryParams);
+
+    res.json({
+      success: true,
+      message: 'Documents uploaded successfully',
+      uploadedFiles: Object.keys(files)
+    });
+
+  } catch (error) {
+    console.error('Error uploading documents:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload documents',
+      error: error.message
+    });
+  }
 };
 
 module.exports = {
   getDashboard,
   uploadReceipt,
   downloadCertificate,
-  requestBankDetails
+  requestBankDetails,
+  uploadDocuments
 };

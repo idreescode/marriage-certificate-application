@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import ApplicantNavbar from '../components/ApplicantNavbar';
 import { ArrowLeft, Upload, File, X, Check, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { uploadDocuments } from '../services/api';
 
 export default function DocumentUpload() {
     const navigate = useNavigate();
@@ -23,6 +25,7 @@ export default function DocumentUpload() {
     const [bridePreviouslyMarried, setBridePreviouslyMarried] = useState(false);
     const [brideDivorceType, setBrideDivorceType] = useState(null); // 'civil', 'islamic', 'both'
     const [brideAhleKitab, setBrideAhleKitab] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const handleFileChange = (e, type) => {
         if (e.target.files[0]) {
@@ -50,6 +53,40 @@ export default function DocumentUpload() {
         }
 
         return false;
+    };
+
+    const handleSubmit = async () => {
+        if (isSubmitDisabled()) return;
+
+        setUploading(true);
+        const toastId = toast.loading('Uploading documents...');
+
+        try {
+            const formData = new FormData();
+
+            // Append files to formData
+            Object.keys(files).forEach(key => {
+                if (files[key]) {
+                    formData.append(key, files[key]);
+                }
+            });
+
+            await uploadDocuments(formData);
+
+            toast.success('Documents uploaded successfully!', { id: toastId });
+
+            // Navigate back after delay
+            setTimeout(() => {
+                navigate('/applicant/dashboard');
+            }, 1000);
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            const msg = error.response?.data?.message || 'Failed to upload documents';
+            toast.error(msg, { id: toastId });
+        } finally {
+            setUploading(false);
+        }
     };
 
     return (
@@ -477,10 +514,11 @@ export default function DocumentUpload() {
                     <div className="mt-8 flex justify-end">
                         <button
                             className="btn btn-primary"
-                            disabled={isSubmitDisabled()}
-                            style={{ opacity: isSubmitDisabled() ? 0.5 : 1 }}
+                            disabled={isSubmitDisabled() || uploading}
+                            onClick={handleSubmit}
+                            style={{ opacity: isSubmitDisabled() || uploading ? 0.5 : 1 }}
                         >
-                            Submit Documents
+                            {uploading ? 'Uploading...' : 'Submit Documents'}
                         </button>
                     </div>
                 </div>

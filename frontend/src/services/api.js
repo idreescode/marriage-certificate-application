@@ -25,7 +25,7 @@ api.interceptors.response.use(
   (error) => {
     // Only redirect if 401 AND not on a login request
     const isLoginRequest = error.config?.url?.includes('/login');
-    
+
     if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       window.location.href = '/';
@@ -49,6 +49,9 @@ export const uploadReceipt = (formData) => api.post('/applicants/upload-receipt'
 });
 export const requestBankDetails = () => api.post('/applicants/request-bank-details');
 export const getCertificate = () => api.get('/applicants/certificate');
+export const uploadDocuments = (formData) => api.post('/applicants/upload-documents', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
 
 // Admin APIs
 // export const adminLogin = (credentials) => api.post('/admin/login', credentials); // DEPRECATED
