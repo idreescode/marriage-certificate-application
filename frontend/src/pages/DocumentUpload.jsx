@@ -26,10 +26,14 @@ export default function DocumentUpload() {
     const [brideDivorceType, setBrideDivorceType] = useState(null); // 'civil', 'islamic', 'both'
     const [brideAhleKitab, setBrideAhleKitab] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const handleFileChange = (e, type) => {
         if (e.target.files[0]) {
             setFiles({ ...files, [type]: e.target.files[0] });
+            if (errors[type]) {
+                setErrors(prev => ({ ...prev, [type]: null }));
+            }
         }
     };
 
@@ -38,25 +42,43 @@ export default function DocumentUpload() {
     };
 
     const isSubmitDisabled = () => {
-        const basicReqs = !files.groomId || !files.brideId || !files.witness1Id || !files.witness2Id || !files.mahrDeclaration;
-        if (basicReqs) return true;
+        // Only disable if no documents are selected at all
+        return Object.values(files).every(file => file === null);
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!files.groomId) newErrors.groomId = true;
+        if (!files.brideId) newErrors.brideId = true;
+        if (!files.witness1Id) newErrors.witness1Id = true;
+        if (!files.witness2Id) newErrors.witness2Id = true;
+        if (!files.mahrDeclaration) newErrors.mahrDeclaration = true;
 
         if (bridePreviouslyMarried) {
-            if (!brideDivorceType) return true;
-            if (brideDivorceType === 'civil' && !files.civilDivorceDoc) return true;
-            if (brideDivorceType === 'islamic' && !files.islamicDivorceDoc) return true;
-            if (brideDivorceType === 'both' && (!files.civilDivorceDoc || !files.islamicDivorceDoc)) return true;
+            if (!brideDivorceType) newErrors.brideDivorceType = true;
+            else if (brideDivorceType === 'civil' && !files.civilDivorceDoc) newErrors.civilDivorceDoc = true;
+            else if (brideDivorceType === 'islamic' && !files.islamicDivorceDoc) newErrors.islamicDivorceDoc = true;
+            else if (brideDivorceType === 'both') {
+                if (!files.civilDivorceDoc) newErrors.civilDivorceDoc = true;
+                if (!files.islamicDivorceDoc) newErrors.islamicDivorceDoc = true;
+            }
         }
 
         if (brideAhleKitab && !files.statutoryDeclaration) {
-            return true;
+            newErrors.statutoryDeclaration = true;
         }
 
-        return false;
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
         if (isSubmitDisabled()) return;
+
+        if (!validateForm()) {
+            toast.error("Please upload all the required document", { id: 'validation-error' });
+            return;
+        }
 
         setUploading(true);
         const toastId = toast.loading('Uploading documents...');
@@ -141,15 +163,13 @@ export default function DocumentUpload() {
                         <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
                             <div className="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 className="font-semibold text-slate-800">Groom's Passport or Driving Licence</h3>
+                                    <h3 className="font-semibold text-slate-800">Groom's Passport or Driving Licence <span style={{ color: 'red' }}>*</span></h3>
                                     <p className="text-sm text-slate-500">Scan or clear photo</p>
                                 </div>
-                                {files.groomId ? (
+                                {files.groomId && (
                                     <span className="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                                         <Check size={12} /> Selected
                                     </span>
-                                ) : (
-                                    <span className="text-amber-600 bg-amber-50 px-2 py-1 rounded text-xs font-bold">Required</span>
                                 )}
                             </div>
 
@@ -179,15 +199,13 @@ export default function DocumentUpload() {
                         <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
                             <div className="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 className="font-semibold text-slate-800">Bride's Passport or Driving Licence</h3>
+                                    <h3 className="font-semibold text-slate-800">Bride's Passport or Driving Licence <span style={{ color: 'red' }}>*</span></h3>
                                     <p className="text-sm text-slate-500">Scan or clear photo</p>
                                 </div>
-                                {files.brideId ? (
+                                {files.brideId && (
                                     <span className="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                                         <Check size={12} /> Selected
                                     </span>
-                                ) : (
-                                    <span className="text-amber-600 bg-amber-50 px-2 py-1 rounded text-xs font-bold">Required</span>
                                 )}
                             </div>
 
@@ -216,19 +234,17 @@ export default function DocumentUpload() {
                         {/* Witness IDs */}
                         <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
                             <div className="mb-4">
-                                <h3 className="font-semibold text-slate-800">Witness IDs</h3>
+                                <h3 className="font-semibold text-slate-800">Witness IDs <span style={{ color: 'red' }}>*</span></h3>
                                 <p className="text-sm text-slate-500">ID proofs for two Muslim male witnesses</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Witness 1 */}
-                                <div className="bg-white p-4 rounded border">
+                                <div className="bg-white p-4 rounded border border-slate-200">
                                     <div className="flex justify-between items-center mb-2">
-                                        <label className="text-sm font-medium text-slate-700">Witness 1 ID</label>
-                                        {files.witness1Id ? (
+                                        <label className="text-sm font-medium text-slate-700">Witness 1 ID <span style={{ color: 'red' }}>*</span></label>
+                                        {files.witness1Id && (
                                             <span className="text-green-600 text-xs font-bold flex items-center gap-1"><Check size={12} /> Selected</span>
-                                        ) : (
-                                            <span className="text-amber-600 text-xs font-bold">Required</span>
                                         )}
                                     </div>
                                     {files.witness1Id ? (
@@ -248,13 +264,11 @@ export default function DocumentUpload() {
                                 </div>
 
                                 {/* Witness 2 */}
-                                <div className="bg-white p-4 rounded border">
+                                <div className="bg-white p-4 rounded border border-slate-200">
                                     <div className="flex justify-between items-center mb-2">
-                                        <label className="text-sm font-medium text-slate-700">Witness 2 ID</label>
-                                        {files.witness2Id ? (
+                                        <label className="text-sm font-medium text-slate-700">Witness 2 ID <span style={{ color: 'red' }}>*</span></label>
+                                        {files.witness2Id && (
                                             <span className="text-green-600 text-xs font-bold flex items-center gap-1"><Check size={12} /> Selected</span>
-                                        ) : (
-                                            <span className="text-amber-600 text-xs font-bold">Required</span>
                                         )}
                                     </div>
                                     {files.witness2Id ? (
@@ -279,15 +293,13 @@ export default function DocumentUpload() {
                         <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
                             <div className="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 className="font-semibold text-slate-800">Dowry (Mahr) Declaration</h3>
+                                    <h3 className="font-semibold text-slate-800">Dowry (Mahr) Declaration <span style={{ color: 'red' }}>*</span></h3>
                                     <p className="text-sm text-slate-500">Signed written declaration by both parties</p>
                                 </div>
-                                {files.mahrDeclaration ? (
+                                {files.mahrDeclaration && (
                                     <span className="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                                         <Check size={12} /> Selected
                                     </span>
-                                ) : (
-                                    <span className="text-amber-600 bg-amber-50 px-2 py-1 rounded text-xs font-bold">Required</span>
                                 )}
                             </div>
 
@@ -403,8 +415,8 @@ export default function DocumentUpload() {
 
                             {bridePreviouslyMarried && (
                                 <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-                                    <div className="bg-white p-4 rounded border">
-                                        <p className="text-sm font-medium text-slate-700 mb-2">Type of Previous Marriage</p>
+                                    <div className="bg-white p-4 rounded border border-slate-200">
+                                        <p className="text-sm font-medium text-slate-700 mb-2">Type of Previous Marriage <span style={{ color: 'red' }}>*</span></p>
                                         <div className="flex flex-col gap-2">
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
@@ -412,7 +424,10 @@ export default function DocumentUpload() {
                                                     name="divorceType"
                                                     value="civil"
                                                     checked={brideDivorceType === 'civil'}
-                                                    onChange={(e) => setBrideDivorceType(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setBrideDivorceType(e.target.value);
+                                                        setErrors(prev => ({ ...prev, brideDivorceType: null }));
+                                                    }}
                                                     className="accent-blue-600"
                                                 />
                                                 <span className="text-sm">Civil (Legal) Marriage Only</span>
@@ -423,7 +438,10 @@ export default function DocumentUpload() {
                                                     name="divorceType"
                                                     value="islamic"
                                                     checked={brideDivorceType === 'islamic'}
-                                                    onChange={(e) => setBrideDivorceType(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setBrideDivorceType(e.target.value);
+                                                        setErrors(prev => ({ ...prev, brideDivorceType: null }));
+                                                    }}
                                                     className="accent-blue-600"
                                                 />
                                                 <span className="text-sm">Islamic Nikah Only</span>
@@ -434,7 +452,10 @@ export default function DocumentUpload() {
                                                     name="divorceType"
                                                     value="both"
                                                     checked={brideDivorceType === 'both'}
-                                                    onChange={(e) => setBrideDivorceType(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setBrideDivorceType(e.target.value);
+                                                        setErrors(prev => ({ ...prev, brideDivorceType: null }));
+                                                    }}
                                                     className="accent-blue-600"
                                                 />
                                                 <span className="text-sm">Both Civil and Islamic</span>
@@ -445,16 +466,14 @@ export default function DocumentUpload() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Civil Divorce Doc */}
                                         {(brideDivorceType === 'civil' || brideDivorceType === 'both') && (
-                                            <div className="bg-white p-4 rounded border">
+                                            <div className="bg-white p-4 rounded border border-slate-200">
                                                 <div className="flex justify-between items-center mb-2">
                                                     <div>
-                                                        <label className="text-sm font-medium text-slate-700">Civil Divorce Document</label>
+                                                        <label className="text-sm font-medium text-slate-700">Civil Divorce Document <span style={{ color: 'red' }}>*</span></label>
                                                         <p className="text-xs text-slate-500">e.g., Decree Absolute</p>
                                                     </div>
-                                                    {files.civilDivorceDoc ? (
+                                                    {files.civilDivorceDoc && (
                                                         <span className="text-green-600 text-xs font-bold flex items-center gap-1"><Check size={12} /> Selected</span>
-                                                    ) : (
-                                                        <span className="text-amber-600 text-xs font-bold">Required</span>
                                                     )}
                                                 </div>
                                                 {files.civilDivorceDoc ? (
@@ -476,16 +495,14 @@ export default function DocumentUpload() {
 
                                         {/* Islamic Divorce Doc */}
                                         {(brideDivorceType === 'islamic' || brideDivorceType === 'both') && (
-                                            <div className="bg-white p-4 rounded border">
+                                            <div className="bg-white p-4 rounded border border-slate-200">
                                                 <div className="flex justify-between items-center mb-2">
                                                     <div>
-                                                        <label className="text-sm font-medium text-slate-700">Islamic Divorce Doc</label>
+                                                        <label className="text-sm font-medium text-slate-700">Islamic Divorce Doc <span style={{ color: 'red' }}>*</span></label>
                                                         <p className="text-xs text-slate-500">Talaq, Khula, or Faskh</p>
                                                     </div>
-                                                    {files.islamicDivorceDoc ? (
+                                                    {files.islamicDivorceDoc && (
                                                         <span className="text-green-600 text-xs font-bold flex items-center gap-1"><Check size={12} /> Selected</span>
-                                                    ) : (
-                                                        <span className="text-amber-600 text-xs font-bold">Required</span>
                                                     )}
                                                 </div>
                                                 {files.islamicDivorceDoc ? (

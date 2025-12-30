@@ -134,6 +134,28 @@ export default function ApplicantDashboard() {
       );
    };
 
+   // Check if all documents are uploaded
+   const areAllDocumentsUploaded = () => {
+      if (!app) return false;
+
+      const basicDocs = app.groom_id_path && app.bride_id_path && app.witness1_id_path && app.witness2_id_path && app.mahr_declaration_path;
+      if (!basicDocs) return false;
+
+      // Conditional: Previously Married
+      if (app.bride_previously_married) {
+         if (app.bride_divorce_type === 'civil' && !app.civil_divorce_doc_path) return false;
+         if (app.bride_divorce_type === 'islamic' && !app.islamic_divorce_doc_path) return false;
+         if (app.bride_divorce_type === 'both' && (!app.civil_divorce_doc_path || !app.islamic_divorce_doc_path)) return false;
+      }
+
+      // Conditional: Ahle Kitab
+      if (app.bride_ahle_kitab && !app.statutory_declaration_path) return false;
+
+      return true;
+   };
+
+   const allDocumentsUploaded = areAllDocumentsUploaded();
+
    return (
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--slate-50)' }}>
          <ApplicantNavbar />
@@ -211,25 +233,28 @@ export default function ApplicantDashboard() {
                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
                   {/* Document Upload Action Card */}
-                  <div className="card" style={{ borderLeft: '4px solid #2563eb' }}>
-                     <div className="d-flex justify-between items-start">
-                        <div>
-                           <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <Upload size={20} className="text-blue-600" /> Upload Documents
-                           </h3>
-                           <p className="text-sm text-slate-600 mb-4" style={{ maxWidth: '90%' }}>
-                              Please upload your ID proofs, address proof, and other required documents to proceed.
-                           </p>
+                  {/* Document Upload Action Card - Hide if deposit is set OR all documents uploaded */}
+                  {!app.deposit_amount && !allDocumentsUploaded && (
+                     <div className="card" style={{ borderLeft: '4px solid #2563eb' }}>
+                        <div className="d-flex justify-between items-start">
+                           <div>
+                              <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                 <Upload size={20} className="text-blue-600" /> Upload Documents
+                              </h3>
+                              <p className="text-sm text-slate-600 mb-4" style={{ maxWidth: '90%' }}>
+                                 Please upload your ID proofs, address proof, and other required documents to proceed.
+                              </p>
+                           </div>
                         </div>
+                        <button
+                           onClick={() => navigate('/applicant/upload-documents')}
+                           className="btn btn-primary"
+                           style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                        >
+                           <Upload size={18} /> Upload Documents
+                        </button>
                      </div>
-                     <button
-                        onClick={() => navigate('/applicant/upload-documents')}
-                        className="btn btn-primary"
-                        style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
-                     >
-                        <Upload size={18} /> Upload Documents
-                     </button>
-                  </div>
+                  )}
                   {/* Urgent Action Card (Payment) */}
                   {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && (
                      <div className="card" style={{ border: '1px solid #fcd34d', backgroundColor: '#fffbeb' }}>
@@ -321,6 +346,15 @@ export default function ApplicantDashboard() {
                         <div style={{ position: 'absolute', left: '-21px', top: '0', width: '12px', height: '12px', borderRadius: '50%', background: '#2563eb', border: '2px solid white', boxShadow: '0 0 0 2px #2563eb' }}></div>
                         <h4 style={{ fontSize: '0.95rem', margin: 0, color: '#1e293b' }}>Application Submitted</h4>
                         <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>{new Date(app.created_at).toLocaleDateString()}</p>
+                     </div>
+
+                     <div style={{ marginBottom: '2rem', position: 'relative' }}>
+                        {/* Check if any main document is uploaded to mark as done/active */}
+                        <div style={{ position: 'absolute', left: '-21px', top: '0', width: '12px', height: '12px', borderRadius: '50%', background: (app.groom_id_path || app.bride_id_path) ? '#2563eb' : '#cbd5e1', border: '2px solid white', boxShadow: (app.groom_id_path || app.bride_id_path) ? '0 0 0 2px #2563eb' : 'none' }}></div>
+                        <h4 style={{ fontSize: '0.95rem', margin: 0, color: (app.groom_id_path || app.bride_id_path) ? '#1e293b' : '#94a3b8' }}>Documents Submitted</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>
+                           {(app.groom_id_path || app.bride_id_path) ? 'Uploaded' : 'Pending Upload'}
+                        </p>
                      </div>
 
                      <div style={{ marginBottom: '2rem', position: 'relative' }}>
