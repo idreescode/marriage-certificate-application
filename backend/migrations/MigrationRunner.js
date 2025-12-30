@@ -27,7 +27,7 @@ class MigrationRunner {
     await this.connection.query(`
       CREATE TABLE IF NOT EXISTS migrations (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(191) NOT NULL UNIQUE,
         executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -44,7 +44,7 @@ class MigrationRunner {
 
   async runMigration(migration) {
     console.log(`🔄 Running migration: ${migration.name}`);
-    
+
     try {
       await migration.up(this.connection);
       await this.markMigrationAsExecuted(migration.name);

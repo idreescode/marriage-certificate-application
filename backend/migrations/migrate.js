@@ -9,6 +9,13 @@ const migrations = [
   require('./003_create_witnesses_table'),
   require('./004_create_email_logs_table'),
   require('./005_seed_admin_user'),
+  require('./006_add_reset_token_columns'),
+  require('./007_create_notifications_table'),
+  require('./008_unify_users_table'),
+  require('./010_add_extended_application_fields'),
+  require('./011_add_extended_witness_fields'),
+  require('./012_make_date_fields_nullable'),
+  require('./015_drop_documents_table'),
 ];
 
 // Run migrations

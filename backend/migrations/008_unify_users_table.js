@@ -18,13 +18,21 @@ module.exports = {
     console.log('   ✓ Updated users table role enum');
 
     // 2. Add user_id column to applications table
-    await connection.query(`
-      ALTER TABLE applications 
-      ADD COLUMN user_id INT,
-      ADD CONSTRAINT fk_applications_user
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-    `);
-    console.log('   ✓ Added user_id to applications table');
+    try {
+      await connection.query(`
+        ALTER TABLE applications 
+        ADD COLUMN user_id INT,
+        ADD CONSTRAINT fk_applications_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+      `);
+      console.log('   ✓ Added user_id to applications table');
+    } catch (error) {
+      if (error.code === 'ER_DUP_FIELDNAME') {
+        console.log('   ! user_id column already exists in applications');
+      } else {
+        throw error;
+      }
+    }
 
     // 3. Migrate data: Create users for existing applications
     const [applications] = await connection.query(`
@@ -40,7 +48,7 @@ module.exports = {
 
       // Check if user already exists (by email)
       const [existingUsers] = await connection.query(
-        'SELECT id FROM users WHERE email = ?', 
+        'SELECT id FROM users WHERE email = ?',
         [app.portal_email]
       );
 
@@ -74,7 +82,7 @@ module.exports = {
     // For safety in this environment, we will keep portal fields for now but make them nullable/ignored.
     // Or we can rename them to indicate deprecation.
     // Let's Drop them to enforce the new architecture as per user request "role base kro".
-    
+
     // Waiting a split second ensures queries finish logic
     await connection.query(`
       ALTER TABLE applications 
@@ -87,7 +95,7 @@ module.exports = {
   async down(connection) {
     // Reverting this is hard because data was moved.
     // Ideally we would restore columns and move data back.
-    
+
     // 1. Restore columns
     await connection.query(`
       ALTER TABLE applications 

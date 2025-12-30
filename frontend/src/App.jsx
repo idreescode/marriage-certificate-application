@@ -10,13 +10,14 @@ import ApplicantDashboard from './pages/ApplicantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import DocumentUpload from './pages/DocumentUpload';
 import AdminLayout from './layouts/AdminLayout';
 import AdminApplications from './pages/AdminApplications';
 
 function App() {
   return (
     <BrowserRouter>
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 5000,
@@ -54,20 +55,21 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         {/* <Route path="/applicant/login" element={<ApplicantLogin />} /> */}
         <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
-        
+
         {/* Applicant Auth */}
         <Route path="/applicant/forgot-password" element={<ForgotPassword type="applicant" />} />
         <Route path="/applicant/reset-password" element={<ResetPassword type="applicant" />} />
+        <Route path="/applicant/upload-documents" element={<DocumentUpload />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
-           <Route path="dashboard" element={<AdminDashboard />} />
-           <Route path="applications" element={<AdminApplications />} />
-           {/* Fallback for now */}
-           <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />
-           <Route path="settings" element={<div className="p-8 text-center text-slate-500">Settings Module Coming Soon</div>} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="applications" element={<AdminApplications />} />
+          {/* Fallback for now */}
+          <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />
+          <Route path="settings" element={<div className="p-8 text-center text-slate-500">Settings Module Coming Soon</div>} />
         </Route>
-        
+
         {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
         <Route path="/admin/login" element={<LoginPage />} /> {/* Redirect old admin link to new login */}
       </Routes>

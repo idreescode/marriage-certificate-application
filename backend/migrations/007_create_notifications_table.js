@@ -1,11 +1,14 @@
-const { pool } = require('../src/config/database');
+// Migration: 007_create_notifications_table
+// Creates the notifications table
 
-// Migration: Create Notifications Table
-const up = async () => {
-  try {
-    console.log('Migrating: Creating notifications table...');
-    
-    await pool.execute(`
+module.exports = {
+  name: '007_create_notifications_table',
+
+  async up(connection) {
+    console.log('   Starting migration: 007_create_notifications_table');
+
+    // Note: MigrationRunner passes a promise-based connection
+    await connection.query(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT DEFAULT NULL,
@@ -19,14 +22,10 @@ const up = async () => {
         FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE SET NULL
       )
     `);
+    console.log('   ✓ Notifications table created');
+  },
 
-    console.log('✅ Notifications table created successfully');
-  } catch (error) {
-    console.error('❌ Migration failed:', error);
-    process.exit(1);
-  } finally {
-    process.exit(0);
+  async down(connection) {
+    await connection.query('DROP TABLE IF EXISTS notifications');
   }
 };
-
-up();

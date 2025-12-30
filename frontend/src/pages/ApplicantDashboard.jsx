@@ -211,8 +211,25 @@ export default function ApplicantDashboard() {
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                
                {/* Document Upload Action Card */}
-
-               
+               <div className="card" style={{ borderLeft: '4px solid #2563eb' }}>
+                  <div className="d-flex justify-between items-start">
+                     <div>
+                        <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                           <Upload size={20} className="text-blue-600" /> Upload Documents
+                        </h3>
+                        <p className="text-sm text-slate-600 mb-4" style={{ maxWidth: '90%' }}>
+                           Please upload your ID proofs, address proof, and other required documents to proceed.
+                        </p>
+                     </div>
+                  </div>
+                  <button 
+                     onClick={() => navigate('/applicant/upload-documents')} 
+                     className="btn btn-primary"
+                     style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                  >
+                     <Upload size={18} /> Upload Documents
+                  </button>
+               </div>
                {/* Urgent Action Card (Payment) */}
                {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && (
                  <div className="card" style={{ border: '1px solid #fcd34d', backgroundColor: '#fffbeb' }}>
