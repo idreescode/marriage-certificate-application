@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/api';
 import toast from 'react-hot-toast';
 import { LogIn, Lock, Mail, ArrowLeft } from 'lucide-react';
+import logo from '../assets/logo.svg';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -39,11 +40,11 @@ export default function LoginPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '60fr 40fr' }}>
       {/* Left Panel - Branding */}
-      <div className="hidden-mobile" style={{ 
-        background: 'linear-gradient(135deg, var(--brand-700), var(--brand-900))', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
+      <div className="hidden-mobile" style={{
+        background: 'linear-gradient(135deg, var(--brand-700), var(--brand-900))',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
         padding: '6rem',
         color: 'white',
         position: 'relative',
@@ -55,7 +56,7 @@ export default function LoginPage() {
 
         <div style={{ position: 'relative', zIndex: 10 }}>
           <h1 style={{ fontSize: '3.5rem', fontWeight: '800', marginBottom: '1.5rem', lineHeight: 1.1, color: 'white' }}>
-            Marriage Certificate<br/>Portal
+            Marriage Certificate<br />Portal
           </h1>
           <p style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '600px', lineHeight: 1.6, color: 'var(--brand-100)' }}>
             One secure platform for applicants and administrators. Manage your applications, verify records, and access services efficiently.
@@ -72,7 +73,7 @@ export default function LoginPage() {
 
           <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-               <img src="/logo.svg" alt="Official Logo" style={{ height: '120px', width: 'auto' }} />
+              <img src={logo} alt="Official Logo" style={{ height: '120px', width: 'auto' }} />
             </div>
             <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: 'var(--slate-900)', textAlign: 'center' }}>Portal Login</h2>
             <p className="text-slate-500" style={{ textAlign: 'center' }}>Access your account securely</p>
@@ -83,8 +84,8 @@ export default function LoginPage() {
               <label className="form-label">Email Address</label>
               <div style={{ position: 'relative' }}>
                 <Mail size={18} className="text-slate-400" style={{ position: 'absolute', left: '16px', top: '19px', color: 'var(--slate-400)' }} />
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   className="form-input"
                   style={{ paddingLeft: '48px', height: '56px', fontSize: '1.1rem', fontWeight: 500 }}
                   placeholder="name@example.com"
@@ -102,8 +103,8 @@ export default function LoginPage() {
               </div>
               <div style={{ position: 'relative' }}>
                 <Lock size={18} className="text-slate-400" style={{ position: 'absolute', left: '16px', top: '19px', color: 'var(--slate-400)' }} />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   className="form-input"
                   style={{ paddingLeft: '48px', height: '56px', fontSize: '1.1rem', fontWeight: 500 }}
                   placeholder="••••••••"
@@ -117,14 +118,14 @@ export default function LoginPage() {
             <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading} style={{ background: 'var(--brand-600)', border: 'none' }}>
               {loading ? 'Authenticating...' : 'Sign In'}
             </button>
-            
+
             <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--slate-600)' }}>
               New Applicant? <Link to="/apply" style={{ color: 'var(--brand-600)', fontWeight: 600, textDecoration: 'none' }}>Start Application</Link>
             </p>
           </form>
         </div>
       </div>
-      
+
       <style>{`
         @media (max-width: 768px) {
           div[style*="grid-template-columns"] {
