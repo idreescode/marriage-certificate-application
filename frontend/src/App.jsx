@@ -13,10 +13,13 @@ import ResetPassword from './pages/ResetPassword';
 import DocumentUpload from './pages/DocumentUpload';
 import AdminLayout from './layouts/AdminLayout';
 import AdminApplications from './pages/AdminApplications';
+import AdminApplicationDetails from './pages/AdminApplicationDetails';
+const basename =
+  import.meta.env.PROD ? '/marriage_frontend' : '/';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -49,7 +52,8 @@ function App() {
         }}
       />
       <Routes>
-        <Route path="/" element={<ApplicationPage />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/apply" element={<ApplicationPage />} />
 
 
         <Route path="/login" element={<LoginPage />} />
@@ -65,6 +69,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="applications" element={<AdminApplications />} />
+          <Route path="applications/:id" element={<AdminApplicationDetails />} />
           {/* Fallback for now */}
           <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />
           <Route path="settings" element={<div className="p-8 text-center text-slate-500">Settings Module Coming Soon</div>} />

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import { getAllApplications, setDepositAmount as setDepositAPI, verifyPayment as verifyPaymentAPI, scheduleAppointment as scheduleAPI, generateCertificate as generateCertAPI } from '../services/api';
@@ -10,12 +11,11 @@ export default function AdminApplications() {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
-  
+
   // Modal States
   const [activeModal, setActiveModal] = useState(null); // 'deposit', 'verify', 'schedule', 'view'
   const [selectedAppId, setSelectedAppId] = useState(null);
-  const [selectedApp, setSelectedApp] = useState(null); // For View Modal
-  
+
   // Form States
   const [depositAmount, setDepositAmount] = useState('');
   const [appointmentData, setAppointmentData] = useState({ date: '', time: '', location: '' });
@@ -36,10 +36,7 @@ export default function AdminApplications() {
   };
 
   // Open Handlers
-  const openView = (app) => {
-    setSelectedApp(app);
-    setActiveModal('view');
-  };
+
 
   const openSetDeposit = (id) => {
     setSelectedAppId(id);
@@ -61,7 +58,6 @@ export default function AdminApplications() {
   const closeModal = () => {
     setActiveModal(null);
     setSelectedAppId(null);
-    setSelectedApp(null);
   };
 
   // Action Handlers
@@ -99,10 +95,10 @@ export default function AdminApplications() {
 
     const toastId = toast.loading('Scheduling appointment...');
     try {
-      await scheduleAPI(selectedAppId, { 
-        appointmentDate: date, 
-        appointmentTime: time, 
-        appointmentLocation: location 
+      await scheduleAPI(selectedAppId, {
+        appointmentDate: date,
+        appointmentTime: time,
+        appointmentLocation: location
       });
       toast.success('Appointment scheduled successfully!', { id: toastId });
       closeModal();
@@ -140,8 +136,8 @@ export default function AdminApplications() {
   };
 
   // Filtering
-  const filteredApps = filterStatus === 'all' 
-    ? applications 
+  const filteredApps = filterStatus === 'all'
+    ? applications
     : applications.filter(app => app.status === filterStatus);
 
   if (loading) return <Loader fullscreen />;
@@ -150,207 +146,163 @@ export default function AdminApplications() {
     <div>
       <div className="d-flex justify-between items-center mb-6">
         <div>
-           <h1 style={{ fontSize: '2rem', margin: 0 }}>Applications</h1>
-           <p className="text-muted">Manage and track all marriage applications.</p>
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>Applications</h1>
+          <p className="text-muted">Manage and track all marriage applications.</p>
         </div>
         <div className="d-flex gap-2">
-           <button className="btn btn-primary btn-sm">
-              <CheckCircle size={16} /> Export CSV
-           </button>
+          <button className="btn btn-primary btn-sm">
+            <CheckCircle size={16} /> Export CSV
+          </button>
         </div>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-         {/* Toolbar */}
-         <div className="card-header" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--slate-50)', marginBottom: 0 }}>
-            <div className="d-flex gap-2">
-               <button 
-                  onClick={() => setFilterStatus('all')}
-                  className={`btn btn-sm ${filterStatus === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-               >
-                  All
-               </button>
-               <button 
-                  onClick={() => setFilterStatus('admin_review')}
-                  className={`btn btn-sm ${filterStatus === 'admin_review' ? 'btn-primary' : 'btn-secondary'}`}
-               >
-                  New Request
-               </button>
-               <button 
-                  onClick={() => setFilterStatus('payment_pending')}
-                  className={`btn btn-sm ${filterStatus === 'payment_pending' ? 'btn-primary' : 'btn-secondary'}`}
-               >
-                  Pending Payment
-               </button>
-            </div>
-            
-            <div style={{ position: 'relative' }}>
-               <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: '#94a3b8' }} />
-               <input placeholder="Search applicants..." className="form-input" style={{ width: '250px', paddingLeft: '35px' }} />
-            </div>
-         </div>
+        {/* Toolbar */}
+        <div className="card-header" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--slate-50)', marginBottom: 0 }}>
+          <div className="d-flex gap-2">
+            <button
+              onClick={() => setFilterStatus('all')}
+              className={`btn btn-sm ${filterStatus === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilterStatus('admin_review')}
+              className={`btn btn-sm ${filterStatus === 'admin_review' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              New Request
+            </button>
+            <button
+              onClick={() => setFilterStatus('payment_pending')}
+              className={`btn btn-sm ${filterStatus === 'payment_pending' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              Pending Payment
+            </button>
+          </div>
 
-         {/* Table */}
-         <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
-           <table>
-             <thead>
-               <tr>
-                 <th>Ref #</th>
-                 <th>Groom</th>
-                 <th>Bride</th>
-                 <th>Status</th>
-                 <th>Date</th>
-                 <th className="text-center">Actions</th>
-               </tr>
-             </thead>
-             <tbody>
-               {filteredApps.map(app => (
-                 <tr key={app.id}>
-                   <td style={{ fontFamily: 'monospace', color: 'var(--slate-500)' }}>
-                     #{app.application_number}
-                   </td>
-                   <td>
-                     <div style={{ fontWeight: 500 }}>{app.groom_full_name}</div>
-                     <div style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>{app.groom_phone}</div>
-                   </td>
-                   <td>
-                     <div style={{ fontWeight: 500 }}>{app.bride_full_name}</div>
-                     <div style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>{app.bride_phone}</div>
-                   </td>
-                   <td>
-                     <StatusBadge status={app.status} />
-                   </td>
-                   <td style={{ color: 'var(--slate-500)' }}>
-                     {new Date(app.created_at).toLocaleDateString()}
-                   </td>
-                   <td>
-                      <div className="d-flex justify-center gap-2">
-                        <button onClick={() => openView(app)} className="btn btn-sm btn-secondary" title="View Details">
-                           <Eye size={16} />
-                        </button>
-                        
-                        {app.status === 'admin_review' && (
-                           <button onClick={() => openSetDeposit(app.id)} className="btn btn-sm btn-primary">Set Deposit</button>
-                        )}
-                        {app.status === 'payment_pending' && app.payment_receipt_url && (
-                           <button onClick={() => openVerifyPayment(app.id)} className="btn btn-sm btn-primary">Verify</button>
-                        )}
-                        {app.status === 'payment_verified' && (
-                           <button onClick={() => openSchedule(app.id)} className="btn btn-sm btn-secondary">Schedule</button>
-                        )}
-                        {app.status === 'appointment_scheduled' && (
-                           <button onClick={() => handleGenerateCertificate(app.id)} className="btn btn-sm btn-success text-white" style={{ backgroundColor: 'var(--success)', border: 'none', color: 'white' }}>Complete</button>
-                        )}
-                      </div>
-                   </td>
-                 </tr>
-               ))}
-               {filteredApps.length === 0 && (
-                  <tr>
-                     <td colSpan="6" className="text-center" style={{ padding: '3rem', color: 'var(--slate-500)' }}>
-                        No applications found in this filter.
-                     </td>
-                  </tr>
-               )}
-             </tbody>
-           </table>
-         </div>
+          <div style={{ position: 'relative' }}>
+            <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: '#94a3b8' }} />
+            <input placeholder="Search applicants..." className="form-input" style={{ width: '250px', paddingLeft: '35px' }} />
+          </div>
+        </div>
 
-         {/* Pagination */}
-         <div style={{ padding: '1rem', borderTop: '1px solid var(--slate-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', color: 'var(--slate-500)' }}>
-            <span>Showing {filteredApps.length} results</span>
-            <div className="d-flex gap-2">
-               <button className="btn btn-sm btn-secondary" disabled><ChevronLeft size={16} /></button>
-               <button className="btn btn-sm btn-secondary" disabled><ChevronRight size={16} /></button>
-            </div>
-         </div>
+        {/* Table */}
+        <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Ref #</th>
+                <th>Groom</th>
+                <th>Bride</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th className="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredApps.map(app => (
+                <tr key={app.id}>
+                  <td style={{ fontFamily: 'monospace', color: 'var(--slate-500)' }}>
+                    #{app.application_number}
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 500 }}>{app.groom_full_name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>{app.groom_phone}</div>
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 500 }}>{app.bride_full_name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>{app.bride_phone}</div>
+                  </td>
+                  <td>
+                    <StatusBadge status={app.status} />
+                  </td>
+                  <td style={{ color: 'var(--slate-500)' }}>
+                    {new Date(app.created_at).toLocaleDateString()}
+                  </td>
+                  <td>
+                    <div className="d-flex justify-center gap-2">
+                      <Link to={`/admin/applications/${app.id}`} className="btn btn-sm btn-secondary" title="View Details">
+                        <Eye size={16} />
+                      </Link>
+
+                      {app.status === 'admin_review' && (
+                        <button onClick={() => openSetDeposit(app.id)} className="btn btn-sm btn-primary">Set Deposit</button>
+                      )}
+                      {app.status === 'payment_pending' && app.payment_receipt_url && (
+                        <button onClick={() => openVerifyPayment(app.id)} className="btn btn-sm btn-primary">Verify</button>
+                      )}
+                      {app.status === 'payment_verified' && (
+                        <button onClick={() => openSchedule(app.id)} className="btn btn-sm btn-secondary">Schedule</button>
+                      )}
+                      {app.status === 'appointment_scheduled' && (
+                        <button onClick={() => handleGenerateCertificate(app.id)} className="btn btn-sm btn-success text-white" style={{ backgroundColor: 'var(--success)', border: 'none', color: 'white' }}>Complete</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredApps.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="text-center" style={{ padding: '3rem', color: 'var(--slate-500)' }}>
+                    No applications found in this filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div style={{ padding: '1rem', borderTop: '1px solid var(--slate-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', color: 'var(--slate-500)' }}>
+          <span>Showing {filteredApps.length} results</span>
+          <div className="d-flex gap-2">
+            <button className="btn btn-sm btn-secondary" disabled><ChevronLeft size={16} /></button>
+            <button className="btn btn-sm btn-secondary" disabled><ChevronRight size={16} /></button>
+          </div>
+        </div>
       </div>
 
-       {/* Modals - Reused from previous implementation */}
-       <Modal isOpen={activeModal === 'deposit'} onClose={closeModal} title="Set Deposit Amount">
-          <form onSubmit={handleSetDeposit}>
-            <div className="form-group">
-              <label className="form-label">Amount (PKR)</label>
-              <input type="number" className="form-input" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} placeholder="e.g. 5000" required />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={closeModal} className="btn btn-secondary">Cancel</button>
-              <button type="submit" className="btn btn-primary">Set Amount</button>
-            </div>
-          </form>
+      {/* Modals - Reused from previous implementation */}
+      <Modal isOpen={activeModal === 'deposit'} onClose={closeModal} title="Set Deposit Amount">
+        <form onSubmit={handleSetDeposit}>
+          <div className="form-group">
+            <label className="form-label">Amount (PKR)</label>
+            <input type="number" className="form-input" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} placeholder="e.g. 5000" required />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={closeModal} className="btn btn-secondary">Cancel</button>
+            <button type="submit" className="btn btn-primary">Set Amount</button>
+          </div>
+        </form>
       </Modal>
 
       <Modal isOpen={activeModal === 'verify'} onClose={closeModal} title="Verify Payment">
-          <p className="text-slate-600 mb-6">Are you sure you want to verify the payment receipt?</p>
-          <div className="flex justify-end gap-2">
-            <button onClick={closeModal} className="btn btn-secondary">Cancel</button>
-            <button onClick={handleVerifyPayment} className="btn btn-primary">Verify</button>
-          </div>
+        <p className="text-slate-600 mb-6">Are you sure you want to verify the payment receipt?</p>
+        <div className="flex justify-end gap-2">
+          <button onClick={closeModal} className="btn btn-secondary">Cancel</button>
+          <button onClick={handleVerifyPayment} className="btn btn-primary">Verify</button>
+        </div>
       </Modal>
 
       <Modal isOpen={activeModal === 'schedule'} onClose={closeModal} title="Schedule Appointment">
-          <form onSubmit={handleScheduleAppointment}>
-            <div className="form-group">
-              <label className="form-label">Date</label>
-              <input type="date" className="form-input" value={appointmentData.date} onChange={(e) => setAppointmentData({...appointmentData, date: e.target.value})} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Time</label>
-              <input type="time" className="form-input" value={appointmentData.time} onChange={(e) => setAppointmentData({...appointmentData, time: e.target.value})} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Location</label>
-              <input type="text" className="form-input" value={appointmentData.location} onChange={(e) => setAppointmentData({...appointmentData, location: e.target.value})} placeholder="e.g. Main Hall" required />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={closeModal} className="btn btn-secondary">Cancel</button>
-              <button type="submit" className="btn btn-primary">Schedule</button>
-            </div>
-          </form>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'view'} onClose={closeModal} title="Application Details">
-           {selectedApp && (
-             <div className="space-y-6">
-               <div className="grid grid-cols-2 gap-4">
-                 <div className="p-4 bg-slate-50 rounded border border-slate-200">
-                   <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 flex items-center gap-2"><User size={14} /> Groom</h3>
-                   <div className="space-y-1 text-sm text-slate-700">
-                     <p className="font-semibold">{selectedApp.groom_full_name}</p>
-                     <p>{selectedApp.groom_phone}</p>
-                     <p>{selectedApp.groom_email}</p>
-                     <p>{selectedApp.groom_address}</p>
-                   </div>
-                 </div>
-                 <div className="p-4 bg-slate-50 rounded border border-slate-200">
-                   <h3 className="text-sm font-bold uppercase text-slate-500 mb-3 flex items-center gap-2"><User size={14} /> Bride</h3>
-                   <div className="space-y-1 text-sm text-slate-700">
-                     <p className="font-semibold">{selectedApp.bride_full_name}</p>
-                     <p>{selectedApp.bride_phone}</p>
-                     <p>{selectedApp.bride_email}</p>
-                     <p>{selectedApp.bride_address}</p>
-                   </div>
-                 </div>
-               </div>
-               <div>
-                  <h3 className="text-sm font-bold uppercase text-slate-500 mb-2">Details</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                      <p><strong>Ref:</strong> {selectedApp.application_number}</p>
-                      <p><strong>Preferred Date:</strong> {selectedApp.preferred_date}</p>
-                      <p className="col-span-2"><strong>Notes:</strong> {selectedApp.special_requests || '-'}</p>
-                  </div>
-               </div>
-               {selectedApp.payment_receipt_url && (
-                 <div className="bg-blue-50 p-3 rounded border border-blue-100 flex justify-between items-center">
-                   <span className="text-blue-800 text-sm font-medium flex items-center gap-2"><FileText size={16} /> Payment Receipt Uploaded</span>
-                   <a href={selectedApp.payment_receipt_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-bold">View Receipt</a>
-                 </div>
-               )}
-               <div className="flex justify-end pt-4 border-t border-slate-100">
-                 <button onClick={closeModal} className="btn btn-secondary">Close</button>
-               </div>
-             </div>
-           )}
+        <form onSubmit={handleScheduleAppointment}>
+          <div className="form-group">
+            <label className="form-label">Date</label>
+            <input type="date" className="form-input" value={appointmentData.date} onChange={(e) => setAppointmentData({ ...appointmentData, date: e.target.value })} required />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Time</label>
+            <input type="time" className="form-input" value={appointmentData.time} onChange={(e) => setAppointmentData({ ...appointmentData, time: e.target.value })} required />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Location</label>
+            <input type="text" className="form-input" value={appointmentData.location} onChange={(e) => setAppointmentData({ ...appointmentData, location: e.target.value })} placeholder="e.g. Main Hall" required />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={closeModal} className="btn btn-secondary">Cancel</button>
+            <button type="submit" className="btn btn-primary">Schedule</button>
+          </div>
+        </form>
       </Modal>
 
     </div>
