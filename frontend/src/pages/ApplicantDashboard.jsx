@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ApplicantNavbar from '../components/ApplicantNavbar';
 import Loader from '../components/Loader';
-import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession } from '../services/api';
+import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession, getFileUrl } from '../services/api';
 import toast from 'react-hot-toast';
 import { FileText, Calendar, CreditCard, Download, Upload, CheckCircle, LogOut, Landmark, AlertCircle, Clock } from 'lucide-react';
 
@@ -329,7 +329,7 @@ export default function ApplicantDashboard() {
                               <h3 style={{ color: '#065f46', margin: 0, fontSize: '1.2rem' }}>Certificate Ready</h3>
                               <p style={{ color: '#047857', marginTop: '0.25rem' }}>Your digital marriage certificate is available.</p>
                            </div>
-                           <a href={`http://localhost:5000${app.certificate_url}`} target="_blank" className="btn btn-success text-white" style={{ backgroundColor: '#059669', border: 'none' }}>
+                           <a href={getFileUrl(app.certificate_url)} target="_blank" className="btn btn-success text-white" style={{ backgroundColor: '#059669', border: 'none' }}>
                               <Download size={18} /> Download PDF
                            </a>
                         </div>

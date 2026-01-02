@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import axios from 'axios';
 import toast from 'react-hot-toast';
+import { createPaymentIntent, confirmPayment } from '../services/api';
 
 const PaymentForm = ({ onSuccess }) => {
   const stripe = useStripe();
@@ -18,14 +18,8 @@ const PaymentForm = ({ onSuccess }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      
       // 1. Create Payment Intent
-      const { data: intentData } = await axios.post(
-        'http://localhost:5000/api/payment/create-payment-intent',
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const { data: intentData } = await createPaymentIntent();
 
       if (!intentData.success) {
         throw new Error(intentData.message || 'Failed to initialize payment');
@@ -45,11 +39,7 @@ const PaymentForm = ({ onSuccess }) => {
       } else {
         if (result.paymentIntent.status === 'succeeded') {
           // 3. Confirm with Backend
-          await axios.post(
-            'http://localhost:5000/api/payment/confirm-payment',
-            { paymentIntentId: result.paymentIntent.id },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          await confirmPayment({ paymentIntentId: result.paymentIntent.id });
 
           toast.success('Payment successful!');
           onSuccess();
@@ -86,9 +76,9 @@ const PaymentForm = ({ onSuccess }) => {
       <div className="p-4 border rounded-md bg-white shadow-sm">
         <CardElement options={cardStyle} />
       </div>
-      <button 
-        type="submit" 
-        disabled={!stripe || loading} 
+      <button
+        type="submit"
+        disabled={!stripe || loading}
         className="btn btn-primary w-full mt-4"
         style={{ opacity: loading ? 0.7 : 1 }}
       >

@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Prioritize VITE_API_URL, fallback to REACT_APP_API_URL for compatibility
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+  (typeof process !== 'undefined' && process.env.REACT_APP_API_URL) ||
+  'http://localhost:5000/api';
+
+export const getFileUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const baseUrl = API_BASE_URL.replace(/\/api$/, ''); // Remove trailing /api
+  return `${baseUrl}${path}`;
+};
 
 // Create axios instance
 const api = axios.create({
@@ -39,6 +49,8 @@ export const submitApplication = (data) => api.post('/applications', data);
 
 // Auth APIs
 export const login = (credentials) => api.post('/auth/login', credentials);
+export const forgotPassword = (data) => api.post('/auth/forgot-password', data);
+export const resetPassword = (data) => api.post('/auth/reset-password', data);
 
 // Applicant APIs
 // export const applicantLogin = (credentials) => api.post('/applicants/login', credentials); // DEPRECATED
@@ -65,6 +77,14 @@ export const generateCertificate = (id) => api.post(`/admin/applications/${id}/g
 
 // Payment APIs
 export const createCheckoutSession = () => api.post('/payment/create-checkout-session');
+
 export const verifySession = (sessionId) => api.post('/payment/verify-session', { sessionId });
+export const createPaymentIntent = () => api.post('/payment/create-payment-intent');
+export const confirmPayment = (data) => api.post('/payment/confirm-payment', data);
+
+// Notification APIs
+export const getNotifications = () => api.get('/notifications');
+export const markNotificationRead = (id) => api.put(`/notifications/${id}/read`);
+export const markAllNotificationsRead = () => api.put('/notifications/read-all');
 
 export default api;
