@@ -15,6 +15,7 @@ const adminRoutes = require('./routes/admin');
 const app = express();
 
 // CORS configuration
+// 1. CORS Middleware - MUST be first
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -27,8 +28,18 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Enable pre-flight for all routes
-app.options("*", cors());
+// FORCE PREFLIGHT SUCCESS: Manual OPTIONS handler
+// This helps if the 'cors' package logic is being skipped or overridden by cPanel/Proxy
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    return res.status(200).send();
+  }
+  next();
+});
 
 const PORT = process.env.PORT || 5000;
 
