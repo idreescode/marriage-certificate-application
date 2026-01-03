@@ -13,13 +13,38 @@ const adminRoutes = require('./routes/admin');
 
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://hassaan.kashmirtech.dev"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Postman / server-to-server request
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS not allowed"));
+    }
+  },
+  credentials: true
+}));
+
+app.options("*", cors());
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,8 +62,8 @@ app.use('/api/auth', require('./routes/auth'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    success: true, 
+  res.json({
+    success: true,
     message: 'Marriage Certificate API is running',
     timestamp: new Date().toISOString()
   });
@@ -67,7 +92,7 @@ const startServer = async () => {
   try {
     // Test database connection
     await testConnection();
-    
+
     // Verify email configuration
     await verifyEmailConfig();
 
