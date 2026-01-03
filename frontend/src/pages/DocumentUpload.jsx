@@ -276,7 +276,7 @@ export default function DocumentUpload() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--slate-200)' }}>
                             <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold" style={{ backgroundColor: 'var(--brand-100)', color: 'var(--brand-700)', width: '1.5rem', height: '1.5rem', borderRadius: '50%', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
-                            <h3 className="text-lg font-semibold m-0" style={{ color: 'var(--brand-600)', fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Marriage Details</h3>
+                            <h3 className="text-lg font-semibold m-0" style={{ color: 'var(--brand-600)', fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Wedding Details</h3>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
                             <UploadCard

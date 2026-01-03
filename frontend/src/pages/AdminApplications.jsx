@@ -147,7 +147,7 @@ export default function AdminApplications() {
       <div className="d-flex justify-between items-center mb-6">
         <div>
           <h1 style={{ fontSize: '2rem', margin: 0 }}>Applications</h1>
-          <p className="text-muted">Manage and track all marriage applications.</p>
+          <p className="text-muted">Manage and track all nikkah applications.</p>
         </div>
         <div className="d-flex gap-2">
           <button className="btn btn-primary btn-sm">

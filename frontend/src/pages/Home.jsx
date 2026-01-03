@@ -20,7 +20,7 @@ export default function Home() {
       <section className="hero">
         <div className="container text-center">
           <div className="badge badge-info mb-4" style={{ marginBottom: '1.5rem' }}>
-            Official Marriage Certification Portal
+            Official Nikkah App
           </div>
           
           <h1 style={{ maxWidth: '800px', margin: '0 auto 1.5rem' }}>
@@ -28,7 +28,7 @@ export default function Home() {
           </h1>
           
           <p style={{ fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto 2.5rem' }}>
-            A fully digital, authenticated process for registering marriages and obtaining official certificates from Jamiyat.org.
+            A fully digital, authenticated process for registering nikkah and obtaining official certificates from Jamiyat.org.
           </p>
 
           <div className="flex justify-center gap-4">

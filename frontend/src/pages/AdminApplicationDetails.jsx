@@ -144,7 +144,7 @@ export default function AdminApplicationDetails() {
                     <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-start gap-6">
                         <div>
                             <div className="flex items-center gap-4 mb-2">
-                                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Marriage Application</h1>
+                                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Nikkah Application</h1>
                                 <StatusBadge status={application.status} />
                             </div>
                             <p className="text-slate-500 text-lg">

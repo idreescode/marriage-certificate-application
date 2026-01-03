@@ -178,7 +178,7 @@ export default function ApplicantDashboard() {
                   </div>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--slate-500)' }}>Current Status</h3>
                   <p style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>
-                     {app.status === 'completed' ? 'Marriage Certified' : 'Processing'}
+                     {app.status === 'completed' ? 'Nikkah Certified' : 'Processing'}
                   </p>
                   <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--slate-500)' }}>
                      Applied on {new Date(app.created_at).toLocaleDateString()}
@@ -327,7 +327,7 @@ export default function ApplicantDashboard() {
                         <div className="d-flex justify-between items-center">
                            <div>
                               <h3 style={{ color: '#065f46', margin: 0, fontSize: '1.2rem' }}>Certificate Ready</h3>
-                              <p style={{ color: '#047857', marginTop: '0.25rem' }}>Your digital marriage certificate is available.</p>
+                              <p style={{ color: '#047857', marginTop: '0.25rem' }}>Your digital nikkah certificate is available.</p>
                            </div>
                            <a href={getFileUrl(app.certificate_url)} target="_blank" className="btn btn-success text-white" style={{ backgroundColor: '#059669', border: 'none' }}>
                               <Download size={18} /> Download PDF
