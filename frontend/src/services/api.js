@@ -1,15 +1,16 @@
 import axios from 'axios';
 
 // Prioritize VITE_API_URL, fallback to REACT_APP_API_URL for compatibility
-const API_BASE_URL = import.meta.env.VITE_API_URL ||
-  (typeof process !== 'undefined' && process.env.REACT_APP_API_URL) ||
-  'http://localhost:5000/api';
+// Use VITE_API_URL from environment
+const ENV_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = `${ENV_API_URL}/api`;
 
 export const getFileUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  const baseUrl = API_BASE_URL.replace(/\/api$/, ''); // Remove trailing /api
-  return `${baseUrl}${path}`;
+  // If path already starts with /api, prevent double /api/api
+  const cleanBase = ENV_API_URL.endsWith('/') ? ENV_API_URL.slice(0, -1) : ENV_API_URL;
+  return `${cleanBase}${path}`;
 };
 
 // Create axios instance
@@ -18,6 +19,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 });
 
 // Add auth token to requests
