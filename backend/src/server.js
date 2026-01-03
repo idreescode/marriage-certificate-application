@@ -13,6 +13,8 @@ const adminRoutes = require('./routes/admin');
 
 
 const app = express();
+
+// 1. CORS Middleware - MUST be first
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -22,16 +24,11 @@ app.use(cors({
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
+// Enable pre-flight for all routes
 app.options("*", cors());
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
 
 const PORT = process.env.PORT || 5000;
 
