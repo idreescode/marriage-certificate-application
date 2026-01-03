@@ -13,6 +13,8 @@ const adminRoutes = require('./routes/admin');
 
 
 const app = express();
+
+// CORS configuration
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -21,17 +23,9 @@ app.use(cors({
     "https://www.hassaan.kashmirtech.dev"
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-app.options("*", cors());
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
 
 const PORT = process.env.PORT || 5000;
 
