@@ -1,26 +1,65 @@
 import axios from 'axios';
 
-// Prioritize VITE_API_URL, fallback to REACT_APP_API_URL for compatibility
-// Use VITE_API_URL from environment
-const ENV_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const API_BASE_URL = `${ENV_API_URL}/api`;
+// -----------------------------------------------------------------------------
+// API CONFIGURATION
+// -----------------------------------------------------------------------------
+
+// 1. Get the base URL from environment variables
+const RAW_API_URL = import.meta.env.VITE_API_URL;
+
+// 2. Fallback for local development if env var is missing (Safety net)
+//    NOTE: It is best practice to always have .env.development set.
+const DEFAULT_API_URL = 'http://localhost:5000';
+
+// 3. Construct the final Base URL
+//    Logic: Take the env URL (or default), strip any trailing slash, and append '/api'
+//    Result: "https://api.example.com/api" or "http://localhost:5000/api"
+const getBaseUrl = () => {
+  let url = RAW_API_URL || DEFAULT_API_URL;
+
+  // Remove trailing slash if present to avoid double slashes
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+
+  // Ensure we don't accidentally append /api if it's already there (e.g. user error in env var)
+  if (!url.endsWith('/api')) {
+    url = `${url}/api`;
+  }
+
+  return url;
+};
+
+const API_BASE_URL = getBaseUrl();
+
+// Debug helper to ensure we know what's happening in production
+console.log(`%c API Config: ${API_BASE_URL}`, 'background: #222; color: #bada55');
 
 export const getFileUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  // If path already starts with /api, prevent double /api/api
-  const cleanBase = ENV_API_URL.endsWith('/') ? ENV_API_URL.slice(0, -1) : ENV_API_URL;
-  return `${cleanBase}${path}`;
+
+  // For static files, we likely want the ROOT application URL, not the /api path.
+  // Assuming uploads are served from http://localhost:5000/uploads (not /api/uploads)
+  const rootUrl = API_BASE_URL.replace(/\/api$/, '');
+
+  // Ensure path starts with /
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${rootUrl}${cleanPath}`;
 };
 
-// Create axios instance
+// 4. Create the global Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true
+  withCredentials: true // CRITICAL: Ensures cookies are sent/received (Connect.sid)
 });
+
+// -----------------------------------------------------------------------------
+// INTERCEPTORS
+// -----------------------------------------------------------------------------
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
@@ -36,15 +75,24 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Only redirect if 401 AND not on a login request
-    const isLoginRequest = error.config?.url?.includes('/login');
+    // Prevents infinite redirect loops if login fails
+    const isLoginRequest = error.config?.url?.includes('/auth/login');
 
     if (error.response?.status === 401 && !isLoginRequest) {
+      console.warn('Session expired or unauthorized. Redirecting to login.');
       localStorage.removeItem('token');
+      // Use window.location carefully: 
+      // specific redirecting might be better handled by React Router in components, 
+      // but this is a fail-safe global handler.
       window.location.href = '/';
     }
     return Promise.reject(error);
   }
 );
+
+// -----------------------------------------------------------------------------
+// API METHODS
+// -----------------------------------------------------------------------------
 
 // Application APIs
 export const submitApplication = (data) => api.post('/applications', data);
