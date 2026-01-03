@@ -6,52 +6,57 @@ require('dotenv').config();
 const { testConnection } = require('./config/database');
 const { verifyEmailConfig } = require('./config/email');
 
-// Import routes
+// Routes
 const applicationsRoutes = require('./routes/applications');
 const applicantsRoutes = require('./routes/applicants');
 const adminRoutes = require('./routes/admin');
 
-
 const app = express();
 
-// CORS configuration
-// 1. CORS Middleware - MUST be first
+/* =========================
+   CORS CONFIG (TOP MOST)
+========================= */
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://hassaan.kashmirtech.dev",
+  "https://www.hassaan.kashmirtech.dev"
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://hassaan.kashmirtech.dev",
-    "https://www.hassaan.kashmirtech.dev"
-  ],
+  origin: function (origin, callback) {
+    // allow requests like Postman / server-side
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
-// FORCE PREFLIGHT SUCCESS: Manual OPTIONS handler
-// This helps if the 'cors' package logic is being skipped or overridden by cPanel/Proxy
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    return res.status(200).send();
-  }
-  next();
-});
+// 🔥 MUST for cPanel / reverse proxy
+app.options("*", cors());
 
-const PORT = process.env.PORT || 5000;
-
-// Middleware
+/* =========================
+   MIDDLEWARES
+========================= */
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (uploads)
+// Static uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// API Routes
+/* =========================
+   ROUTES
+========================= */
+
 app.use('/api/applications', applicationsRoutes);
 app.use('/api/applicants', applicantsRoutes);
 app.use('/api/admin', adminRoutes);
@@ -59,17 +64,22 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/auth', require('./routes/auth'));
 
+/* =========================
+   HEALTH CHECK
+========================= */
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
-    message: 'Marriage Certificate API is running',
-    timestamp: new Date().toISOString()
+    message: 'API is running',
+    time: new Date().toISOString()
   });
 });
 
-// 404 handler
+/* =========================
+   404 HANDLER
+========================= */
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -77,37 +87,34 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+/* =========================
+   ERROR HANDLER
+========================= */
+
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error(err);
   res.status(500).json({
     success: false,
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: err.message || 'Internal server error'
   });
 });
 
-// Start server
+/* =========================
+   SERVER START
+========================= */
+
+const PORT = process.env.PORT || 5000;
+
 const startServer = async () => {
   try {
-    // Test database connection
     await testConnection();
-
-    // Verify email configuration
     await verifyEmailConfig();
 
-    // Start listening
     app.listen(PORT, () => {
-      console.log('='.repeat(50));
-      console.log('🚀 Marriage Certificate API Server');
-      console.log('='.repeat(50));
-      console.log(`📡 Server running on port: ${PORT}`);
-      console.log(`🌐 API URL: http://localhost:${PORT}`);
-      console.log(`🔥 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log('='.repeat(50));
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('Startup failed:', error);
     process.exit(1);
   }
 };
