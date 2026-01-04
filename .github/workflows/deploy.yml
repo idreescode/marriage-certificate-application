@@ -1,110 +1,80 @@
-name: Deploy to IONOS
+name: Deploy to cPanel (FTP)
 
 on:
   push:
     branches:
       - main
-      - master
-  workflow_dispatch:
-
-env:
-  NODE_VERSION: '18.x'
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name:  Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '18'
           cache: 'npm'
-          cache-dependency-path: |
-            frontend/package-lock.json
-            backend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install frontend dependencies
+      # ----------------------------------------------------------------
+      # FRONTEND BUILD
+      # ----------------------------------------------------------------
+      - name: 🔨 Install Frontend Dependencies
         run: |
           cd frontend
           npm ci
 
-      - name: Build frontend
+      - name: 🏗️ Build Frontend
         run: |
           cd frontend
           npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Install backend dependencies
+      # ----------------------------------------------------------------
+      # PREPARE DEPLOYMENT FILES
+      # ----------------------------------------------------------------
+      - name: 📂 Prepare Deployment Files
         run: |
-          cd backend
-          npm ci --production
+          mkdir deploy_artifact
+          
+          # 1. Copy Backend (Source Code)
+          cp -r backend/* deploy_artifact/
+          
+          # 2. Copy Frontend Build (to public/dist or wherever static files are served)
+          # Assuming your backend is configured to serve '../frontend/dist' or specific folder
+          # Creating standard structure:
+          mkdir -p deploy_artifact/frontend_build
+          cp -r frontend/dist/* deploy_artifact/frontend_build/
 
-      - name: Create deployment package
-        run: |
-          mkdir -p deploy
-          # Copy backend
-          cp -r backend deploy/
-          # Copy built frontend
-          cp -r frontend/dist deploy/frontend-dist
-          # Copy necessary files
-          cp package.json deploy/
-          cp ecosystem.config.js deploy/
-          cp .gitignore deploy/
-          # Remove node_modules from backend if exists
-          rm -rf deploy/backend/node_modules
-          # Create .env.example
-          echo "Creating .env.example file"
-          # Create deployment archive
-          tar -czf deployment.tar.gz deploy/
+          # 3. Create Restart Trigger for cPanel (Phusion Passenger/Node)
+          mkdir -p deploy_artifact/tmp
+          touch deploy_artifact/tmp/restart.txt
 
-      - name: Deploy to IONOS via SFTP
+          # Cleanup node_modules (too big for FTP, run npm install on server if possible OR upload dependencies if no SSH)
+          # NOTE: Uploading node_modules via FTP is slow. 
+          # IF YOU CANNOT RUN npm install ON SERVER via SSH Terminal:
+          # You MUST build node_modules here. But linux binaries might not match cPanel.
+          # Best practice for FTP-only: Upload package.json and trigger install on server if possible.
+          # For now, we assume dependency updates are rare or manual.
+          
+      # ----------------------------------------------------------------
+      # FTP DEPLOY
+      # ----------------------------------------------------------------
+      - name: 🚀 Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./deploy/
-          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+          server-dir: /public_html/  # CHANGE THIS to your actual path (e.g., / or /app)
+          local-dir: ./deploy_artifact/
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            **/.env
-            **/*.log
-
-      - name: Deploy via SSH (Alternative)
-        if: ${{ secrets.SSH_HOST != '' }}
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          script: |
-            cd ${{ secrets.SSH_REMOTE_DIR }}
-            # Extract deployment package
-            tar -xzf deployment.tar.gz
-            # Install backend dependencies
-            cd backend
-            npm install --production
-            # Run migrations
-            npm run migrate || echo "Migrations may have already run"
-            # Restart application with PM2
-            pm2 restart marriage-cert-api || pm2 start ecosystem.config.js
-            pm2 save
-
-      - name: Cleanup
-        run: |
-          rm -rf deploy
-          rm -f deployment.tar.gz
-
-      - name: Deployment notification
-        if: success()
-        run: |
-          echo "✅ Deployment completed successfully!"
 
