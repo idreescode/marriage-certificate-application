@@ -15,19 +15,25 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install & Build
+      - name: Install & Build Frontend
         run: |
           cd frontend
           npm ci
           npm run build
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Deploy Frontend via FTP
+      - name: ✅ Verify dist exists
+        run: |
+          ls -la frontend
+          ls -la frontend/dist
+
+      - name: Deploy Frontend via FTPS
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server: ftp.kashmirtech.dev
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          passive: true
           local-dir: frontend/dist/
-          server-dir: /app.domain.com/
+          server-dir: /certificate/frontend/dist/
