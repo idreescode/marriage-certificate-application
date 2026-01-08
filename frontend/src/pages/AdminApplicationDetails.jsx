@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import {
     ArrowLeft, User, Calendar, Phone, Mail, MapPin,
     FileText, CheckCircle, Clock, Globe, Shield, Download,
-    CreditCard, MoreVertical
+    CreditCard, MoreVertical, ExternalLink
 } from 'lucide-react';
 
 export default function AdminApplicationDetails() {
@@ -81,26 +81,27 @@ export default function AdminApplicationDetails() {
         </div>
     );
 
-    const DocumentCard = ({ title, path, type = 'doc' }) => {
+    const DocumentCard = ({ title, path }) => {
         if (!path) return null;
-        const isImage = path.match(/\.(jpeg|jpg|png|webp)$/i);
 
         return (
-            <a
-                href={getFileUrl(path)}
-                target="_blank"
-                rel="noreferrer"
-                className="group relative flex flex-col items-center justify-center p-4 border border-slate-200 rounded-xl bg-white hover:border-blue-400 hover:shadow-md transition-all duration-200 aspect-square text-center"
-            >
-                <div className="mb-3 p-3 bg-slate-50 rounded-full group-hover:bg-blue-50 transition-colors">
-                    {isImage ? <FileText className="text-slate-500 group-hover:text-blue-500" size={24} /> : <FileText className="text-slate-500 group-hover:text-blue-500" size={24} />}
+            <div className="doc-action-row">
+                <div className="doc-row-left">
+                    <div className="doc-icon-box">
+                        <FileText size={18} />
+                    </div>
+                    <span className="doc-row-title">{title}</span>
                 </div>
-                <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700 mb-1 line-clamp-2">{title}</span>
-                <span className="text-xs text-slate-400 group-hover:text-blue-400">View Document</span>
-
-                {/* Hover overlay hint */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-xl transition-colors pointer-events-none" />
-            </a>
+                <a
+                    href={getFileUrl(path)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="doc-view-btn"
+                >
+                    Open
+                    <ExternalLink size={14} />
+                </a>
+            </div>
         );
     };
 
@@ -336,15 +337,15 @@ export default function AdminApplicationDetails() {
                                 </div>
                                 <h2 className="card-title-text">Documents</h2>
                             </div>
-                            <div className="card-body p-2">
-                                <div className="grid grid-cols-2 gap-3">
-                                    {application.payment_receipt_url && <DocumentCard title="Receipt" path={application.payment_receipt_url} />}
-                                    {application.groom_id_path && <DocumentCard title="Groom ID" path={application.groom_id_path} />}
-                                    {application.bride_id_path && <DocumentCard title="Bride ID" path={application.bride_id_path} />}
-                                    {application.mahr_declaration_path && <DocumentCard title="Mahr" path={application.mahr_declaration_path} />}
-                                    {application.civil_divorce_doc_path && <DocumentCard title="C-Divorce" path={application.civil_divorce_doc_path} />}
-                                    {application.islamic_divorce_doc_path && <DocumentCard title="I-Divorce" path={application.islamic_divorce_doc_path} />}
-                                    {application.statutory_declaration_path && <DocumentCard title="Statutory" path={application.statutory_declaration_path} />}
+                            <div className="card-body p-4">
+                                <div className="grid grid-cols-1 gap-3">
+                                    {application.payment_receipt_url && <DocumentCard title="Payment Receipt" path={application.payment_receipt_url} />}
+                                    {application.groom_id_path && <DocumentCard title="Groom ID Card" path={application.groom_id_path} />}
+                                    {application.bride_id_path && <DocumentCard title="Bride ID Card" path={application.bride_id_path} />}
+                                    {application.mahr_declaration_path && <DocumentCard title="Mahr Declaration" path={application.mahr_declaration_path} />}
+                                    {application.civil_divorce_doc_path && <DocumentCard title="Civil Divorce" path={application.civil_divorce_doc_path} />}
+                                    {application.islamic_divorce_doc_path && <DocumentCard title="Islamic Divorce" path={application.islamic_divorce_doc_path} />}
+                                    {application.statutory_declaration_path && <DocumentCard title="Statutory Decl." path={application.statutory_declaration_path} />}
                                 </div>
 
                                 {![
