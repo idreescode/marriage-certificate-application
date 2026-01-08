@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
-  // Use root path for local dev ('serve'), subdirectory for production build
-  base: command === 'serve' ? '/' : '/marriage_frontend/',
+  // Use root path for both dev and production
+  base: '/',
   server: {
     port: 5173,
     open: true
