@@ -7,10 +7,13 @@ import { getAllApplications, setDepositAmount as setDepositAPI, verifyPayment as
 import toast from 'react-hot-toast';
 import { Search, Filter, CheckCircle, Clock, Banknote, Calendar, Eye, FileText, User, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { useSearchParams } from 'react-router-dom';
+
 export default function AdminApplications() {
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
 
   // Modal States
   const [activeModal, setActiveModal] = useState(null); // 'deposit', 'verify', 'schedule', 'view'
@@ -144,13 +147,21 @@ export default function AdminApplications() {
 
   return (
     <div>
-      <div className="d-flex justify-between items-center mb-6">
+      <div style={{
+        background: 'var(--brand-600)',
+        padding: '1.5rem 2rem',
+        borderRadius: 'var(--radius-lg)',
+        marginBottom: '1.5rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
         <div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>Applications</h1>
-          <p className="text-muted">Manage and track all nikkah applications.</p>
+          <h1 style={{ fontSize: '2rem', margin: 0, color: 'white' }}>Applications</h1>
+          <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0, marginTop: '0.25rem' }}>Manage and track all nikkah applications.</p>
         </div>
         <div className="d-flex gap-2">
-          <button className="btn btn-primary btn-sm">
+          <button className="btn btn-sm" style={{ background: 'white', color: 'var(--brand-600)', border: 'none', fontWeight: 600 }}>
             <CheckCircle size={16} /> Export CSV
           </button>
         </div>
@@ -158,23 +169,38 @@ export default function AdminApplications() {
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Toolbar */}
-        <div className="card-header" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--slate-50)', marginBottom: 0 }}>
+        <div className="card-header" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white', borderBottom: '1px solid var(--slate-200)', marginBottom: 0 }}>
           <div className="d-flex gap-2">
             <button
               onClick={() => setFilterStatus('all')}
-              className={`btn btn-sm ${filterStatus === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm`}
+              style={{
+                background: filterStatus === 'all' ? 'var(--brand-600)' : 'transparent',
+                color: filterStatus === 'all' ? 'white' : 'var(--slate-600)',
+                border: filterStatus === 'all' ? 'none' : '1px solid var(--slate-300)'
+              }}
             >
               All
             </button>
             <button
               onClick={() => setFilterStatus('admin_review')}
-              className={`btn btn-sm ${filterStatus === 'admin_review' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm`}
+              style={{
+                background: filterStatus === 'admin_review' ? 'var(--brand-600)' : 'transparent',
+                color: filterStatus === 'admin_review' ? 'white' : 'var(--slate-600)',
+                border: filterStatus === 'admin_review' ? 'none' : '1px solid var(--slate-300)'
+              }}
             >
               New Request
             </button>
             <button
               onClick={() => setFilterStatus('payment_pending')}
-              className={`btn btn-sm ${filterStatus === 'payment_pending' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm`}
+              style={{
+                background: filterStatus === 'payment_pending' ? 'var(--brand-600)' : 'transparent',
+                color: filterStatus === 'payment_pending' ? 'white' : 'var(--slate-600)',
+                border: filterStatus === 'payment_pending' ? 'none' : '1px solid var(--slate-300)'
+              }}
             >
               Pending Payment
             </button>

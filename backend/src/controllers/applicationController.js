@@ -12,7 +12,7 @@ const submitApplication = async (req, res) => {
     console.log('===== COMPLETE REQUEST BODY =====');
     console.log(JSON.stringify(req.body, null, 2));
     console.log('=================================');
-    
+
     // Convert array format to object format
     // Frontend sends: { data: [{ name: "groomName", value: "..." }, ...] }
     // We need: { groomName: "...", ... }
@@ -25,11 +25,11 @@ const submitApplication = async (req, res) => {
       // If data is already in object format, use it directly
       formData = req.body;
     }
-    
+
     console.log('===== CONVERTED FORM DATA =====');
     console.log(JSON.stringify(formData, null, 2));
     console.log('=================================');
-    
+
     // Extract data from converted formData object
     // Groom
     const groomName = formData.groomName || null;
@@ -40,14 +40,14 @@ const submitApplication = async (req, res) => {
     const groomConfirm = formData.groomConfirm || false;
     const groomPersonally = formData.groomPersonally || false;
     const groomRepresentative = formData.groomRepresentative || false;
-    
+
     // Groom Representative
     const groomRepName = formData.groomRepName || null;
     const groomRepFatherName = formData.groomRepFatherName || null;
     const groomRepDateOfBirth = formData.groomRepDateOfBirth || null;
     const groomRepPlaceOfBirth = formData.groomRepPlaceOfBirth || null;
     const groomRepAddress = formData.groomRepAddress || null;
-    
+
     // Bride
     const brideName = formData.brideName || null;
     const brideFatherName = formData.brideFatherName || null;
@@ -57,32 +57,32 @@ const submitApplication = async (req, res) => {
     const brideConfirm = formData.brideConfirm || false;
     const bridePersonally = formData.bridePersonally || false;
     const brideRepresentative = formData.brideRepresentative || false;
-    
+
     // Bride Representative
     const brideRepName = formData.brideRepName || null;
     const brideRepFatherName = formData.brideRepFatherName || null;
     const brideRepDateOfBirth = formData.brideRepDateOfBirth || null;
     const brideRepPlaceOfBirth = formData.brideRepPlaceOfBirth || null;
     const brideRepAddress = formData.brideRepAddress || null;
-    
+
     // Witness 1
     const witness1Name = formData.witness1Name || null;
     const witness1FatherName = formData.witness1FatherName || null;
     const witness1DateOfBirth = formData.witness1DateOfBirth || null;
     const witness1PlaceOfBirth = formData.witness1PlaceOfBirth || null;
     const witness1Address = formData.witness1Address || null;
-    
+
     // Witness 2
     const witness2Name = formData.witness2Name || null;
     const witness2FatherName = formData.witness2FatherName || null;
     const witness2DateOfBirth = formData.witness2DateOfBirth || null;
     const witness2PlaceOfBirth = formData.witness2PlaceOfBirth || null;
     const witness2Address = formData.witness2Address || null;
-    
+
     // Mahr
     const mahrAmount = formData.mahrAmount || null;
     const mahrType = formData.mahrType || null;
-    
+
     // Solemnised
     const solemnisedDate = formData.solemnisedDate || null;
     const solemnisedPlace = formData.solemnisedPlace || null;
@@ -100,9 +100,9 @@ const submitApplication = async (req, res) => {
 
     // Generate unique application number
     const applicationNumber = generateApplicationNumber();
-    
+
     // Generate portal credentials (auto-create user for testing)
-    const portalEmail = `app${applicationNumber}@marriage.test`; // Auto-generate email
+    const portalEmail = `app${applicationNumber}@nikah.org`; // Auto-generate email
     const portalPassword = generatePassword();
     const hashedPassword = await bcrypt.hash(portalPassword, 10);
 
@@ -179,7 +179,7 @@ const submitApplication = async (req, res) => {
           );
         }
       }
-      
+
       // COMMIT TRANSACTION
       await connection.commit();
       console.log('Transaction Committed');
@@ -205,11 +205,11 @@ const submitApplication = async (req, res) => {
       // Create In-App Notification
       try {
         await createNotification({
-            applicationId,
-            role: 'admin',
-            type: 'new_application',
-            title: 'New Application Received',
-            message: `New marriage application #${applicationNumber} from ${groomName} & ${brideName}`
+          applicationId,
+          role: 'admin',
+          type: 'new_application',
+          title: 'New Application Received',
+          message: `New marriage application #${applicationNumber} from ${groomName} & ${brideName}`
         });
       } catch (notifErr) {
         console.error('Notification Error:', notifErr);
@@ -244,7 +244,7 @@ const submitApplication = async (req, res) => {
   } catch (error) {
     console.error('Error submitting application:', error);
     console.error('Stack:', error.stack);
-    
+
     // Handle MySQL Duplicate Entry Error
     if (error.code === 'ER_DUP_ENTRY') {
       let message = 'Duplicate entry found.';
@@ -252,7 +252,7 @@ const submitApplication = async (req, res) => {
       if (error.message.includes('bride_email')) message = 'This Bride Email is already registered.';
       if (error.message.includes('application_number')) message = 'Application number collision, please try again.';
       if (error.message.includes('portal_email')) message = 'An account with this email already exists.';
-      
+
       return res.status(409).json({
         success: false,
         message: message
