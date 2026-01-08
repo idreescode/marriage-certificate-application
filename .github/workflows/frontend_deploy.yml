@@ -20,6 +20,8 @@ jobs:
           cd frontend
           npm ci
           npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: ✅ Verify dist exists
         run: |
