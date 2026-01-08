@@ -26,14 +26,14 @@ jobs:
           ls -la frontend
           ls -la frontend/dist
 
-      - name: Deploy Frontend via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      - name: Deploy Frontend via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ftp.kashmirtech.dev
-          username: ${{ secrets.Frontend_USERNAME }}
-          password: ${{ secrets.Frontend_PASSWORD }}
-          protocol: ftps
-          port: 21
-          passive: true
-          local-dir: frontend/dist/
-          server-dir: /certificate/frontend/dist/
+          server: ${{ secrets.FRONTEND_FTPSERVER }}
+          username: ${{ secrets.FRONTEND_USERNAME }}
+          password: ${{ secrets.FRONTEND_PASSWORD }}
+          port: 22
+          local_path: './frontend/dist/*'
+          remote_path: '/nikkahapp'
+          sftp_only: true
+          args: '-o ConnectTimeout=5'
