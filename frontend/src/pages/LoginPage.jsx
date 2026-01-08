@@ -67,9 +67,6 @@ export default function LoginPage() {
       {/* Right Panel - Form */}
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '2rem', background: 'var(--slate-50)' }}>
         <div style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}>
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--slate-500)', textDecoration: 'none', marginBottom: '2rem', fontSize: '0.9rem' }}>
-            <ArrowLeft size={16} /> Back to Home
-          </Link>
 
           <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
