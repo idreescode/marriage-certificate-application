@@ -14,22 +14,22 @@ export default function Navbar() {
           <div className="flex justify-between items-center w-full">
             <Link to="/admin/dashboard" className="nav-brand" style={{ color: 'white' }}>
               <div style={{ background: 'white', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', marginRight: '8px' }}>
-                 <img src="/logo.svg" alt="Logo" style={{ height: '40px', width: 'auto' }} />
+                <img src="/logo.svg" alt="Logo" style={{ height: '40px', width: 'auto' }} />
               </div>
-              <span>Admin Portal</span>
+              <span>Nikkah Portal</span>
             </Link>
-            
+
             <ul className="nav-links">
-               {path === '/admin/login' ? (
-                 <li>
-                   <Link to="/" className="text-slate-300 hover:text-white flex items-center gap-2" style={{ textDecoration: 'none', fontSize: '0.9rem' }}>
-                     <HomeIcon size={16} /> Back to Home
-                   </Link>
-                 </li>
-               ) : (
-                 // Dashboard links can go here if needed, currently Dashboard has its own logout
-                 null
-               )}
+              {path === '/admin/login' ? (
+                <li>
+                  <Link to="/" className="text-slate-300 hover:text-white flex items-center gap-2" style={{ textDecoration: 'none', fontSize: '0.9rem' }}>
+                    <HomeIcon size={16} /> Back to Home
+                  </Link>
+                </li>
+              ) : (
+                // Dashboard links can go here if needed, currently Dashboard has its own logout
+                null
+              )}
             </ul>
           </div>
         </div>
@@ -45,22 +45,22 @@ export default function Navbar() {
           <div className="flex justify-between items-center w-full">
             <Link to="/applicant/dashboard" className="nav-brand" style={{ color: 'white' }}>
               <div style={{ background: 'white', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', marginRight: '8px' }}>
-                 <img src="/logo.png" alt="Logo" style={{ height: '32px', width: 'auto' }} />
+                <img src="/logo.png" alt="Logo" style={{ height: '32px', width: 'auto' }} />
               </div>
               <span>Applicant Portal</span>
             </Link>
 
             <ul className="nav-links">
-               {path === '/applicant/login' ? (
-                 <li>
-                   <Link to="/" className="nav-link flex items-center gap-2" style={{ color: 'white' }}>
-                     <HomeIcon size={16} /> Back to Home
-                   </Link>
-                 </li>
-               ) : (
-                 // Logged in specific links could go here
-                 null
-               )}
+              {path === '/applicant/login' ? (
+                <li>
+                  <Link to="/" className="nav-link flex items-center gap-2" style={{ color: 'white' }}>
+                    <HomeIcon size={16} /> Back to Home
+                  </Link>
+                </li>
+              ) : (
+                // Logged in specific links could go here
+                null
+              )}
             </ul>
           </div>
         </div>
