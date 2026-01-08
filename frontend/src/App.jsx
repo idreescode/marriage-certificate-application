@@ -14,8 +14,7 @@ import DocumentUpload from './pages/DocumentUpload';
 import AdminLayout from './layouts/AdminLayout';
 import AdminApplications from './pages/AdminApplications';
 import AdminApplicationDetails from './pages/AdminApplicationDetails';
-const basename =
-  import.meta.env.PROD ? '/marriage_frontend' : '/';
+const basename = '/';
 
 function App() {
   return (
