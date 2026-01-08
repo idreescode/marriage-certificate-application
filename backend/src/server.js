@@ -41,7 +41,7 @@ app.use(cors({
 }));
 
 // 🔥 MUST for cPanel / reverse proxy
-app.options("*", cors());
+app.options(/(.*)/, cors());
 
 /* =========================
    MIDDLEWARES
