@@ -62,3 +62,40 @@ jobs:
             **/*.log
             **/uploads/**
 
+      - name: 🚀 Setup and Start Backend via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BACKEND_FTPSERVER }}
+          username: ${{ secrets.BACKEND_USERNAME }}
+          password: ${{ secrets.BACKEND_PASSWORD }}
+          port: 22
+          script: |
+            cd /nikkahapp-backend
+            
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            npm install --production
+            
+            # Create uploads directory if not exists
+            echo "📁 Creating uploads directory..."
+            mkdir -p uploads/certificates uploads/receipts
+            chmod -R 755 uploads
+            
+            # Run database migrations
+            echo "🗄️ Running database migrations..."
+            npm run migrate
+            
+            # Check if PM2 is installed
+            if command -v pm2 &> /dev/null; then
+              echo "🔄 Restarting with PM2..."
+              pm2 restart nikkahapp-api || pm2 start src/server.js --name nikkahapp-api
+              pm2 save
+            else
+              echo "⚠️ PM2 not found. Install PM2: npm install -g pm2"
+              echo "Starting with node (for testing only)..."
+              pkill -f "node src/server.js" || true
+              nohup node src/server.js > /dev/null 2>&1 &
+            fi
+            
+            echo "✅ Backend deployment completed!"
+
