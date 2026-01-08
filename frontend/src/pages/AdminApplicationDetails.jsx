@@ -69,14 +69,14 @@ export default function AdminApplicationDetails() {
     };
 
     const InfoItem = ({ icon: Icon, label, value, subValue }) => (
-        <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-            <div className="p-2 bg-slate-100 rounded-md text-slate-600">
-                <Icon size={18} />
+        <div className="info-item-row">
+            <div className="item-icon-circle">
+                <Icon size={16} />
             </div>
-            <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-                <p className="text-sm font-semibold text-slate-800">{value || 'N/A'}</p>
-                {subValue && <p className="text-xs text-slate-500 mt-0.5 max-w-xs">{subValue}</p>}
+            <div className="info-content">
+                <p className="info-label">{label}</p>
+                <p className="info-value">{value || 'N/A'}</p>
+                {subValue && <p className="info-subvalue">{subValue}</p>}
             </div>
         </div>
     );
@@ -117,41 +117,51 @@ export default function AdminApplicationDetails() {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-12">
-            {/* Top Navigation Bar */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-6 py-4 shadow-sm">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <button
-                        onClick={() => navigate('/admin/applications')}
-                        className="flex items-center text-slate-500 hover:text-slate-800 font-medium transition-colors"
-                    >
-                        <ArrowLeft size={18} className="mr-2" /> Back to Dashboard
-                    </button>
+        <div className="min-h-screen pb-12">
 
-                    <div className="flex items-center gap-3">
-                        <span className="text-slate-400 text-sm">Application ID:</span>
-                        <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded">#{application.application_number}</span>
-                    </div>
-                </div>
-            </div>
 
-            <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="max-w-6xl mx-auto px-6">
 
                 {/* Header Hero Section */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full -mr-32 -mt-32 opacity-50 blur-3xl" />
+                <div style={{
+                    background: 'linear-gradient(135deg, var(--brand-600) 0%, var(--brand-800) 100%)',
+                    padding: '2.5rem',
+                    borderRadius: '20px',
+                    marginBottom: '2rem',
+                    color: 'white',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                }}>
+                    {/* Breadcrumb / Top Row */}
+                    <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-2">
+                        <button
+                            onClick={() => navigate('/admin/applications')}
+                            className="flex items-center text-white/80 hover:text-white font-medium transition-colors text-sm"
+                            style={{ background: 'transparent', border: 'none', color: 'white', padding: 0 }}
+                        >
+                            <ArrowLeft size={16} className="mr-2" /> Back to Applications
+                        </button>
+                        <span className="font-mono text-white/80 text-sm bg-white/10 px-3 py-1 rounded-full">
+                            ID: #{application.application_number}
+                        </span>
+                    </div>
 
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-start gap-6">
+                    <div className="flex flex-col md:flex-row justify-between md:items-start gap-6">
                         <div>
                             <div className="flex items-center gap-4 mb-2">
-                                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Nikkah Application</h1>
-                                <StatusBadge status={application.status} />
+                                <h1 style={{ color: 'white', margin: 0 }} className="text-3xl font-bold tracking-tight">Nikkah Application</h1>
+                                <div className="bg-white rounded-full px-2 py-1">
+                                    <StatusBadge status={application.status} />
+                                </div>
                             </div>
-                            <p className="text-slate-500 text-lg">
-                                <span className="font-semibold text-slate-700">{application.groom_full_name}</span> &
-                                <span className="font-semibold text-slate-700 ml-1">{application.bride_full_name}</span>
+                            <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.125rem' }}>
+                                <span className="font-semibold">{application.groom_full_name}</span>
+                                <span className="mx-2">&</span>
+                                <span className="font-semibold">{application.bride_full_name}</span>
                             </p>
-                            <div className="flex items-center gap-6 mt-4 text-sm text-slate-500">
+                            <div className="flex items-center gap-6 mt-4 text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                                 <span className="flex items-center gap-1.5"><Clock size={16} /> Applied on {new Date(application.created_at).toLocaleDateString()}</span>
                                 {application.preferred_date && (
                                     <span className="flex items-center gap-1.5"><Calendar size={16} /> Preferred Date: {new Date(application.preferred_date).toLocaleDateString()}</span>
@@ -170,7 +180,7 @@ export default function AdminApplicationDetails() {
                                     href={getFileUrl(application.certificate_url)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="btn w-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+                                    className="btn w-full bg-white text-blue-600 hover:bg-blue-50 border-none shadow-md transition-all font-semibold"
                                 >
                                     <Download size={18} className="mr-2" /> Download Certificate
                                 </a>
@@ -185,134 +195,158 @@ export default function AdminApplicationDetails() {
                     <div className="xl:col-span-2 space-y-8">
 
                         {/* Applicant Details */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                    <User className="text-blue-500" size={20} /> Applicant Information
-                                </h2>
+                        {/* Split Groom & Bride Cards */}
+                        <div className="grid-2-cols">
+
+                            {/* Groom Card */}
+                            <div className="details-card bg-groom-card">
+                                <div className="card-title-row">
+                                    <div className="icon-box icon-box-blue">
+                                        <User size={22} />
+                                    </div>
+                                    <h2 className="card-title-text">Groom’s Details</h2>
+                                </div>
+                                <div className="card-body">
+                                    <InfoItem icon={User} label="Full Name" value={application.groom_full_name} subValue={`Born on ${new Date(application.groom_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })}`} />
+                                    <InfoItem icon={CreditCard} label="ID Number" value={application.groom_id_number} />
+                                    <InfoItem icon={Phone} label="Contact Information" value={application.groom_phone} subValue={application.groom_email} />
+                                    <InfoItem icon={MapPin} label="Residential Address" value={application.groom_address} />
+                                </div>
                             </div>
 
-                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                                {/* Vertical Divider */}
-                                <div className="hidden md:block absolute left-1/2 top-6 bottom-6 w-px bg-slate-100" />
-
-                                {/* Groom */}
-                                <div className="space-y-4">
-                                    <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Groom</span>
-                                    <InfoItem icon={User} label="Full Name" value={application.groom_full_name} subValue={`DOB: ${new Date(application.groom_date_of_birth).toLocaleDateString()}`} />
-                                    <InfoItem icon={CreditCard} label="ID Number" value={application.groom_id_number} />
-                                    <InfoItem icon={Phone} label="Contact" value={application.groom_phone} subValue={application.groom_email} />
-                                    <InfoItem icon={MapPin} label="Address" value={application.groom_address} />
+                            {/* Bride Card */}
+                            <div className="details-card bg-bride-card">
+                                <div className="card-title-row">
+                                    <div className="icon-box icon-box-rose">
+                                        <User size={22} />
+                                    </div>
+                                    <h2 className="card-title-text">Bride’s Details</h2>
                                 </div>
-
-                                {/* Bride */}
-                                <div className="space-y-4">
-                                    <span className="inline-block px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Bride</span>
-                                    <InfoItem icon={User} label="Full Name" value={application.bride_full_name} subValue={`DOB: ${new Date(application.bride_date_of_birth).toLocaleDateString()}`} />
+                                <div className="card-body">
+                                    <InfoItem icon={User} label="Full Name" value={application.bride_full_name} subValue={`Born on ${new Date(application.bride_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })}`} />
                                     <InfoItem icon={CreditCard} label="ID Number" value={application.bride_id_number} />
-                                    <InfoItem icon={Phone} label="Contact" value={application.bride_phone} subValue={application.bride_email} />
-                                    <InfoItem icon={MapPin} label="Address" value={application.bride_address} />
+                                    <InfoItem icon={Phone} label="Contact Information" value={application.bride_phone} subValue={application.bride_email} />
+                                    <InfoItem icon={MapPin} label="Residential Address" value={application.bride_address} />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Witnesses */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                    <Globe className="text-blue-500" size={20} /> Witnesses
-                                </h2>
-                            </div>
-                            <div className="p-6">
-                                {witnesses.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {witnesses.map((witness, i) => (
-                                            <div key={witness.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs">
-                                                        {i + 1}
-                                                    </div>
-                                                    <h4 className="font-semibold text-slate-800">{witness.witness_name}</h4>
+
+                        {witnesses.length > 0 ? (
+                            <div className="grid-2-cols">
+                                {witnesses.map((witness, i) => {
+                                    const variants = [
+                                        { bg: 'bg-witness-amber', icon: 'icon-box-amber' },
+                                        { bg: 'bg-witness-emerald', icon: 'icon-box-emerald' },
+                                        { bg: 'bg-witness-violet', icon: 'icon-box-violet' },
+                                        { bg: 'bg-witness-orange', icon: 'icon-box-orange' },
+                                        { bg: 'bg-witness-slate', icon: 'icon-box-slate' },
+                                        { bg: 'bg-witness-lime', icon: 'icon-box-lime' }
+                                    ];
+                                    const variant = variants[i % variants.length];
+
+                                    return (
+                                        <div key={witness.id} className={`details-card ${variant.bg}`}>
+                                            <div className="card-title-row">
+                                                <div className={`icon-box ${variant.icon}`}>
+                                                    <User size={22} />
                                                 </div>
-                                                <div className="space-y-1 pl-11">
-                                                    <p className="text-sm text-slate-600 flex items-center gap-2"><Phone size={14} className="text-slate-400" /> {witness.witness_phone}</p>
-                                                    {witness.witness_email && <p className="text-sm text-slate-600 flex items-center gap-2"><Mail size={14} className="text-slate-400" /> {witness.witness_email}</p>}
-                                                </div>
+                                                <h2 className="card-title-text">Witness {i + 1}</h2>
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="card-body">
+                                                <InfoItem icon={User} label="Full Name" value={witness.witness_name} />
+                                                <InfoItem icon={Phone} label="Contact Phone" value={witness.witness_phone} />
+                                                {witness.witness_email && (
+                                                    <InfoItem icon={Mail} label="Email Address" value={witness.witness_email} />
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="details-card bg-white border-dashed text-center py-12">
+                                <p className="text-slate-400 font-medium">No witness information available for this application.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="">
+
+                        {/* Appointment Details Card */}
+                        <div className="details-card bg-appointment-card">
+                            <div className="card-title-row">
+                                <div className="icon-box icon-box-purple">
+                                    <Calendar size={22} />
+                                </div>
+                                <h2 className="card-title-text">Appointment</h2>
+                            </div>
+                            <div className="card-body">
+                                {application.appointment_date ? (
+                                    <>
+                                        <InfoItem
+                                            icon={Calendar}
+                                            label="Date"
+                                            value={new Date(application.appointment_date).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                                        />
+                                        <InfoItem icon={Clock} label="Time Slot" value={application.appointment_time} />
+                                        <InfoItem icon={MapPin} label="Location" value={application.appointment_location} />
+                                    </>
                                 ) : (
-                                    <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                        No witness information available.
+                                    <div className="py-4 text-center">
+                                        <p className="text-slate-400 italic text-sm">Appointment not yet scheduled.</p>
+                                    </div>
+                                )}
+
+                                {application.special_requests && (
+                                    <div className="mt-6 pt-6 border-t border-indigo-100/50">
+                                        <p className="info-label">Special Requests</p>
+                                        <div className="bg-white/60 p-4 rounded-xl border border-indigo-100/40 text-sm text-slate-600 line-height-relaxed">
+                                            "{application.special_requests}"
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    {/* Right Sidebar */}
-                    <div className="space-y-8">
-
-                        {/* Payment & Appointment Status Card */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div className="p-6 space-y-6">
-
-                                {/* Appointment Block */}
-                                <div>
-                                    <h3 className="text-sm font-bold bg-slate-100 inline-block px-3 py-1 rounded-lg text-slate-600 mb-4">
-                                        <span className="flex items-center gap-2"><Calendar size={16} /> Appointment Details</span>
-                                    </h3>
-                                    {application.appointment_date ? (
-                                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                                            <p className="text-blue-900 font-bold text-lg mb-1">{new Date(application.appointment_date).toLocaleDateString()}</p>
-                                            <div className="space-y-1 text-blue-700 text-sm">
-                                                <p className="flex items-center gap-2"><Clock size={14} /> {application.appointment_time}</p>
-                                                <p className="flex items-center gap-2"><MapPin size={14} /> {application.appointment_location}</p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="text-sm text-slate-500 italic px-2">Appointment not yet scheduled.</div>
-                                    )}
-                                    {application.special_requests && (
-                                        <div className="mt-4 pt-4 border-t border-slate-100">
-                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Special Requests</p>
-                                            <p className="text-sm text-slate-600 bg-yellow-50 p-3 rounded-lg border border-yellow-100">"{application.special_requests}"</p>
-                                        </div>
-                                    )}
+                        {/* Payment Status Card */}
+                        <div className="details-card bg-payment-card">
+                            <div className="card-title-row">
+                                <div className="icon-box icon-box-green">
+                                    <CreditCard size={22} />
                                 </div>
-
-                                {/* Payment Block */}
-                                <div>
-                                    <h3 className="text-sm font-bold bg-slate-100 inline-block px-3 py-1 rounded-lg text-slate-600 mb-4">
-                                        <span className="flex items-center gap-2"><CreditCard size={16} /> Payment Status</span>
-                                    </h3>
-                                    <div className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50">
-                                        <span className="text-sm text-slate-600 font-medium">Deposit Amount</span>
-                                        <span className="text-lg font-bold text-slate-800">{application.deposit_amount ? `PKR ${application.deposit_amount}` : 'Not Set'}</span>
-                                    </div>
-                                </div>
+                                <h2 className="card-title-text">Payment Status</h2>
+                            </div>
+                            <div className="card-body">
+                                <InfoItem
+                                    icon={CreditCard}
+                                    label="Deposit Amount"
+                                    value={application.deposit_amount ? `PKR ${application.deposit_amount}` : 'Not Set'}
+                                    subValue={application.payment_status || 'Pending Verification'}
+                                />
                             </div>
                         </div>
 
-                        {/* Documents Section */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                    <FileText className="text-blue-500" size={20} /> Attached Documents
-                                </h2>
+                        {/* Documents Card */}
+                        <div className="details-card bg-documents-card">
+                            <div className="card-title-row">
+                                <div className="icon-box icon-box-teal-sidebar">
+                                    <FileText size={22} />
+                                </div>
+                                <h2 className="card-title-text">Documents</h2>
                             </div>
-                            <div className="p-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                    {application.payment_receipt_url && <DocumentCard title="Payment Receipt" path={application.payment_receipt_url} />}
+                            <div className="card-body p-2">
+                                <div className="grid grid-cols-2 gap-3">
+                                    {application.payment_receipt_url && <DocumentCard title="Receipt" path={application.payment_receipt_url} />}
                                     {application.groom_id_path && <DocumentCard title="Groom ID" path={application.groom_id_path} />}
                                     {application.bride_id_path && <DocumentCard title="Bride ID" path={application.bride_id_path} />}
-                                    {application.mahr_declaration_path && <DocumentCard title="Mahr Declaration" path={application.mahr_declaration_path} />}
-                                    {application.civil_divorce_doc_path && <DocumentCard title="Civil Divorce" path={application.civil_divorce_doc_path} />}
-                                    {application.islamic_divorce_doc_path && <DocumentCard title="Islamic Divorce" path={application.islamic_divorce_doc_path} />}
-                                    {application.statutory_declaration_path && <DocumentCard title="Statutory Declaration" path={application.statutory_declaration_path} />}
+                                    {application.mahr_declaration_path && <DocumentCard title="Mahr" path={application.mahr_declaration_path} />}
+                                    {application.civil_divorce_doc_path && <DocumentCard title="C-Divorce" path={application.civil_divorce_doc_path} />}
+                                    {application.islamic_divorce_doc_path && <DocumentCard title="I-Divorce" path={application.islamic_divorce_doc_path} />}
+                                    {application.statutory_declaration_path && <DocumentCard title="Statutory" path={application.statutory_declaration_path} />}
                                 </div>
 
-                                {/* Empty State if no docs */}
                                 {![
                                     application.payment_receipt_url,
                                     application.groom_id_path,
@@ -322,7 +356,7 @@ export default function AdminApplicationDetails() {
                                     application.islamic_divorce_doc_path,
                                     application.statutory_declaration_path
                                 ].some(Boolean) && (
-                                        <p className="text-center text-slate-400 text-sm py-4">No documents uploaded.</p>
+                                        <p className="text-center text-slate-400 text-sm py-8 italic">No documents uploaded.</p>
                                     )}
                             </div>
                         </div>
