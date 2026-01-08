@@ -21,8 +21,10 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://hassaan.kashmirtech.dev",
-  "https://www.hassaan.kashmirtech.dev"
-];
+  "https://www.hassaan.kashmirtech.dev",
+  "https://nikahapp.jamiyat.org",
+  process.env.CLIENT_URL // Allow frontend URL from env
+].filter(Boolean); // Remove undefined values
 
 app.use(cors({
   origin: function (origin, callback) {
