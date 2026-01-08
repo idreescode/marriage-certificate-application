@@ -70,6 +70,12 @@ jobs:
           password: ${{ secrets.BACKEND_PASSWORD }}
           port: 22
           script: |
+            # Load environment (for npm, node, pm2)
+            export PATH=$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node | tail -1)/bin:$PATH
+            export PATH=$PATH:/usr/local/bin:/usr/bin
+            
+            # Create directory if doesn't exist
+            mkdir -p /nikkahapp-backend
             cd /nikkahapp-backend
             
             # Install dependencies only if needed
