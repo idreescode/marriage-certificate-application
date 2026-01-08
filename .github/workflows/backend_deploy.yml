@@ -21,7 +21,7 @@ jobs:
       - name: Install Backend Dependencies
         run: |
           cd backend
-          npm ci --production
+          npm install --production
 
       - name: Create .env file
         working-directory: ./backend
