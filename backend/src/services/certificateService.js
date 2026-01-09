@@ -102,7 +102,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       const rightColX = 315;
       
       // GROOM Box
-      doc.rect(leftColX - 10, y - 10, colWidth, 120)
+      doc.rect(leftColX - 10, y - 10, colWidth, 185)
          .fillAndStroke(BORDER_BG, '#fed7aa'); // Light fill, subtle border
       
       doc.fillColor(PRIMARY_COLOR).fontSize(14).font('Helvetica-Bold')
@@ -112,18 +112,26 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       doc.fillColor(TEXT_COLOR).fontSize(11).font('Helvetica-Bold')
          .text(applicationData.groom_full_name, leftColX, boxY, { width: colWidth - 20, align: 'center' });
       
-      boxY += 20;
-      doc.fillColor(LIGHT_TEXT).fontSize(10).font('Helvetica')
-         .text(`CNIC: ${applicationData.groom_id_number}`, leftColX, boxY, { width: colWidth - 20, align: 'center' });
+      boxY += 18;
+      doc.fillColor(LIGHT_TEXT).fontSize(9).font('Helvetica')
+         .text(`S/O: ${applicationData.groom_father_name || 'N/A'}`, leftColX, boxY, { width: colWidth - 20, align: 'center' });
+      
+      boxY += 15;
+      doc.text(`CNIC: ${applicationData.groom_id_number}`, leftColX, boxY, { width: colWidth - 20, align: 'center' });
       
       boxY += 15;
       doc.text(`DOB: ${new Date(applicationData.groom_date_of_birth).toLocaleDateString()}`, leftColX, boxY, { width: colWidth - 20, align: 'center' });
       
       boxY += 15;
-      doc.fontSize(9).text(applicationData.groom_address || '', leftColX, boxY, { width: colWidth - 20, align: 'center' });
+      if (applicationData.groom_place_of_birth) {
+         doc.text(`POB: ${applicationData.groom_place_of_birth}`, leftColX, boxY, { width: colWidth - 20, align: 'center' });
+         boxY += 15;
+      }
+      
+      doc.fontSize(8).text(applicationData.groom_address || '', leftColX, boxY, { width: colWidth - 20, align: 'center' });
 
       // BRIDE Box
-      doc.rect(rightColX - 10, y - 10, colWidth, 120)
+      doc.rect(rightColX - 10, y - 10, colWidth, 185)
          .fillAndStroke(BORDER_BG, '#fed7aa');
          
       doc.fillColor(PRIMARY_COLOR).fontSize(14).font('Helvetica-Bold')
@@ -133,18 +141,26 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       doc.fillColor(TEXT_COLOR).fontSize(11).font('Helvetica-Bold')
          .text(applicationData.bride_full_name, rightColX, boxY, { width: colWidth - 20, align: 'center' });
       
-      boxY += 20;
-      doc.fillColor(LIGHT_TEXT).fontSize(10).font('Helvetica')
-         .text(`CNIC: ${applicationData.bride_id_number}`, rightColX, boxY, { width: colWidth - 20, align: 'center' });
+      boxY += 18;
+      doc.fillColor(LIGHT_TEXT).fontSize(9).font('Helvetica')
+         .text(`D/O: ${applicationData.bride_father_name || 'N/A'}`, rightColX, boxY, { width: colWidth - 20, align: 'center' });
+      
+      boxY += 15;
+      doc.text(`CNIC: ${applicationData.bride_id_number}`, rightColX, boxY, { width: colWidth - 20, align: 'center' });
       
       boxY += 15;
       doc.text(`DOB: ${new Date(applicationData.bride_date_of_birth).toLocaleDateString()}`, rightColX, boxY, { width: colWidth - 20, align: 'center' });
-
+      
       boxY += 15;
-      doc.fontSize(9).text(applicationData.bride_address || '', rightColX, boxY, { width: colWidth - 20, align: 'center' });
+      if (applicationData.bride_place_of_birth) {
+         doc.text(`POB: ${applicationData.bride_place_of_birth}`, rightColX, boxY, { width: colWidth - 20, align: 'center' });
+         boxY += 15;
+      }
+      
+      doc.fontSize(8).text(applicationData.bride_address || '', rightColX, boxY, { width: colWidth - 20, align: 'center' });
 
 
-      y += 140;
+      y += 205;
 
       // Connection text
       doc.fontSize(12).fillColor(TEXT_COLOR).font('Helvetica')
@@ -171,13 +187,37 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
           doc.fontSize(12).fillColor(SECONDARY_COLOR).font('Helvetica-Bold')
              .text('Witnesses:', 60, y);
           
-          let wY = y + 20;
+          let wY = y + 30;
           witnesses.forEach((w, i) => {
-             doc.fontSize(11).fillColor(TEXT_COLOR).font('Helvetica')
-                .text(`${i+1}. ${w.witness_name} (${w.witness_phone})`, 80, wY);
-             wY += 18;
+             doc.fontSize(10).fillColor(TEXT_COLOR).font('Helvetica-Bold')
+                .text(`${i+1}. ${w.witness_name}`, 80, wY);
+             wY += 16;
+             
+             doc.fontSize(9).fillColor(LIGHT_TEXT).font('Helvetica');
+             
+             if (w.witness_father_name) {
+                doc.text(`    Father: ${w.witness_father_name}`, 80, wY);
+                wY += 14;
+             }
+             
+             if (w.witness_date_of_birth) {
+                doc.text(`    DOB: ${new Date(w.witness_date_of_birth).toLocaleDateString()}`, 80, wY);
+                wY += 14;
+             }
+             
+             if (w.witness_place_of_birth) {
+                doc.text(`    POB: ${w.witness_place_of_birth}`, 80, wY);
+                wY += 14;
+             }
+             
+             if (w.witness_address) {
+                doc.text(`    Address: ${w.witness_address}`, 80, wY, { width: 450 });
+                wY += 16;
+             }
+             
+             wY += 12; // Space between witnesses
           });
-          y = wY + 20;
+          y = wY + 25;
       } else {
           y += 40; // Spacing if no witnesses (rare)
       }

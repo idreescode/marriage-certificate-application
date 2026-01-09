@@ -167,20 +167,23 @@ export default function AdminApplicationDetails() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 min-w-[200px]">
-                            {application.status === 'appointment_scheduled' && (
-                                <button onClick={handleGenerateCertificate} className="btn w-full bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                                    <CheckCircle size={18} className="mr-2" /> Mark Completed
-                                </button>
-                            )}
+                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: '200px' }}>
+                            <div>
+                                {application.status === 'appointment_scheduled' && (
+                                    <button onClick={handleGenerateCertificate} className="btn bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                                        <CheckCircle size={18} className="mr-2" /> Mark Completed
+                                    </button>
+                                )}
+                            </div>
                             {application.certificate_url && (
                                 <a
                                     href={getFileUrl(application.certificate_url)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="btn w-full bg-white text-blue-600 hover:bg-blue-50 border-none shadow-md transition-all font-semibold"
+                                    className="btn-back-nav"
+                                    style={{ textDecoration: 'none', marginTop: 'auto' }}
                                 >
-                                    <Download size={18} className="mr-2" /> Download Certificate
+                                    <Download size={16} /> Download Certificate
                                 </a>
                             )}
                         </div>
@@ -205,9 +208,15 @@ export default function AdminApplicationDetails() {
                                     <h2 className="card-title-text">Groom’s Details</h2>
                                 </div>
                                 <div className="card-body">
-                                    <InfoItem icon={User} label="Full Name" value={application.groom_full_name} subValue={`Born on ${new Date(application.groom_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })}`} />
+                                    <InfoItem icon={User} label="Full Name" value={application.groom_full_name} />
+                                    {application.groom_father_name && (
+                                        <InfoItem icon={User} label="Father Name" value={application.groom_father_name} />
+                                    )}
+                                    <InfoItem icon={Calendar} label="Date of Birth" value={new Date(application.groom_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
+                                    {application.groom_place_of_birth && (
+                                        <InfoItem icon={MapPin} label="Place of Birth" value={application.groom_place_of_birth} />
+                                    )}
                                     <InfoItem icon={CreditCard} label="ID Number" value={application.groom_id_number} />
-                                    <InfoItem icon={Phone} label="Contact Information" value={application.groom_phone} subValue={application.groom_email} />
                                     <InfoItem icon={MapPin} label="Residential Address" value={application.groom_address} />
                                 </div>
                             </div>
@@ -221,9 +230,15 @@ export default function AdminApplicationDetails() {
                                     <h2 className="card-title-text">Bride’s Details</h2>
                                 </div>
                                 <div className="card-body">
-                                    <InfoItem icon={User} label="Full Name" value={application.bride_full_name} subValue={`Born on ${new Date(application.bride_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })}`} />
+                                    <InfoItem icon={User} label="Full Name" value={application.bride_full_name} />
+                                    {application.bride_father_name && (
+                                        <InfoItem icon={User} label="Father Name" value={application.bride_father_name} />
+                                    )}
+                                    <InfoItem icon={Calendar} label="Date of Birth" value={new Date(application.bride_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
+                                    {application.bride_place_of_birth && (
+                                        <InfoItem icon={MapPin} label="Place of Birth" value={application.bride_place_of_birth} />
+                                    )}
                                     <InfoItem icon={CreditCard} label="ID Number" value={application.bride_id_number} />
-                                    <InfoItem icon={Phone} label="Contact Information" value={application.bride_phone} subValue={application.bride_email} />
                                     <InfoItem icon={MapPin} label="Residential Address" value={application.bride_address} />
                                 </div>
                             </div>
@@ -253,9 +268,17 @@ export default function AdminApplicationDetails() {
                                             </div>
                                             <div className="card-body">
                                                 <InfoItem icon={User} label="Full Name" value={witness.witness_name} />
-                                                <InfoItem icon={Phone} label="Contact Phone" value={witness.witness_phone} />
-                                                {witness.witness_email && (
-                                                    <InfoItem icon={Mail} label="Email Address" value={witness.witness_email} />
+                                                {witness.witness_father_name && (
+                                                    <InfoItem icon={User} label="Father Name" value={witness.witness_father_name} />
+                                                )}
+                                                {witness.witness_date_of_birth && (
+                                                    <InfoItem icon={Calendar} label="Date of Birth" value={new Date(witness.witness_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
+                                                )}
+                                                {witness.witness_place_of_birth && (
+                                                    <InfoItem icon={MapPin} label="Place of Birth" value={witness.witness_place_of_birth} />
+                                                )}
+                                                {witness.witness_address && (
+                                                    <InfoItem icon={MapPin} label="Residential Address" value={witness.witness_address} />
                                                 )}
                                             </div>
                                         </div>
