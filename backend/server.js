@@ -18,17 +18,32 @@ const app = express();
    CORS CONFIG
 ========================= */
 
-// Allow ALL origins (for testing - restrict in production!)
+const allowedOrigins = [
+  'https://nikahapp.jamiyat.org',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: true, // Allow all origins
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Range", "X-Content-Range"],
+  maxAge: 86400 // Cache preflight for 24 hours
 }));
 
-// Handle preflight requests (important for cPanel/reverse proxy)
-// Express 5.x compatible: use regex instead of '*'
-app.options(/.*/,  cors());
+// Handle preflight requests
+app.options('*', cors());
 
 /* =========================
    MIDDLEWARES
