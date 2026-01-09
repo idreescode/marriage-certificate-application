@@ -22,8 +22,10 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://hassaan.kashmirtech.dev",
-  "https://www.hassaan.kashmirtech.dev"
-];
+  "https://www.hassaan.kashmirtech.dev",
+  "https://nikahapp.jamiyat.org",
+  process.env.CLIENT_URL
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -35,6 +37,9 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
+
+// Handle preflight requests (important for cPanel/reverse proxy)
+app.options('*', cors());
 
 
 /* =========================

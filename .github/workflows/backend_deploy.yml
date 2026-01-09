@@ -131,16 +131,16 @@ jobs:
             # Try PM2 first
             if command -v pm2 &> /dev/null; then
               pm2 delete nikkahapp-api 2>/dev/null || true
-              pm2 start src/server.js --name nikkahapp-api
+              pm2 start server.js --name nikkahapp-api
               pm2 save
               pm2 list
               echo "✅ Started with PM2"
             else
               # Fallback to direct node
               echo "⚠️ PM2 not found, using direct Node.js"
-              pkill -f "node src/server.js" 2>/dev/null || true
+              pkill -f "node server.js" 2>/dev/null || true
               sleep 2
-              nohup node src/server.js > app.log 2>&1 &
+              nohup node server.js > app.log 2>&1 &
               echo "✅ Started Node.js (PID: $!)"
             fi
             
