@@ -112,6 +112,12 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`ðŸš€ Server running on port ${PORT}`);
+app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  
+  // Test database connection
+  await testConnection();
+  
+  // Verify email configuration
+  await verifyEmailConfig();
 });

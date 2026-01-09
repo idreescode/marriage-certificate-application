@@ -88,6 +88,35 @@ const submitApplication = async (req, res) => {
     const solemnisedPlace = formData.solemnisedPlace || null;
     const solemnisedAddress = formData.solemnisedAddress || null;
 
+    // Contact Information
+    const email = formData.email || null;
+    const contactNumber = formData.contactnumber || null;
+
+    // Validate email
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email address is required'
+      });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    // Validate contact number
+    if (!contactNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number is required'
+      });
+    }
+
     // DEBUG: Log received data
     console.log('Received form data:', {
       groomName,
@@ -95,14 +124,16 @@ const submitApplication = async (req, res) => {
       witness1Name,
       witness2Name,
       mahrAmount,
-      solemnisedDate
+      solemnisedDate,
+      email,
+      contactNumber
     });
 
     // Generate unique application number
     const applicationNumber = generateApplicationNumber();
 
-    // Generate portal credentials (auto-create user for testing)
-    const portalEmail = `app${applicationNumber}@nikah.org`; // Auto-generate email
+    // Use the email provided in the form
+    const portalEmail = email;
     const portalPassword = generatePassword();
     const hashedPassword = await bcrypt.hash(portalPassword, 10);
 
@@ -111,6 +142,21 @@ const submitApplication = async (req, res) => {
     await connection.beginTransaction();
 
     try {
+      // Check if email already exists
+      const [existingUser] = await connection.execute(
+        'SELECT id FROM users WHERE email = ?',
+        [portalEmail]
+      );
+
+      if (existingUser.length > 0) {
+        await connection.rollback();
+        connection.release();
+        return res.status(409).json({
+          success: false,
+          message: 'An account with this email already exists. Please use a different email address.'
+        });
+      }
+
       // 1. Create User
       console.log('Creating user with email:', portalEmail);
       const [userResult] = await connection.execute(
@@ -126,34 +172,34 @@ const submitApplication = async (req, res) => {
         `INSERT INTO applications (
           application_number, user_id,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
-          groom_address,
+          groom_address, groom_email, groom_phone,
           groom_confirm, groom_personally, groom_representative,
           groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
           groom_rep_place_of_birth, groom_rep_address,
           bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
-          bride_address,
+          bride_address, bride_email, bride_phone,
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
           status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber, userId,
           groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
-          groomAddress || null,
+          groomAddress || null, portalEmail, contactNumber,
           groomConfirm || false, groomPersonally || false, groomRepresentative || false,
           groomRepName || null, groomRepFatherName || null, groomRepDateOfBirth || null,
           groomRepPlaceOfBirth || null, groomRepAddress || null,
           brideName || null, brideFatherName || null, brideDateOfBirth || null, bridePlaceOfBirth || null,
-          brideAddress || null,
+          brideAddress || null, portalEmail, contactNumber,
           brideConfirm || false, bridePersonally || false, brideRepresentative || false,
           brideRepName || null, brideRepFatherName || null, brideRepDateOfBirth || null,
           brideRepPlaceOfBirth || null, brideRepAddress || null,
           mahrAmount || null, mahrType || null,
           solemnisedDate || null, solemnisedPlace || null, solemnisedAddress || null,
-          'admin_review'
+          'admin_review'  // status value
         ]
       );
 
@@ -184,23 +230,21 @@ const submitApplication = async (req, res) => {
       await connection.commit();
       console.log('Transaction Committed');
 
-      // Send confirmation email (DISABLED - no email collection in form)
-      /*
+      // Send confirmation email with credentials
       const applicationData = {
         id: applicationId,
         application_number: applicationNumber,
         groom_full_name: groomName,
         bride_full_name: brideName,
         portal_email: portalEmail,
-        // portalPassword: portalPassword
+        portalPassword: portalPassword
       };
       
-      // Send emails in parallel
+      // Send emails in parallel (non-blocking)
       Promise.all([
         sendApplicationConfirmation(applicationData),
         sendAdminNewApplicationEmail(applicationData)
       ]).catch(err => console.error('Background Email Error:', err));
-      */
 
       // Create In-App Notification
       try {
@@ -215,13 +259,13 @@ const submitApplication = async (req, res) => {
         console.error('Notification Error:', notifErr);
       }
 
-      // DEVELOPMENT LOG - Display generated credentials for testing
+      // DEVELOPMENT LOG - Credentials sent via email
       console.log('\n' + '='.repeat(60));
-      console.log('🔑 APPLICANT DASHBOARD CREDENTIALS (For Testing)');
+      console.log('✅ APPLICATION SUBMITTED SUCCESSFULLY');
       console.log('='.repeat(60));
-      console.log('📧 Email:', portalEmail);
-      console.log('🔐 Password:', portalPassword);
+      console.log('📧 Confirmation email sent to:', portalEmail);
       console.log('🔗 Application Number:', applicationNumber);
+      console.log('🔐 Password sent via email');
       console.log('='.repeat(60) + '\n');
 
       res.status(201).json({

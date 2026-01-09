@@ -105,12 +105,10 @@ const forgotPassword = async (req, res) => {
     // Send Email with UNHASHED token
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     
-    // We can default to /reset-password path, no need for user type?
-    // Frontend route is likely generic now? Let's assume generic or default to auth route.
-    // Looking at previous patterns, user might be redirected to specific portals.
-    // However, since login is unified, reset could be unified too.
-    // Let's keep one link.
-    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+    // Generate reset link based on user type
+    // If type is provided, use it; otherwise check user role
+    const userType = type || (user.role === 'admin' ? 'admin' : 'applicant');
+    const resetLink = `${frontendUrl}/${userType}/reset-password?token=${resetToken}`;
 
     await sendPasswordResetEmail(email, resetLink);
 

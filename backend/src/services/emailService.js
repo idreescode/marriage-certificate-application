@@ -19,7 +19,7 @@ const sendApplicationConfirmation = async (applicationData) => {
   const { application_number, groom_full_name, bride_full_name, portal_email, portalPassword, id } = applicationData;
 
   const mailOptions = {
-    from: `"Jamiyat.org Marriage Services" <${process.env.EMAIL_USER}>`,
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
     subject: `Application Received - #${application_number}`,
     html: `
@@ -31,7 +31,7 @@ const sendApplicationConfirmation = async (applicationData) => {
         <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px;">
           <p style="font-size: 16px; color: #374151;">Assalamu Alaikum,</p>
           
-          <p>Your marriage certificate application has been successfully received.</p>
+          <p>Your nikah certificate application has been successfully received.</p>
           
           <div style="background-color: #f0fdf4; padding: 20px; border-left: 4px solid #22c55e; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #16a34a;">Application Details</h3>
@@ -69,7 +69,7 @@ const sendApplicationConfirmation = async (applicationData) => {
         </div>
         
         <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-          <p>© 2024 Jamiyat.org | Marriage Certificate Services</p>
+          <p>© 2024 Jamiyat.org | Nikah Certificate Services</p>
         </div>
       </div>
     `
@@ -90,7 +90,7 @@ const sendDepositAmountEmail = async (applicationData) => {
   const { application_number, groom_full_name, bride_full_name, portal_email, deposit_amount, id } = applicationData;
 
   const mailOptions = {
-    from: `"Jamiyat.org Marriage Services" <${process.env.EMAIL_USER}>`,
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
     subject: `Payment Amount Set - #${application_number}`,
     html: `
@@ -138,7 +138,7 @@ const sendDepositAmountEmail = async (applicationData) => {
         </div>
         
         <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-          <p>© 2024 Jamiyat.org | Marriage Certificate Services</p>
+          <p>© 2024 Jamiyat.org | Nikah Certificate Services</p>
         </div>
       </div>
     `
@@ -189,7 +189,7 @@ const sendPaymentVerifiedEmail = async (applicationData) => {
   const { application_number, groom_full_name, portal_email, id } = applicationData;
 
   const mailOptions = {
-    from: `"Jamiyat.org Marriage Services" <${process.env.EMAIL_USER}>`,
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
     subject: `Payment Verified - #${application_number}`,
     html: `
@@ -230,7 +230,7 @@ const sendAppointmentEmail = async (applicationData) => {
   const { application_number, groom_full_name, portal_email, appointment_date, appointment_time, appointment_location, id } = applicationData;
 
   const mailOptions = {
-    from: `"Jamiyat.org Marriage Services" <${process.env.EMAIL_USER}>`,
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
     subject: `Your Nikah Appointment - ${formatDate(appointment_date)}`,
     html: `
@@ -281,9 +281,9 @@ const sendCertificateReadyEmail = async (applicationData) => {
   const { application_number, groom_full_name, portal_email, id } = applicationData;
 
   const mailOptions = {
-    from: `"Jamiyat.org Marriage Services" <${process.env.EMAIL_USER}>`,
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
-    subject: `Your Marriage Certificate is Ready! - #${application_number}`,
+    subject: `Your Nikah Certificate is Ready! - #${application_number}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
         <div style="background-color: #16a34a; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -293,7 +293,7 @@ const sendCertificateReadyEmail = async (applicationData) => {
         <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px;">
           <p style="font-size: 16px; color: #374151;">Assalamu Alaikum ${groom_full_name},</p>
           
-          <p>Congratulations! Your Marriage Certificate has been generated and is ready for download.</p>
+          <p>Congratulations! Your Nikah Certificate has been generated and is ready for download.</p>
           
           <div style="background-color: #f0fdf4; padding: 20px; border-left: 4px solid #22c55e; margin: 20px 0; text-align: center;">
             <h3 style="color: #16a34a; margin-top: 0;">✅ Application Completed</h3>
@@ -311,7 +311,7 @@ const sendCertificateReadyEmail = async (applicationData) => {
             You can download your certificate anytime by logging into your applicant portal.
           </p>
           
-          <p style="margin-top: 20px;">Thank you for using our services. May Allah bless your marriage!</p>
+          <p style="margin-top: 20px;">Thank you for using our services. May Allah bless your nikah!</p>
         </div>
       </div>
     `
@@ -374,7 +374,7 @@ const sendAdminNewApplicationEmail = async (applicationData, adminEmail = 'admin
         <div style="border: 1px solid #e5e7eb; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
           <p><strong>Application:</strong> ${application_number}</p>
           <p><strong>Applicants:</strong> ${groom_full_name} & ${bride_full_name}</p>
-          <p>A new marriage certificate application has been submitted.</p>
+          <p>A new nikah certificate application has been submitted.</p>
           <div style="text-align: center; margin-top: 20px;">
             <a href="${process.env.FRONTEND_URL}/admin/applications/${id}" 
                style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
