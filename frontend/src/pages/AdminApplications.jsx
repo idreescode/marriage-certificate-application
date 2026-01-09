@@ -237,7 +237,7 @@ export default function AdminApplications() {
                 <th>Bride</th>
                 <th>Status</th>
                 <th>Date</th>
-                <th className="text-center">Actions</th>
+                <th style={{ width: '220px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -261,7 +261,7 @@ export default function AdminApplications() {
                     {new Date(app.created_at).toLocaleDateString()}
                   </td>
                   <td>
-                    <div className="d-flex justify-center gap-2">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <Link to={`/admin/applications/${app.id}`} className="btn btn-sm btn-secondary" title="View Details">
                         <Eye size={16} />
                       </Link>
@@ -310,13 +310,13 @@ export default function AdminApplications() {
                       )}
                       
                       {app.status === 'payment_pending' && app.payment_receipt_url && (
-                        <button onClick={() => openVerifyPayment(app.id)} className="btn btn-sm btn-primary">Verify</button>
+                        <button onClick={() => openVerifyPayment(app.id)} className="btn btn-sm btn-primary" style={{ whiteSpace: 'nowrap' }}>Verify</button>
                       )}
                       {app.status === 'payment_verified' && (
-                        <button onClick={() => openSchedule(app.id)} className="btn btn-sm btn-secondary">Schedule</button>
+                        <button onClick={() => openSchedule(app.id)} className="btn btn-sm btn-secondary" style={{ whiteSpace: 'nowrap' }}>Schedule</button>
                       )}
                       {app.status === 'appointment_scheduled' && (
-                        <button onClick={() => handleGenerateCertificate(app.id)} className="btn btn-sm btn-success text-white" style={{ backgroundColor: 'var(--success)', border: 'none', color: 'white' }}>Complete</button>
+                        <button onClick={() => handleGenerateCertificate(app.id)} className="btn btn-sm btn-success text-white" style={{ backgroundColor: 'var(--success)', border: 'none', color: 'white', whiteSpace: 'nowrap' }}>Complete</button>
                       )}
                     </div>
                   </td>
