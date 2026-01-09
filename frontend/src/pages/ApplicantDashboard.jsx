@@ -257,7 +257,7 @@ export default function ApplicantDashboard() {
                   icon={CreditCard}
                   color="white"
                   bg="rgba(255,255,255,0.15)"
-                  variant={app.payment_verified_at ? 'green' : 'purple'}
+                  variant={app.payment_verified_at ? 'teal' : 'purple'}
                   subtitle={app.payment_verified_at ? 'Payment confirmed' : app.deposit_amount ? 'Payment due' : 'Awaiting quote'}
                />
                <StatCard
@@ -266,7 +266,7 @@ export default function ApplicantDashboard() {
                   icon={Calendar}
                   color="white"
                   bg="rgba(255,255,255,0.15)"
-                  variant="green"
+                  variant={app.appointment_date ? 'indigo' : 'orange'}
                   subtitle={app.appointment_date ? `${app.appointment_time || ''}` : 'Not scheduled yet'}
                />
             </div>
@@ -562,14 +562,10 @@ export default function ApplicantDashboard() {
                            <div>
                               <label style={{ fontSize: '0.75rem', color: 'var(--slate-500)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Groom</label>
                               <p style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, color: 'var(--slate-800)' }}>{app.groom_full_name}</p>
-                              <p style={{ fontSize: '0.875rem', color: 'var(--slate-500)', margin: 0, marginTop: '0.25rem' }}>{app.groom_phone}</p>
-                              {app.groom_email && <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', margin: 0 }}>{app.groom_email}</p>}
                            </div>
                            <div>
                               <label style={{ fontSize: '0.75rem', color: 'var(--slate-500)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>Bride</label>
                               <p style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, color: 'var(--slate-800)' }}>{app.bride_full_name}</p>
-                              <p style={{ fontSize: '0.875rem', color: 'var(--slate-500)', margin: 0, marginTop: '0.25rem' }}>{app.bride_phone}</p>
-                              {app.bride_email && <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', margin: 0 }}>{app.bride_email}</p>}
                            </div>
                         </div>
                         {app.appointment_location && (

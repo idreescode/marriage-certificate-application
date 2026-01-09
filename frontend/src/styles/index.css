@@ -733,7 +733,7 @@ td {
 }
 
 .stat-card--purple {
-  background: #44403c;
+  background: #7c3aed;
   border: none;
 }
 
@@ -757,6 +757,34 @@ td {
 }
 
 .stat-card--green .stat-icon {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.stat-card--teal {
+  background: #0891b2;
+  border: none;
+}
+
+.stat-card--teal p,
+.stat-card--teal h3 {
+  color: white !important;
+}
+
+.stat-card--teal .stat-icon {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.stat-card--indigo {
+  background: #4f46e5;
+  border: none;
+}
+
+.stat-card--indigo p,
+.stat-card--indigo h3 {
+  color: white !important;
+}
+
+.stat-card--indigo .stat-icon {
   background: rgba(255, 255, 255, 0.15);
 }
 
