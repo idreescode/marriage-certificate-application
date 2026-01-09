@@ -27,7 +27,8 @@ app.use(cors({
 }));
 
 // Handle preflight requests (important for cPanel/reverse proxy)
-app.options('*', cors());
+// Express 5.x compatible: use regex instead of '*'
+app.options(/.*/,  cors());
 
 
 /* =========================
