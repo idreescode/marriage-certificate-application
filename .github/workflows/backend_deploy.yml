@@ -43,15 +43,22 @@ jobs:
           rm -f *.log
           echo "✅ Cleaned up files"
 
-      - name: 📤 Upload to cPanel via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: 📤 Upload to cPanel via FTP (TLS)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.BACKEND_FTPSERVER }}
           username: ${{ secrets.BACKEND_USERNAME }}
           password: ${{ secrets.BACKEND_PASSWORD }}
-          port: 22
-          local_path: './backend/*'
-          remote_path: '/'
-          sftp_only: true
-          sftpArgs: '-o StrictHostKeyChecking=no'
+          protocol: ftps
+          port: 21
+          security: loose
+          local-dir: ./backend/
+          server-dir: ./
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*.log
+            **/uploads/**
 
