@@ -45,20 +45,19 @@ jobs:
           ls -la backend
           echo "Backend ready for deployment!"
 
-      - name: Deploy Backend via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Deploy Backend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.BACKEND_FTPSERVER }}
           username: ${{ secrets.BACKEND_USERNAME }}
           password: ${{ secrets.BACKEND_PASSWORD }}
-          port: 22
-          local_path: './backend/*'
-          remote_path: '/'
-          sftp_only: true
-          args: '-o ConnectTimeout=5'
+          port: 21
+          local-dir: ./backend/
+          server-dir: ./
           exclude: |
+            **/.git*
+            **/.git*/**
             **/node_modules/**
-            **/.git/**
             **/*.log
             **/uploads/**
 
