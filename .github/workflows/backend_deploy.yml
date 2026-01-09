@@ -45,12 +45,13 @@ jobs:
           ls -la backend
           echo "Backend ready for deployment!"
 
-      - name: Deploy Backend via FTP
+      - name: Deploy Backend via FTP (TLS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.BACKEND_FTPSERVER }}
           username: ${{ secrets.BACKEND_USERNAME }}
           password: ${{ secrets.BACKEND_PASSWORD }}
+          protocol: ftps
           port: 21
           local-dir: ./backend/
           server-dir: ./
