@@ -17,6 +17,7 @@ const migrations = [
   require('./012_make_date_fields_nullable'),
   require('./015_drop_documents_table'),
   require('./016_add_document_path_columns'),
+  require('./017_add_documents_verified'),
 ];
 
 // Run migrations

@@ -179,6 +179,60 @@ const getApplicationById = async (req, res) => {
   }
 };
 
+// Verify Documents
+const verifyDocuments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user.id;
+
+    // Get application to check if documents exist
+    const [appRows] = await pool.execute(
+      'SELECT * FROM applications WHERE id = ?',
+      [id]
+    );
+
+    if (appRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application not found'
+      });
+    }
+
+    const app = appRows[0];
+
+    // Check if required documents are uploaded
+    if (!app.groom_id_path || !app.bride_id_path) {
+      return res.status(400).json({
+        success: false,
+        message: 'Required documents are not uploaded yet'
+      });
+    }
+
+    // Update application - mark documents as verified
+    await pool.execute(
+      `UPDATE applications 
+       SET documents_verified = TRUE, 
+           documents_verified_by = ?, 
+           documents_verified_at = NOW()
+       WHERE id = ?`,
+      [adminId, id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Documents verified successfully'
+    });
+
+  } catch (error) {
+    console.error('Error verifying documents:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to verify documents',
+      error: error.message
+    });
+  }
+};
+
 // Set Deposit Amount
 const setDepositAmount = async (req, res) => {
   try {
@@ -425,6 +479,7 @@ module.exports = {
   adminLogin,
   getAllApplications,
   getApplicationById,
+  verifyDocuments,
   setDepositAmount,
   verifyPayment,
   scheduleAppointment,

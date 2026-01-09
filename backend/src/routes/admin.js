@@ -5,6 +5,7 @@ const {
   adminLogin,
   getAllApplications,
   getApplicationById,
+  verifyDocuments,
   setDepositAmount,
   verifyPayment,
   scheduleAppointment,
@@ -24,6 +25,9 @@ router.get('/applications', getAllApplications);
 
 // GET /api/admin/applications/:id - Get application by ID
 router.get('/applications/:id', getApplicationById);
+
+// PUT /api/admin/applications/:id/verify-documents - Verify uploaded documents
+router.put('/applications/:id/verify-documents', verifyDocuments);
 
 // PUT /api/admin/applications/:id/set-deposit - Set deposit amount
 router.put('/applications/:id/set-deposit', setDepositAmount);

@@ -119,6 +119,7 @@ export const uploadDocuments = (formData) => api.post('/applicants/upload-docume
 // export const adminLogin = (credentials) => api.post('/admin/login', credentials); // DEPRECATED
 export const getAllApplications = (params) => api.get('/admin/applications', { params });
 export const getApplicationById = (id) => api.get(`/admin/applications/${id}`);
+export const verifyDocuments = (id) => api.put(`/admin/applications/${id}/verify-documents`);
 export const setDepositAmount = (id, data) => api.put(`/admin/applications/${id}/set-deposit`, data);
 export const verifyPayment = (id) => api.put(`/admin/applications/${id}/verify-payment`);
 export const scheduleAppointment = (id, data) => api.put(`/admin/applications/${id}/schedule-appointment`, data);

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
-import { getAllApplications, setDepositAmount as setDepositAPI, verifyPayment as verifyPaymentAPI, scheduleAppointment as scheduleAPI, generateCertificate as generateCertAPI } from '../services/api';
+import { getAllApplications, verifyDocuments as verifyDocumentsAPI, setDepositAmount as setDepositAPI, verifyPayment as verifyPaymentAPI, scheduleAppointment as scheduleAPI, generateCertificate as generateCertAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { Search, Filter, CheckCircle, Clock, Banknote, Calendar, Eye, FileText, User, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -16,7 +16,7 @@ export default function AdminApplications() {
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
 
   // Modal States
-  const [activeModal, setActiveModal] = useState(null); // 'deposit', 'verify', 'schedule', 'view'
+  const [activeModal, setActiveModal] = useState(null); // 'documents', 'deposit', 'verify', 'schedule', 'view'
   const [selectedAppId, setSelectedAppId] = useState(null);
 
   // Form States
@@ -39,7 +39,10 @@ export default function AdminApplications() {
   };
 
   // Open Handlers
-
+  const openVerifyDocuments = (id) => {
+    setSelectedAppId(id);
+    setActiveModal('documents');
+  };
 
   const openSetDeposit = (id) => {
     setSelectedAppId(id);
@@ -64,6 +67,18 @@ export default function AdminApplications() {
   };
 
   // Action Handlers
+  const handleVerifyDocuments = async () => {
+    const toastId = toast.loading('Verifying documents...');
+    try {
+      await verifyDocumentsAPI(selectedAppId);
+      toast.success('Documents verified successfully!', { id: toastId });
+      closeModal();
+      fetchApplications();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to verify documents', { id: toastId });
+    }
+  };
+
   const handleSetDeposit = async (e) => {
     e.preventDefault();
     if (!depositAmount) return;
@@ -252,8 +267,48 @@ export default function AdminApplications() {
                       </Link>
 
                       {app.status === 'admin_review' && (
-                        <button onClick={() => openSetDeposit(app.id)} className="btn btn-sm btn-primary">Set Deposit</button>
+                        <>
+                          {/* Show Verify Documents button if documents are uploaded but not verified */}
+                          {(app.groom_id_path || app.bride_id_path) && !app.documents_verified ? (
+                            <button 
+                              onClick={() => openVerifyDocuments(app.id)} 
+                              className="btn btn-sm btn-primary"
+                              style={{ whiteSpace: 'nowrap' }}
+                            >
+                              Verify Documents
+                            </button>
+                          ) : null}
+                          
+                          {/* Show Set Deposit button only if documents are verified */}
+                          {app.documents_verified ? (
+                            <button 
+                              onClick={() => openSetDeposit(app.id)} 
+                              className="btn btn-sm btn-primary"
+                              style={{ whiteSpace: 'nowrap' }}
+                            >
+                              Set Deposit
+                            </button>
+                          ) : null}
+                          
+                          {/* Show badge if no documents uploaded yet */}
+                          {!app.groom_id_path && !app.bride_id_path ? (
+                            <span 
+                              className="badge" 
+                              style={{ 
+                                fontSize: '0.75rem', 
+                                color: 'var(--slate-600)', 
+                                backgroundColor: 'var(--slate-100)',
+                                padding: '0.35rem 0.75rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              Awaiting Documents
+                            </span>
+                          ) : null}
+                        </>
                       )}
+                      
                       {app.status === 'payment_pending' && app.payment_receipt_url && (
                         <button onClick={() => openVerifyPayment(app.id)} className="btn btn-sm btn-primary">Verify</button>
                       )}
@@ -289,6 +344,17 @@ export default function AdminApplications() {
       </div>
 
       {/* Modals - Reused from previous implementation */}
+      <Modal isOpen={activeModal === 'documents'} onClose={closeModal} title="Verify Documents">
+        <p className="text-slate-600 mb-6">
+          Have you reviewed and verified all the uploaded documents?<br />
+          This will allow you to proceed with setting the deposit amount.
+        </p>
+        <div className="flex justify-end gap-2">
+          <button onClick={closeModal} className="btn btn-secondary">Cancel</button>
+          <button onClick={handleVerifyDocuments} className="btn btn-primary">Verify Documents</button>
+        </div>
+      </Modal>
+
       <Modal isOpen={activeModal === 'deposit'} onClose={closeModal} title="Set Deposit Amount">
         <form onSubmit={handleSetDeposit}>
           <div className="form-group">

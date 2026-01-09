@@ -36,6 +36,7 @@ const submitApplication = async (req, res) => {
     const groomFatherName = formData.groomFatherName || null;
     const groomDateOfBirth = formData.groomDateOfBirth || null;
     const groomPlaceOfBirth = formData.groomPlaceOfBirth || null;
+    const groomIdNumber = formData.groomIdNumber || null;
     const groomAddress = formData.groomAddress || null;
     const groomConfirm = formData.groomConfirm || false;
     const groomPersonally = formData.groomPersonally || false;
@@ -53,6 +54,7 @@ const submitApplication = async (req, res) => {
     const brideFatherName = formData.brideFatherName || null;
     const brideDateOfBirth = formData.brideDateOfBirth || null;
     const bridePlaceOfBirth = formData.bridePlaceOfBirth || null;
+    const brideIdNumber = formData.brideIdNumber || null;
     const brideAddress = formData.brideAddress || null;
     const brideConfirm = formData.brideConfirm || false;
     const bridePersonally = formData.bridePersonally || false;
@@ -172,28 +174,28 @@ const submitApplication = async (req, res) => {
         `INSERT INTO applications (
           application_number, user_id,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
-          groom_address, groom_email, groom_phone,
+          groom_id_number, groom_address, groom_email, groom_phone,
           groom_confirm, groom_personally, groom_representative,
           groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
           groom_rep_place_of_birth, groom_rep_address,
           bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
-          bride_address, bride_email, bride_phone,
+          bride_id_number, bride_address, bride_email, bride_phone,
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
           status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber, userId,
           groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
-          groomAddress || null, portalEmail, contactNumber,
+          groomIdNumber || null, groomAddress || null, portalEmail, contactNumber,
           groomConfirm || false, groomPersonally || false, groomRepresentative || false,
           groomRepName || null, groomRepFatherName || null, groomRepDateOfBirth || null,
           groomRepPlaceOfBirth || null, groomRepAddress || null,
           brideName || null, brideFatherName || null, brideDateOfBirth || null, bridePlaceOfBirth || null,
-          brideAddress || null, portalEmail, contactNumber,
+          brideIdNumber || null, brideAddress || null, portalEmail, contactNumber,
           brideConfirm || false, bridePersonally || false, brideRepresentative || false,
           brideRepName || null, brideRepFatherName || null, brideRepDateOfBirth || null,
           brideRepPlaceOfBirth || null, brideRepAddress || null,

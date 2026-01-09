@@ -23,55 +23,142 @@ const sendApplicationConfirmation = async (applicationData) => {
     to: portal_email,
     subject: `Application Received - #${application_number}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-        <div style="background-color: #22c55e; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: white; margin: 0;">✅ Application Received</h1>
-        </div>
-        
-        <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px;">
-          <p style="font-size: 16px; color: #374151;">Assalamu Alaikum,</p>
-          
-          <p>Your nikah certificate application has been successfully received.</p>
-          
-          <div style="background-color: #f0fdf4; padding: 20px; border-left: 4px solid #22c55e; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #16a34a;">Application Details</h3>
-            <p><strong>Application Number:</strong> ${application_number}</p>
-            <p><strong>Groom:</strong> ${groom_full_name}</p>
-            <p><strong>Bride:</strong> ${bride_full_name}</p>
-            <p><strong>Status:</strong> Under Admin Review</p>
-          </div>
-          
-          <div style="background-color: #fffbeb; padding: 20px; border-left: 4px solid #f59e0b; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #d97706;">Portal Access</h3>
-            <p><strong>Email:</strong> ${portal_email}</p>
-            <p><strong>Password:</strong> ${portalPassword}</p>
-            <p style="font-size: 14px; color: #92400e;">Please save these credentials to access your application portal.</p>
-          </div>
-          
-          <h3 style="color: #16a34a;">Next Steps:</h3>
-          <ol style="color: #374151;">
-            <li><strong>Jamiyat staff will contact you</strong> by email or telephone to discuss the availability of the date and time of nikah.</li>
-            <li>A deposit by a bank transfer will be required to confirm the date and time.</li>
-            <li>You will receive an email when the payment amount is set.</li>
-            <li>Log into your portal to track your application status.</li>
-          </ol>
-          
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="${process.env.FRONTEND_URL}/applicant/login" 
-               style="background-color: #22c55e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Access Your Portal
-            </a>
-          </div>
-          
-          <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-            If you have any questions, please contact us at ${process.env.EMAIL_USER}
-          </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-          <p>© 2024 Jamiyat.org | Nikah Certificate Services</p>
-        </div>
-      </div>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5;">
+          <tr>
+            <td align="center" style="padding: 40px 20px;">
+              <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                
+                <!-- Header with Logo -->
+                <tr>
+                  <td style="background: linear-gradient(135deg, #b05a33 0%, #8f4728 100%); padding: 40px 30px; text-align: center;">
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td align="center">
+                          <img src="https://jamiyat.org/wp-content/uploads/2024/02/cropped-cropped-Jamiyat-Logo-Resized-removebg-preview-300x106.png" alt="Jamiyat" style="height: 80px; display: block; margin: 0 auto 20px auto; max-width: 200px;" />
+                        </td>
+                      </tr>
+                    </table>
+                    <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">Application Received</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Nikah Certificate Services</p>
+                  </td>
+                </tr>
+                
+                <!-- Main Content -->
+                <tr>
+                  <td style="padding: 40px 30px;">
+                    <p style="font-size: 16px; color: #1f2937; margin: 0 0 20px 0; line-height: 1.6;">Assalamu Alaikum,</p>
+                    
+                    <p style="font-size: 15px; color: #4b5563; margin: 0 0 30px 0; line-height: 1.6;">
+                      Your nikah certificate application has been successfully received and is now under review.
+                    </p>
+                    
+                    <!-- Application Details Box -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                      <tr>
+                        <td style="padding: 25px;">
+                          <h3 style="margin: 0 0 15px 0; color: #b05a33; font-size: 16px; font-weight: 600;">Application Details</h3>
+                          <table role="presentation" style="width: 100%;">
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Application Number:</td>
+                              <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${application_number}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Groom:</td>
+                              <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">${groom_full_name}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Bride:</td>
+                              <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">${bride_full_name}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Status:</td>
+                              <td style="padding: 8px 0;">
+                                <span style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Under Review</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Portal Access Box -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 25px;">
+                      <tr>
+                        <td style="padding: 25px;">
+                          <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px; font-weight: 600;">Portal Access Credentials</h3>
+                          <table role="presentation" style="width: 100%;">
+                            <tr>
+                              <td style="padding: 8px 0; color: #1e40af; font-size: 14px; width: 30%;">Email:</td>
+                              <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500; word-break: break-all;">${portal_email}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #1e40af; font-size: 14px;">Password:</td>
+                              <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; font-family: 'Courier New', monospace;">${portalPassword}</td>
+                            </tr>
+                          </table>
+                          <p style="margin: 15px 0 0 0; font-size: 13px; color: #1e40af;">Please save these credentials securely to access your application portal.</p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Next Steps -->
+                    <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Next Steps</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px; width: 30px;">1.</td>
+                        <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">Jamiyat staff will contact you by email or telephone to discuss the availability of the date and time of nikah.</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px;">2.</td>
+                        <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">A deposit by bank transfer will be required to confirm the date and time.</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px;">3.</td>
+                        <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">You will receive an email notification when the payment amount is set.</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px;">4.</td>
+                        <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">Log into your portal to track your application status at any time.</td>
+                      </tr>
+                    </table>
+                    
+                    <!-- CTA Button -->
+                    <table role="presentation" style="width: 100%; margin: 35px 0;">
+                      <tr>
+                        <td align="center">
+                          <a href="${process.env.FRONTEND_URL}/login" style="display: inline-block; background-color: #b05a33; color: #ffffff; padding: 14px 40px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(176, 90, 51, 0.3);">Access Your Portal</a>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <p style="font-size: 13px; color: #6b7280; margin: 25px 0 0 0; line-height: 1.6; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                      If you have any questions, please contact us at ${process.env.EMAIL_USER}
+                    </p>
+                  </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                  <td style="background-color: #f9fafb; padding: 25px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                    <p style="margin: 0; font-size: 13px; color: #6b7280;">Jamiyat Tabligh-ul-Islam</p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">Nikah Certificate Services</p>
+                    <p style="margin: 10px 0 0 0; font-size: 11px; color: #9ca3af;">&copy; 2024 Jamiyat.org. All rights reserved.</p>
+                  </td>
+                </tr>
+                
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
     `
   };
 
@@ -92,7 +179,7 @@ const sendDepositAmountEmail = async (applicationData) => {
   const mailOptions = {
     from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
-    subject: `Payment Amount Set - #${application_number}`,
+    subject: `Payment Required - #${application_number}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
         <div style="background-color: #f59e0b; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -283,37 +370,88 @@ const sendCertificateReadyEmail = async (applicationData) => {
   const mailOptions = {
     from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
-    subject: `Your Nikah Certificate is Ready! - #${application_number}`,
+    subject: `Your Nikah Certificate is Ready - #${application_number}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-        <div style="background-color: #16a34a; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: white; margin: 0;">🎉 Certificate Ready!</h1>
-        </div>
-        
-        <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px;">
-          <p style="font-size: 16px; color: #374151;">Assalamu Alaikum ${groom_full_name},</p>
-          
-          <p>Congratulations! Your Nikah Certificate has been generated and is ready for download.</p>
-          
-          <div style="background-color: #f0fdf4; padding: 20px; border-left: 4px solid #22c55e; margin: 20px 0; text-align: center;">
-            <h3 style="color: #16a34a; margin-top: 0;">✅ Application Completed</h3>
-            <p>Application Number: <strong>${application_number}</strong></p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="${process.env.FRONTEND_URL}/applicant/certificate" 
-               style="background-color: #22c55e; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">
-              📄 Download Certificate
-            </a>
-          </div>
-          
-          <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-            You can download your certificate anytime by logging into your applicant portal.
-          </p>
-          
-          <p style="margin-top: 20px;">Thank you for using our services. May Allah bless your nikah!</p>
-        </div>
-      </div>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5;">
+          <tr>
+            <td align="center" style="padding: 40px 20px;">
+              <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                
+                <!-- Header with Logo -->
+                <tr>
+                  <td style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 40px 30px; text-align: center;">
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td align="center">
+                          <img src="https://jamiyat.org/wp-content/uploads/2024/02/cropped-cropped-Jamiyat-Logo-Resized-removebg-preview-300x106.png" alt="Jamiyat" style="height: 80px; display: block; margin: 0 auto 20px auto; max-width: 200px;" />
+                        </td>
+                      </tr>
+                    </table>
+                    <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">Certificate Ready</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your nikah certificate is now available</p>
+                  </td>
+                </tr>
+                
+                <!-- Main Content -->
+                <tr>
+                  <td style="padding: 40px 30px;">
+                    <p style="font-size: 16px; color: #1f2937; margin: 0 0 20px 0; line-height: 1.6;">Assalamu Alaikum ${groom_full_name},</p>
+                    
+                    <p style="font-size: 15px; color: #4b5563; margin: 0 0 30px 0; line-height: 1.6;">
+                      Congratulations! Your nikah certificate has been generated and is now ready for download.
+                    </p>
+                    
+                    <!-- Success Box -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #ecfdf5; border: 2px solid #059669; border-radius: 8px; margin-bottom: 30px;">
+                      <tr>
+                        <td style="padding: 30px; text-align: center;">
+                          <h3 style="margin: 0 0 10px 0; color: #047857; font-size: 18px; font-weight: 600;">Application Completed</h3>
+                          <p style="margin: 0; color: #065f46; font-size: 14px;">Application Number: <strong style="font-size: 16px;">${application_number}</strong></p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- CTA Button -->
+                    <table role="presentation" style="width: 100%; margin: 35px 0;">
+                      <tr>
+                        <td align="center">
+                          <a href="${process.env.FRONTEND_URL}/login" style="display: inline-block; background-color: #059669; color: #ffffff; padding: 16px 45px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);">Download Certificate</a>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <p style="font-size: 14px; color: #6b7280; margin: 30px 0 0 0; text-align: center; line-height: 1.6;">
+                      You can access and download your certificate anytime by logging into your applicant portal.
+                    </p>
+                    
+                    <p style="font-size: 14px; color: #4b5563; margin: 30px 0 0 0; text-align: center; line-height: 1.6; font-style: italic; border-top: 1px solid #e5e7eb; padding-top: 25px;">
+                      Thank you for using our services. May Allah bless your nikah.
+                    </p>
+                  </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                  <td style="background-color: #f9fafb; padding: 25px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                    <p style="margin: 0; font-size: 13px; color: #6b7280;">Jamiyat Tabligh-ul-Islam</p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">Nikah Certificate Services</p>
+                    <p style="margin: 10px 0 0 0; font-size: 11px; color: #9ca3af;">&copy; 2024 Jamiyat.org. All rights reserved.</p>
+                  </td>
+                </tr>
+                
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
     `
   };
 

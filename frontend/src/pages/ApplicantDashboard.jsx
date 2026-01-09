@@ -356,8 +356,36 @@ export default function ApplicantDashboard() {
                      </div>
                   )}
 
+                  {/* Payment Receipt Submitted Confirmation */}
+                  {app.status === 'payment_pending' && app.payment_receipt_url && !app.payment_verified_at && (
+                     <div style={{
+                        background: 'white',
+                        borderRadius: 'var(--radius-lg)',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(59, 130, 246, 0.15)',
+                        border: '1px solid #3b82f6',
+                        transition: 'box-shadow 0.3s ease'
+                     }}>
+                        <div style={{
+                           background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                           padding: '1rem 1.5rem',
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: '0.5rem'
+                        }}>
+                           <CheckCircle size={18} color="white" />
+                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Payment Receipt Submitted</h3>
+                        </div>
+                        <div style={{ padding: '1.5rem' }}>
+                           <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', margin: 0 }}>
+                              Thank you! Your payment receipt has been submitted successfully. Our admin team will verify your payment shortly and you'll be notified once approved.
+                           </p>
+                        </div>
+                     </div>
+                  )}
+
                   {/* Urgent Payment Action Card */}
-                  {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && (
+                  {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && !app.payment_receipt_url && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',
@@ -659,17 +687,25 @@ export default function ApplicantDashboard() {
 
                            <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                               <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: (app.groom_id_path || app.bride_id_path) ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: (app.groom_id_path || app.bride_id_path) ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: (app.groom_id_path || app.bride_id_path) ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Documents Submitted</h4>
+                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: (app.groom_id_path || app.bride_id_path) ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Documents Uploaded</h4>
                               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {(app.groom_id_path || app.bride_id_path) ? 'Uploaded & Under Review' : 'Pending Upload'}
+                                 {(app.groom_id_path || app.bride_id_path) ? 'Submitted Successfully' : 'Pending Upload'}
+                              </p>
+                           </div>
+
+                           <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.documents_verified ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.documents_verified ? '0 0 0 3px #2563eb' : 'none' }}></div>
+                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.documents_verified ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Documents Verified</h4>
+                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                 {app.documents_verified ? (app.documents_verified_at ? new Date(app.documents_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Verified') : 'Under Review'}
                               </p>
                            </div>
 
                            <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                               <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.deposit_amount ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.deposit_amount ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.deposit_amount ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Admin Review</h4>
+                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.deposit_amount ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Payment Quote Set</h4>
                               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {app.deposit_amount ? `Quote: £${app.deposit_amount}` : 'Awaiting Review'}
+                                 {app.deposit_amount ? `Amount: £${app.deposit_amount}` : 'Awaiting Quote'}
                               </p>
                            </div>
 
