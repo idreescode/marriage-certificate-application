@@ -18,17 +18,17 @@ const app = express();
    CORS CONFIG
 ========================= */
 
-// CORS Configuration - Allow all origins for testing
+// Allow ALL origins (for testing - restrict in production!)
 app.use(cors({
-  origin: true,
+  origin: true, // Allow all origins
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-  optionsSuccessStatus: 200
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
-// Handle preflight
-app.options('*', cors());
+// Handle preflight requests (important for cPanel/reverse proxy)
+// Express 5.x compatible: use regex instead of '*'
+app.options(/.*/,  cors());
 
 /* =========================
    MIDDLEWARES
