@@ -119,9 +119,7 @@ export default function AdminApplicationDetails() {
 
     return (
         <div className="min-h-screen pb-12">
-
-
-            <div className="max-w-6xl mx-auto px-6">
+            <div className="max-w-6xl mx-auto px-6" style={{ paddingTop: '2rem' }}>
 
                 {/* Header Hero Section */}
                 <div style={{
@@ -139,10 +137,9 @@ export default function AdminApplicationDetails() {
                     <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-2">
                         <button
                             onClick={() => navigate('/admin/applications')}
-                            className="flex items-center text-white/80 hover:text-white font-medium transition-colors text-sm"
-                            style={{ background: 'transparent', border: 'none', color: 'white', padding: 0 }}
+                            className="btn-back-nav"
                         >
-                            <ArrowLeft size={16} className="mr-2" /> Back to Applications
+                            <ArrowLeft size={16} /> Back to Applications
                         </button>
                         <span className="font-mono text-white/80 text-sm bg-white/10 px-3 py-1 rounded-full">
                             ID: #{application.application_number}
@@ -190,10 +187,10 @@ export default function AdminApplicationDetails() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-3" style={{ gap: '2rem' }}>
 
                     {/* Main Info Column */}
-                    <div className="xl:col-span-2 space-y-8">
+                    <div className="xl:col-span-2" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
                         {/* Applicant Details */}
                         {/* Split Groom & Bride Cards */}
@@ -273,7 +270,7 @@ export default function AdminApplicationDetails() {
                     </div>
 
                     {/* Right Sidebar */}
-                    <div className="">
+                    <div className="" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
                         {/* Appointment Details Card */}
                         <div className="details-card bg-appointment-card">
