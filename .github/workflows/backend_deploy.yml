@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - '.github/workflows/backend_deploy.yml'
   workflow_dispatch:
 
 jobs:
@@ -12,18 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Backend Dependencies
-        run: |
-          cd backend
-          npm install --production
-
-      - name: Create .env file
+      - name: 📝 Create .env file
         working-directory: ./backend
         run: |
           echo "PORT=${{ secrets.BACKEND_PORT }}" >> .env
@@ -39,99 +32,26 @@ jobs:
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
           echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
           echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
+          echo "✅ .env file created"
 
-      - name: ✅ Verify backend ready
-        run: |
-          ls -la backend
-          echo "Backend ready for deployment!"
-
-      - name: 🧹 Clean files before upload (save bandwidth)
+      - name: 🧹 Remove unnecessary files
         run: |
           cd backend
           rm -rf node_modules
           rm -rf uploads
           rm -rf .git
           rm -f *.log
-          echo "✅ Cleaned unnecessary files"
+          echo "✅ Cleaned up files"
 
-      - name: 📤 Deploy via FTP (Explicit TLS)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 📤 Upload to cPanel via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.BACKEND_FTPSERVER }}
           username: ${{ secrets.BACKEND_USERNAME }}
           password: ${{ secrets.BACKEND_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: loose
-          local-dir: ./backend/
-          server-dir: ./
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/*.log
-            **/uploads/**
-
-      - name: 🚀 Setup and Start Backend via SSH (cPanel)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.BACKEND_FTPSERVER }}
-          username: ${{ secrets.BACKEND_USERNAME }}
-          password: ${{ secrets.BACKEND_PASSWORD }}
           port: 22
-          script: |
-            # cPanel/Namecheap: Load Node.js environment
-            source ~/.bashrc 2>/dev/null || true
-            
-            # Try to load nvm if available
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            
-            # Add common cPanel node paths
-            export PATH=$HOME/nodevenv/nodejs20/bin:$PATH
-            export PATH=$HOME/.nvm/versions/node/v20*/bin:$PATH
-            export PATH=$HOME/bin:$PATH
-            export PATH=$PATH:/usr/local/bin
-            
-            # Verify environment
-            echo "🔍 Environment Check..."
-            echo "Working directory: $(pwd)"
-            node --version 2>/dev/null || echo "⚠️ Node not found"
-            npm --version 2>/dev/null || echo "⚠️ npm not found"
-            
-            # Work in home directory (where SFTP uploaded files)
-            cd $HOME
-            
-            # Install dependencies (only if needed)
-            if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules" ]; then
-              echo "📦 Installing dependencies..."
-              npm install --production 2>&1 || echo "⚠️ npm install failed"
-            else
-              echo "✅ Dependencies up to date"
-            fi
-            
-            # Create uploads directory
-            echo "📁 Setting up uploads..."
-            mkdir -p uploads/certificates uploads/receipts
-            chmod -R 755 uploads 2>/dev/null || true
-            
-            # Run migrations
-            echo "🗄️ Running migrations..."
-            npm run migrate 2>&1 || echo "⚠️ Migrations failed or not configured"
-            
-            # Start/Restart application
-            echo "🚀 Starting application..."
-            if command -v pm2 &> /dev/null; then
-              pm2 restart nikkahapp-api || pm2 start src/server.js --name nikkahapp-api
-              pm2 save
-              echo "✅ PM2 restarted"
-            else
-              echo "⚠️ PM2 not available, using direct node"
-              pkill -f "node src/server.js" 2>/dev/null || true
-              nohup node src/server.js > app.log 2>&1 &
-              echo "✅ Node started in background"
-            fi
-            
-            echo "✅ Deployment completed!"
+          local_path: './backend/*'
+          remote_path: './'
+          sftp_only: true
+          sftpArgs: '-o StrictHostKeyChecking=no'
 
