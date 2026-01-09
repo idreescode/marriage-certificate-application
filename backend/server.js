@@ -18,21 +18,9 @@ const app = express();
    CORS CONFIG
 ========================= */
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://hassaan.kashmirtech.dev",
-  "https://www.hassaan.kashmirtech.dev",
-  "https://nikahapp.jamiyat.org",
-  process.env.CLIENT_URL
-].filter(Boolean);
-
+// Allow ALL origins (for testing - restrict in production!)
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error("CORS not allowed"));
-  },
+  origin: true, // Allow all origins
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
