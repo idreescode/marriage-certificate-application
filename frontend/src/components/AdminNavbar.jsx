@@ -60,9 +60,6 @@ export default function AdminNavbar() {
 
             {/* User Profile / Logout */}
             <div className="d-flex items-center gap-3">
-              <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: 'var(--brand-50)', color: 'var(--brand-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: '1px solid var(--brand-100)' }}>
-                A
-              </div>
               <button
                 onClick={handleLogout}
                 className="btn btn-sm btn-outline-brand"
