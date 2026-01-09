@@ -34,62 +34,74 @@ module.exports = {
       }
     }
 
-    // 3. Migrate data: Create users for existing applications
-    const [applications] = await connection.query(`
-      SELECT id, portal_email, portal_password, groom_full_name, created_at 
-      FROM applications 
-      WHERE portal_email IS NOT NULL AND portal_email != ''
+    // 3. Migrate data: Create users for existing applications (if columns exist)
+    // Check if portal_email column exists first
+    const [columns] = await connection.query(`
+      SHOW COLUMNS FROM applications LIKE 'portal_email'
     `);
 
-    console.log(`   Migrating ${applications.length} applicants to users table...`);
+    if (columns.length > 0) {
+      const [applications] = await connection.query(`
+        SELECT id, portal_email, portal_password, groom_full_name, created_at 
+        FROM applications 
+        WHERE portal_email IS NOT NULL AND portal_email != ''
+      `);
 
-    for (const app of applications) {
-      if (!app.portal_email || !app.portal_password) continue;
+      console.log(`   Migrating ${applications.length} applicants to users table...`);
 
-      // Check if user already exists (by email)
-      const [existingUsers] = await connection.query(
-        'SELECT id FROM users WHERE email = ?',
-        [app.portal_email]
-      );
+      for (const app of applications) {
+        if (!app.portal_email || !app.portal_password) continue;
 
-      let userId;
-
-      if (existingUsers.length > 0) {
-        // User exists, just link them
-        userId = existingUsers[0].id;
-        console.log(`     User ${app.portal_email} already exists (ID: ${userId}). Linking...`);
-      } else {
-        // Create new user
-        // Note: portal_password is already hashed, so we can insert it directly
-        const [result] = await connection.query(
-          `INSERT INTO users (email, password, role, full_name, created_at) 
-           VALUES (?, ?, 'applicant', ?, ?)`,
-          [app.portal_email, app.portal_password, app.groom_full_name || 'Applicant', app.created_at]
+        // Check if user already exists (by email)
+        const [existingUsers] = await connection.query(
+          'SELECT id FROM users WHERE email = ?',
+          [app.portal_email]
         );
-        userId = result.insertId;
-        console.log(`     Created user for ${app.portal_email} (ID: ${userId})`);
+
+        let userId;
+
+        if (existingUsers.length > 0) {
+          // User exists, just link them
+          userId = existingUsers[0].id;
+          console.log(`     User ${app.portal_email} already exists (ID: ${userId}). Linking...`);
+        } else {
+          // Create new user
+          // Note: portal_password is already hashed, so we can insert it directly
+          const [result] = await connection.query(
+            `INSERT INTO users (email, password, role, full_name, created_at) 
+             VALUES (?, ?, 'applicant', ?, ?)`,
+            [app.portal_email, app.portal_password, app.groom_full_name || 'Applicant', app.created_at]
+          );
+          userId = result.insertId;
+          console.log(`     Created user for ${app.portal_email} (ID: ${userId})`);
+        }
+
+        // Update application with user_id
+        await connection.query(
+          'UPDATE applications SET user_id = ? WHERE id = ?',
+          [userId, app.id]
+        );
       }
-
-      // Update application with user_id
-      await connection.query(
-        'UPDATE applications SET user_id = ? WHERE id = ?',
-        [userId, app.id]
-      );
+      console.log('   ✓ Data migration complete');
+    } else {
+      console.log('   ! portal_email column does not exist, skipping data migration');
     }
-    console.log('   ✓ Data migration complete');
 
-    // 4. Cleanup: Verify migration success before dropping columns?
-    // For safety in this environment, we will keep portal fields for now but make them nullable/ignored.
-    // Or we can rename them to indicate deprecation.
-    // Let's Drop them to enforce the new architecture as per user request "role base kro".
-
-    // Waiting a split second ensures queries finish logic
-    await connection.query(`
-      ALTER TABLE applications 
-      DROP COLUMN portal_email,
-      DROP COLUMN portal_password
+    // 4. Cleanup: Drop legacy columns if they exist
+    const [portalColumns] = await connection.query(`
+      SHOW COLUMNS FROM applications LIKE 'portal_email'
     `);
-    console.log('   ✓ Legacy columns dropped (portal_email, portal_password)');
+
+    if (portalColumns.length > 0) {
+      await connection.query(`
+        ALTER TABLE applications 
+        DROP COLUMN portal_email,
+        DROP COLUMN portal_password
+      `);
+      console.log('   ✓ Legacy columns dropped (portal_email, portal_password)');
+    } else {
+      console.log('   ! Legacy columns already removed, skipping cleanup');
+    }
   },
 
   async down(connection) {
