@@ -55,7 +55,7 @@ export default function ResetPassword({ type = 'applicant' }) {
     }
   };
 
-  const loginLink = type === 'admin' ? '/admin/login' : '/applicant/login';
+  const loginLink = type === 'admin' ? '/admin/login' : '/login';
   const isApplicant = type === 'applicant';
 
   if (!token) {

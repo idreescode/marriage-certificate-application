@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import ApplicantNavbar from '../components/ApplicantNavbar';
 import { ArrowLeft, UploadCloud, FileText, Trash2, CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, Loader2, Info } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -190,22 +189,62 @@ export default function DocumentUpload() {
     );
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: 'var(--slate-50)' }}>
-            <ApplicantNavbar />
-
-            <main className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem 1rem' }}>
-                <button
-                    onClick={() => navigate('/applicant/dashboard')}
-                    className="btn btn-link text-slate-500 mb-6 pl-0 flex items-center gap-2 hover:text-slate-800 transition-colors"
-                    style={{ background: 'transparent', paddingLeft: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: 'none', color: 'var(--slate-500)', cursor: 'pointer' }}
-                >
-                    <ArrowLeft size={18} /> Back to Dashboard
-                </button>
-
-                <div className="mb-8 text-center md:text-left" style={{ marginBottom: '2rem' }}>
-                    <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--brand-600)', fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>Document Submission</h1>
-                    <p className="text-slate-500" style={{ color: 'var(--slate-500)', margin: 0 }}>Please provide clear, legible copies of all required documents to proceed with your Nikah application.</p>
+        <>
+            <div style={{
+                background: 'linear-gradient(135deg, #b05a33 0%, #8f4728 100%)',
+                padding: '2rem 2.5rem',
+                borderRadius: 'var(--radius-lg)',
+                marginBottom: '1.5rem',
+                boxShadow: '0 8px 24px rgba(176, 90, 51, 0.25)',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    width: '300px',
+                    height: '300px',
+                    background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                    borderRadius: '50%',
+                    transform: 'translate(30%, -30%)'
+                }}></div>
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    <button
+                        onClick={() => navigate('/applicant/dashboard')}
+                        className="btn btn-link"
+                        style={{ 
+                            background: 'transparent', 
+                            padding: '0.5rem 1rem',
+                            marginBottom: '1rem', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.5rem', 
+                            border: '1px solid rgba(255, 255, 255, 0.3)', 
+                            color: 'white', 
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            borderRadius: 'var(--radius-md)',
+                            fontSize: '0.9rem',
+                            fontWeight: 500
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                            e.currentTarget.style.transform = 'translateX(-4px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                            e.currentTarget.style.transform = 'translateX(0)';
+                        }}
+                    >
+                        <ArrowLeft size={16} /> Back to Dashboard
+                    </button>
+                    <h1 style={{ fontSize: '2.1rem', margin: 0, color: 'white', fontWeight: 700, letterSpacing: '-0.02em' }}>Document Submission</h1>
+                    <p style={{ color: 'rgba(255,255,255,0.9)', margin: 0, marginTop: '0.5rem', fontSize: '1rem' }}>Please provide clear, legible copies of all required documents to proceed with your Nikah application.</p>
                 </div>
+            </div>
 
                 {/* Important Requirement Alert */}
                 <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm" style={{ backgroundColor: '#fffbeb', borderColor: '#fcd34d', marginBottom: '2rem', borderRadius: '0.75rem', padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
@@ -524,7 +563,6 @@ export default function DocumentUpload() {
                         )}
                     </button>
                 </div>
-            </main >
-        </div >
+        </>
     );
 }
