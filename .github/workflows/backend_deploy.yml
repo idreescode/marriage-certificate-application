@@ -62,3 +62,87 @@ jobs:
             **/*.log
             **/uploads/**
 
+      - name: 🚀 Setup and Start Node.js Application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BACKEND_FTPSERVER }}
+          username: ${{ secrets.BACKEND_USERNAME }}
+          password: ${{ secrets.BACKEND_PASSWORD }}
+          port: 22
+          command_timeout: 30m
+          script: |
+            echo "🔧 Starting Node.js application setup..."
+            
+            # Load shell environment
+            source ~/.bashrc 2>/dev/null || source ~/.bash_profile 2>/dev/null || true
+            
+            # Load cPanel Node.js environment
+            if [ -d "$HOME/nodevenv" ]; then
+              echo "📦 Loading cPanel Node.js environment..."
+              for nodedir in $HOME/nodevenv/*/bin; do
+                export PATH="$nodedir:$PATH"
+              done
+            fi
+            
+            # Try nvm if available
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Add additional paths
+            export PATH=$HOME/bin:$PATH
+            
+            # Verify Node.js
+            echo "🔍 Checking environment..."
+            echo "Current directory: $(pwd)"
+            node --version 2>/dev/null || echo "⚠️ Node.js not found"
+            npm --version 2>/dev/null || echo "⚠️ npm not found"
+            
+            # Check if Node.js is available
+            if ! command -v node &> /dev/null; then
+              echo "❌ ERROR: Node.js not installed!"
+              echo "Please setup Node.js in cPanel: 'Setup Node.js App'"
+              exit 1
+            fi
+            
+            echo "✅ Node.js: $(node --version)"
+            echo "✅ npm: $(npm --version)"
+            
+            # Navigate to home directory (where FTP uploaded files)
+            cd $HOME
+            
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            npm install --production
+            
+            # Create uploads directory
+            echo "📁 Creating uploads directory..."
+            mkdir -p uploads/certificates uploads/receipts
+            chmod -R 755 uploads 2>/dev/null || true
+            
+            # Run database migrations
+            if grep -q '"migrate"' package.json 2>/dev/null; then
+              echo "🗄️ Running database migrations..."
+              npm run migrate || echo "⚠️ Migration failed"
+            fi
+            
+            # Restart application
+            echo "🚀 Restarting application..."
+            
+            # Try PM2 first
+            if command -v pm2 &> /dev/null; then
+              pm2 delete nikkahapp-api 2>/dev/null || true
+              pm2 start src/server.js --name nikkahapp-api
+              pm2 save
+              pm2 list
+              echo "✅ Started with PM2"
+            else
+              # Fallback to direct node
+              echo "⚠️ PM2 not found, using direct Node.js"
+              pkill -f "node src/server.js" 2>/dev/null || true
+              sleep 2
+              nohup node src/server.js > app.log 2>&1 &
+              echo "✅ Started Node.js (PID: $!)"
+            fi
+            
+            echo "🎉 Deployment completed successfully!"
+
