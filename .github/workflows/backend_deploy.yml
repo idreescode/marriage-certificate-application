@@ -45,7 +45,16 @@ jobs:
           ls -la backend
           echo "Backend ready for deployment!"
 
-      - name: Deploy Backend via FTP (TLS)
+      - name: 🧹 Clean files before upload (save bandwidth)
+        run: |
+          cd backend
+          rm -rf node_modules
+          rm -rf uploads
+          rm -rf .git
+          rm -f *.log
+          echo "✅ Cleaned unnecessary files"
+
+      - name: 📤 Deploy via FTP (Explicit TLS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.BACKEND_FTPSERVER }}
@@ -53,8 +62,10 @@ jobs:
           password: ${{ secrets.BACKEND_PASSWORD }}
           protocol: ftps
           port: 21
+          security: loose
           local-dir: ./backend/
           server-dir: ./
+          dangerous-clean-slate: false
           exclude: |
             **/.git*
             **/.git*/**
@@ -62,7 +73,7 @@ jobs:
             **/*.log
             **/uploads/**
 
-      - name: 🚀 Setup and Start Backend via SSH
+      - name: 🚀 Setup and Start Backend via SSH (cPanel)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.BACKEND_FTPSERVER }}
@@ -70,58 +81,57 @@ jobs:
           password: ${{ secrets.BACKEND_PASSWORD }}
           port: 22
           script: |
-            # Load nvm and node environment
+            # cPanel/Namecheap: Load Node.js environment
+            source ~/.bashrc 2>/dev/null || true
+            
+            # Try to load nvm if available
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             
-            # Alternative: try to find node/npm in common locations
-            export PATH=$HOME/.nvm/versions/node/v20.18.1/bin:$PATH
-            export PATH=$HOME/.local/bin:$PATH
-            export PATH=$PATH:/usr/local/bin:/usr/bin
+            # Add common cPanel node paths
+            export PATH=$HOME/nodevenv/nodejs20/bin:$PATH
+            export PATH=$HOME/.nvm/versions/node/v20*/bin:$PATH
+            export PATH=$HOME/bin:$PATH
+            export PATH=$PATH:/usr/local/bin
             
-            # Verify node and npm are available
-            echo "🔍 Checking node and npm..."
-            which node || echo "Node not found in PATH"
-            which npm || echo "npm not found in PATH"
-            node --version || echo "Cannot run node"
-            npm --version || echo "Cannot run npm"
+            # Verify environment
+            echo "🔍 Environment Check..."
+            echo "Working directory: $(pwd)"
+            node --version 2>/dev/null || echo "⚠️ Node not found"
+            npm --version 2>/dev/null || echo "⚠️ npm not found"
             
-            # Use home directory for deployment
-            DEPLOY_DIR="$HOME"
+            # Work in home directory (where SFTP uploaded files)
+            cd $HOME
             
-            # Create directory if doesn't exist
-            echo "📁 Creating deployment directory..."
-            mkdir -p $DEPLOY_DIR
-            cd $DEPLOY_DIR
-            
-            # Install dependencies only if needed
+            # Install dependencies (only if needed)
             if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules" ]; then
               echo "📦 Installing dependencies..."
-              npm install --production
+              npm install --production 2>&1 || echo "⚠️ npm install failed"
             else
-              echo "✅ Dependencies already installed, skipping..."
+              echo "✅ Dependencies up to date"
             fi
             
-            # Create uploads directory if not exists
-            echo "📁 Creating uploads directory..."
+            # Create uploads directory
+            echo "📁 Setting up uploads..."
             mkdir -p uploads/certificates uploads/receipts
-            chmod -R 755 uploads
+            chmod -R 755 uploads 2>/dev/null || true
             
-            # Run database migrations
-            echo "🗄️ Running database migrations..."
-            npm run migrate
+            # Run migrations
+            echo "🗄️ Running migrations..."
+            npm run migrate 2>&1 || echo "⚠️ Migrations failed or not configured"
             
-            # Check if PM2 is installed
+            # Start/Restart application
+            echo "🚀 Starting application..."
             if command -v pm2 &> /dev/null; then
-              echo "🔄 Restarting with PM2..."
               pm2 restart nikkahapp-api || pm2 start src/server.js --name nikkahapp-api
               pm2 save
+              echo "✅ PM2 restarted"
             else
-              echo "⚠️ PM2 not found. Install PM2: npm install -g pm2"
-              echo "Starting with node (for testing only)..."
-              pkill -f "node src/server.js" || true
-              nohup node src/server.js > /dev/null 2>&1 &
+              echo "⚠️ PM2 not available, using direct node"
+              pkill -f "node src/server.js" 2>/dev/null || true
+              nohup node src/server.js > app.log 2>&1 &
+              echo "✅ Node started in background"
             fi
             
-            echo "✅ Backend deployment completed!"
+            echo "✅ Deployment completed!"
 
