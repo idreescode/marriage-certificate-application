@@ -159,7 +159,10 @@ const confirmPayment = async (req, res) => {
 
       // Get application details for email/notification
       const [appRows] = await pool.execute(
-        "SELECT * FROM applications WHERE id = ?",
+        `SELECT a.*, u.email as portal_email 
+         FROM applications a 
+         JOIN users u ON a.user_id = u.id 
+         WHERE a.id = ?`,
         [applicationId]
       );
       if (appRows.length > 0) {

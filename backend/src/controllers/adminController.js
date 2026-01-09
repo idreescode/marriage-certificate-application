@@ -259,9 +259,12 @@ const setDepositAmount = async (req, res) => {
       [depositAmount, adminId, id]
     );
 
-    // Get application data
+    // Get application data with user email
     const [rows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      `SELECT a.*, u.email as portal_email 
+       FROM applications a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.id = ?`,
       [id]
     );
 
@@ -302,9 +305,12 @@ const verifyPayment = async (req, res) => {
       [adminId, id]
     );
 
-    // Get application data
+    // Get application data with user email
     const [rows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      `SELECT a.*, u.email as portal_email 
+       FROM applications a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.id = ?`,
       [id]
     );
 
@@ -345,9 +351,12 @@ const scheduleAppointment = async (req, res) => {
       [appointmentDate, appointmentTime, appointmentLocation, id]
     );
 
-    // Get application data
+    // Get application data with user email
     const [rows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      `SELECT a.*, u.email as portal_email 
+       FROM applications a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.id = ?`,
       [id]
     );
 
@@ -448,7 +457,7 @@ const generateCertificate = async (req, res) => {
 
     // Send email to applicant
     const [updatedRows] = await pool.execute(
-      `SELECT a.*, u.email 
+      `SELECT a.*, u.email as portal_email 
        FROM applications a 
        JOIN users u ON a.user_id = u.id 
        WHERE a.id = ?`,
