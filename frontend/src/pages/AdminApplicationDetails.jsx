@@ -7,12 +7,13 @@ import toast from 'react-hot-toast';
 import {
     ArrowLeft, User, Calendar, Phone, Mail, MapPin,
     FileText, CheckCircle, Clock, Globe, Shield, Download,
-    CreditCard, MoreVertical, ExternalLink
+    CreditCard, MoreVertical, ExternalLink, Printer
 } from 'lucide-react';
 
 export default function AdminApplicationDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    // Print functionality added
 
     const [loading, setLoading] = useState(true);
     const [application, setApplication] = useState(null);
@@ -46,6 +47,15 @@ export default function AdminApplicationDetails() {
         } catch (error) {
             toast.error('Failed to generate certificate', { id: toastId });
         }
+    };
+
+    const handlePrint = () => {
+        // Add application data to body for print header
+        if (application) {
+            document.body.setAttribute('data-app-number', application.application_number || '');
+            document.body.setAttribute('data-app-date', application.created_at ? new Date(application.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '');
+        }
+        window.print();
     };
 
     const StatusBadge = ({ status }) => {
@@ -167,13 +177,20 @@ export default function AdminApplicationDetails() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: '200px' }}>
-                            <div>
+                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: '200px', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-end' }}>
                                 {application.status === 'appointment_scheduled' && (
                                     <button onClick={handleGenerateCertificate} className="btn bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
                                         <CheckCircle size={18} className="mr-2" /> Mark Completed
                                     </button>
                                 )}
+                                <button 
+                                    onClick={handlePrint} 
+                                    className="btn-back-nav print-button"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                >
+                                    <Printer size={16} /> Print Application
+                                </button>
                             </div>
                             {application.certificate_url && (
                                 <a
@@ -210,13 +227,12 @@ export default function AdminApplicationDetails() {
                                 <div className="card-body">
                                     <InfoItem icon={User} label="Full Name" value={application.groom_full_name} />
                                     {application.groom_father_name && (
-                                        <InfoItem icon={User} label="Father Name" value={application.groom_father_name} />
+                                        <InfoItem icon={User} label="Father's Name" value={application.groom_father_name} />
                                     )}
                                     <InfoItem icon={Calendar} label="Date of Birth" value={new Date(application.groom_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
                                     {application.groom_place_of_birth && (
                                         <InfoItem icon={MapPin} label="Place of Birth" value={application.groom_place_of_birth} />
                                     )}
-                                    <InfoItem icon={CreditCard} label="ID Number" value={application.groom_id_number} />
                                     <InfoItem icon={MapPin} label="Residential Address" value={application.groom_address} />
                                 </div>
                             </div>
@@ -232,18 +248,75 @@ export default function AdminApplicationDetails() {
                                 <div className="card-body">
                                     <InfoItem icon={User} label="Full Name" value={application.bride_full_name} />
                                     {application.bride_father_name && (
-                                        <InfoItem icon={User} label="Father Name" value={application.bride_father_name} />
+                                        <InfoItem icon={User} label="Father's Name" value={application.bride_father_name} />
                                     )}
                                     <InfoItem icon={Calendar} label="Date of Birth" value={new Date(application.bride_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
                                     {application.bride_place_of_birth && (
                                         <InfoItem icon={MapPin} label="Place of Birth" value={application.bride_place_of_birth} />
                                     )}
-                                    <InfoItem icon={CreditCard} label="ID Number" value={application.bride_id_number} />
                                     <InfoItem icon={MapPin} label="Residential Address" value={application.bride_address} />
                                 </div>
                             </div>
                         </div>
 
+                        {/* Representatives Section - Side by Side */}
+                        {(application.groom_rep_name || application.bride_rep_name) && (
+                            <div className="grid-2-cols">
+                                {/* Groom Representative */}
+                                {application.groom_rep_name && (
+                                    <div className="details-card bg-witness-card">
+                                        <div className="card-title-row">
+                                            <div className="icon-box icon-box-blue">
+                                                <User size={22} />
+                                            </div>
+                                            <h2 className="card-title-text">Groom's Representative</h2>
+                                        </div>
+                                        <div className="card-body">
+                                            <InfoItem icon={User} label="Full Name" value={application.groom_rep_name} />
+                                            {application.groom_rep_father_name && (
+                                                <InfoItem icon={User} label="Father's Name" value={application.groom_rep_father_name} />
+                                            )}
+                                            {application.groom_rep_date_of_birth && (
+                                                <InfoItem icon={Calendar} label="Date of Birth" value={new Date(application.groom_rep_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
+                                            )}
+                                            {application.groom_rep_place_of_birth && (
+                                                <InfoItem icon={MapPin} label="Place of Birth" value={application.groom_rep_place_of_birth} />
+                                            )}
+                                            {application.groom_rep_address && (
+                                                <InfoItem icon={MapPin} label="Residential Address" value={application.groom_rep_address} />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Bride Representative */}
+                                {application.bride_rep_name && (
+                                    <div className="details-card bg-witness-card">
+                                        <div className="card-title-row">
+                                            <div className="icon-box icon-box-rose">
+                                                <User size={22} />
+                                            </div>
+                                            <h2 className="card-title-text">Bride's Representative</h2>
+                                        </div>
+                                        <div className="card-body">
+                                            <InfoItem icon={User} label="Full Name" value={application.bride_rep_name} />
+                                            {application.bride_rep_father_name && (
+                                                <InfoItem icon={User} label="Father's Name" value={application.bride_rep_father_name} />
+                                            )}
+                                            {application.bride_rep_date_of_birth && (
+                                                <InfoItem icon={Calendar} label="Date of Birth" value={new Date(application.bride_rep_date_of_birth).toLocaleDateString(undefined, { dateStyle: 'long' })} />
+                                            )}
+                                            {application.bride_rep_place_of_birth && (
+                                                <InfoItem icon={MapPin} label="Place of Birth" value={application.bride_rep_place_of_birth} />
+                                            )}
+                                            {application.bride_rep_address && (
+                                                <InfoItem icon={MapPin} label="Residential Address" value={application.bride_rep_address} />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {witnesses.length > 0 ? (
                             <div className="grid-2-cols">
@@ -290,10 +363,81 @@ export default function AdminApplicationDetails() {
                                 <p className="text-slate-400 font-medium">No witness information available for this application.</p>
                             </div>
                         )}
+
+                        {/* Mahr Details Section */}
+                        {(application.mahr_amount || application.mahr_type) && (
+                            <div className="details-card bg-payment-card">
+                                <div className="card-title-row">
+                                    <div className="icon-box icon-box-green">
+                                        <CreditCard size={22} />
+                                    </div>
+                                    <h2 className="card-title-text">Mahr (Dower) Details</h2>
+                                </div>
+                                <div className="card-body">
+                                    {application.mahr_amount && (
+                                        <InfoItem icon={CreditCard} label="Mahr Amount" value={application.mahr_amount} />
+                                    )}
+                                    {application.mahr_type && (
+                                        <InfoItem icon={FileText} label="Mahr Type" value={application.mahr_type === 'prompt' ? 'Prompt (Immediate)' : 'Deferred'} />
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Solemnisation Details Section */}
+                        {(application.solemnised_date || application.solemnised_place || application.solemnised_address) && (
+                            <div className="details-card bg-appointment-card">
+                                <div className="card-title-row">
+                                    <div className="icon-box icon-box-purple">
+                                        <Calendar size={22} />
+                                    </div>
+                                    <h2 className="card-title-text">Solemnisation Details</h2>
+                                </div>
+                                <div className="card-body">
+                                    {application.solemnised_date && (
+                                        <InfoItem 
+                                            icon={Calendar} 
+                                            label="Date of Solemnisation" 
+                                            value={new Date(application.solemnised_date).toLocaleDateString(undefined, { dateStyle: 'long' })} 
+                                        />
+                                    )}
+                                    {application.solemnised_place && (
+                                        <InfoItem icon={MapPin} label="Place of Solemnisation" value={application.solemnised_place} />
+                                    )}
+                                    {application.solemnised_address && (
+                                        <InfoItem icon={MapPin} label="Solemnisation Address" value={application.solemnised_address} />
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Additional Information Section */}
+                        {(application.preferred_date || application.special_requests) && (
+                            <div className="details-card bg-witness-card">
+                                <div className="card-title-row">
+                                    <div className="icon-box icon-box-slate">
+                                        <FileText size={22} />
+                                    </div>
+                                    <h2 className="card-title-text">Additional Information</h2>
+                                </div>
+                                <div className="card-body">
+                                    {application.preferred_date && (
+                                        <InfoItem 
+                                            icon={Calendar} 
+                                            label="Preferred Date" 
+                                            value={new Date(application.preferred_date).toLocaleDateString(undefined, { dateStyle: 'long' })} 
+                                        />
+                                    )}
+                                    {application.special_requests && (
+                                        <InfoItem icon={FileText} label="Special Requests" value={application.special_requests} />
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Sidebar */}
-                    <div className="" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div className="no-print-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
                         {/* Appointment Details Card */}
                         <div className="details-card bg-appointment-card">

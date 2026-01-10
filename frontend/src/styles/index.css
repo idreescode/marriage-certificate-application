@@ -1273,3 +1273,326 @@ td {
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* ===================================
+   PRINT STYLES
+   Simple Form Layout - Label & Value Only
+   =================================== */
+@media print {
+  /* Reset page margins */
+  @page {
+    margin: 1.5cm 2cm 2cm 2cm;
+    size: A4 portrait;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.4;
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
+  }
+
+  /* Improve text rendering for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    text-rendering: optimizeLegibility !important;
+  }
+
+  /* Hide ALL navigation, UI elements, buttons */
+  .admin-sidebar,
+  .admin-header,
+  .btn-back-nav,
+  .print-button,
+  button,
+  .sidebar-link,
+  nav,
+  .toast,
+  .Toaster,
+  a,
+  .doc-view-btn {
+    display: none !important;
+  }
+
+  /* Hide the entire colored header section */
+  div[style*="linear-gradient"] {
+    display: none !important;
+  }
+
+  /* Reset layout */
+  .admin-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .admin-main {
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .min-h-screen {
+    min-height: auto !important;
+  }
+
+  .max-w-6xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Add application info at top */
+  body::before {
+    content: "Application No: " attr(data-app-number) " | Date: " attr(data-app-date);
+    display: block;
+    text-align: right;
+    font-size: 9pt;
+    color: #666;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #ddd;
+  }
+
+  /* Add clean print header */
+  .max-w-6xl::before {
+    content: "NIKKAH APPLICATION FORM";
+    display: block;
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #000;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Remove all card styling - make it flat */
+  .details-card {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+  }
+
+  .details-card:hover {
+    transform: none !important;
+  }
+
+  /* Remove all colored backgrounds */
+  .bg-groom-card,
+  .bg-bride-card,
+  .bg-witness-amber,
+  .bg-witness-emerald,
+  .bg-witness-violet,
+  .bg-witness-orange,
+  .bg-witness-slate,
+  .bg-witness-lime,
+  .bg-appointment-card,
+  .bg-payment-card,
+  .bg-documents-card {
+    background: white !important;
+    border: none !important;
+  }
+
+  /* Hide icon boxes completely */
+  .icon-box,
+  .item-icon-circle {
+    display: none !important;
+  }
+
+  /* Section title - simple underline */
+  .card-title-row {
+    border-bottom: 1px solid #000 !important;
+    padding: 0 0 0.3rem 0 !important;
+    margin: 0 0 0.6rem 0 !important;
+  }
+
+  .card-title-text {
+    font-size: 12pt !important;
+    font-weight: bold !important;
+    color: black !important;
+    text-transform: uppercase !important;
+    margin: 0 !important;
+    letter-spacing: 0.5px !important;
+    page-break-after: avoid !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+
+  /* Simple field display - just label and value */
+  .info-item-row {
+    display: block !important;
+    padding: 0.3rem 0 !important;
+    border-bottom: none !important;
+    page-break-inside: avoid !important;
+  }
+
+  .info-content {
+    width: 100% !important;
+  }
+
+  .info-label {
+    font-size: 9pt !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    margin-bottom: 0.15rem !important;
+    display: block !important;
+  }
+
+  .info-value {
+    font-size: 11pt !important;
+    font-weight: normal !important;
+    color: black !important;
+    margin: 0 0 0.15rem 0 !important;
+    padding: 0.25rem 0.5rem !important;
+    border-bottom: 1px solid #ddd !important;
+    display: block !important;
+    min-height: 1.5em !important;
+  }
+
+  /* Handle N/A values better */
+  .info-value:contains("N/A") {
+    color: #999 !important;
+    font-style: italic !important;
+  }
+
+  .info-subvalue {
+    font-size: 9pt !important;
+    color: #666 !important;
+    font-style: italic !important;
+    margin-top: 0.2rem !important;
+  }
+
+  /* Grid layouts for print - 2 columns */
+  .grid-2-cols {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+    page-break-inside: avoid !important;
+    margin: 1rem 0 !important;
+  }
+
+  .xl\\:col-span-2,
+  .xl\\:grid-cols-3 {
+    display: block !important;
+  }
+
+  /* Card body - remove padding */
+  .card-body {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Consistent vertical rhythm */
+  .xl\\:col-span-2 > * {
+    margin-bottom: 0 !important;
+  }
+
+  .xl\\:col-span-2 > .grid-2-cols {
+    margin: 1rem 0 !important;
+  }
+
+  .xl\\:col-span-2 > .grid-2-cols:first-child {
+    margin-top: 0 !important;
+  }
+
+  /* Document list - simple text */
+  .doc-action-row {
+    border: none !important;
+    background: white !important;
+    padding: 0.3rem 0 !important;
+    margin-bottom: 0.3rem !important;
+    page-break-inside: avoid !important;
+    display: block !important;
+  }
+
+  .doc-row-left {
+    display: block !important;
+  }
+
+  .doc-row-title {
+    font-size: 10pt !important;
+    color: black !important;
+    font-weight: normal !important;
+    padding: 0.2rem 0.5rem !important;
+    border-bottom: 1px solid #ddd !important;
+    display: block !important;
+  }
+
+  .doc-row-title::before {
+    content: "• ";
+    font-weight: bold;
+  }
+
+  .doc-icon-box {
+    display: none !important;
+  }
+
+  /* Clean typography */
+  * {
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Remove hover effects */
+  *:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide empty sections */
+  .text-center.py-12,
+  .py-4.text-center {
+    display: none !important;
+  }
+
+  /* Hide the entire right sidebar (Appointment, Payment, Documents) */
+  .no-print-sidebar {
+    display: none !important;
+  }
+
+  /* Make main content full width when sidebar is hidden */
+  .xl\\:col-span-2 {
+    width: 100% !important;
+  }
+
+  /* Hide grid layout and make it single column */
+  .grid.grid-cols-1.xl\\:grid-cols-3 {
+    display: block !important;
+  }
+
+  /* Better page break control */
+  .grid-2-cols {
+    page-break-inside: avoid !important;
+  }
+
+  .details-card {
+    page-break-inside: avoid !important;
+  }
+
+  /* Improve print quality */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Special styling for special requests */
+  div[class*="bg-white"] {
+    background: white !important;
+    padding: 0.5rem !important;
+    border: 1px solid #ccc !important;
+    border-radius: 0 !important;
+    margin-top: 0.5rem !important;
+  }
+}
