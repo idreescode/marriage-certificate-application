@@ -1384,6 +1384,7 @@ td {
     border-collapse: collapse !important;
     border: 2px solid #000 !important;
     font-size: 8pt !important;
+    table-layout: auto !important;
   }
 
   .print-certificate-table th {
@@ -1393,6 +1394,9 @@ td {
     font-weight: bold !important;
     background: #f5f5f5 !important;
     font-size: 7pt !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
   }
 
   .print-certificate-table td {
@@ -1400,6 +1404,10 @@ td {
     padding: 4px 6px !important;
     vertical-align: top !important;
     font-size: 8pt !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    max-width: 0 !important;
   }
 
   /* Bottom section - compact */

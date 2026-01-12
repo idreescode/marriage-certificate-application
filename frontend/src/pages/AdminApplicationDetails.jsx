@@ -547,42 +547,42 @@ export default function AdminApplicationDetails() {
                             {/* BRIDE GROOM */}
                             <tr>
                                 <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>BRIDE GROOM</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_full_name}</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_father_name || ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_full_name || 'NIL'}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_father_name || 'NIL'}</td>
                                 <td style={{ border: '1px solid black', padding: '12px' }}>
-                                    {new Date(application.groom_date_of_birth).toLocaleDateString('en-GB')}<br/>
-                                    {application.groom_place_of_birth || ''}
+                                    {application.groom_date_of_birth ? new Date(application.groom_date_of_birth).toLocaleDateString('en-GB') : 'NIL'}<br/>
+                                    {application.groom_place_of_birth || 'NIL'}
                                 </td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_address}</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}></td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_personally ? 'Personally' : application.groom_representative ? 'By Representative' : ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_address || 'NIL'}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_marital_status || 'NIL'}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_personally ? 'Personally' : application.groom_representative ? 'By Representative' : 'NIL'}</td>
                             </tr>
 
                             {/* BRIDE */}
                             <tr>
                                 <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>BRIDE</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_full_name}</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_father_name || ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_full_name || 'NIL'}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_father_name || 'NIL'}</td>
                                 <td style={{ border: '1px solid black', padding: '12px' }}>
-                                    {new Date(application.bride_date_of_birth).toLocaleDateString('en-GB')}<br/>
-                                    {application.bride_place_of_birth || ''}
+                                    {application.bride_date_of_birth ? new Date(application.bride_date_of_birth).toLocaleDateString('en-GB') : 'NIL'}<br/>
+                                    {application.bride_place_of_birth || 'NIL'}
                                 </td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_address}</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}></td>
-                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_personally ? 'Personally' : application.bride_representative ? 'By Representative' : ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_address || 'NIL'}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_marital_status || 'NIL'}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_personally ? 'Personally' : application.bride_representative ? 'By Representative' : 'NIL'}</td>
                             </tr>
 
                             {/* REPRESENTATIVE OR GUARDIAN OF BRIDE GROOM */}
                             {application.groom_rep_name && (
                                 <tr>
                                     <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>REPRESENTATIVE OR GUARDIAN OF BRIDE GROOM</td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_name}</td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_father_name || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_name || 'NIL'}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_father_name || 'NIL'}</td>
                                     <td style={{ border: '1px solid black', padding: '12px' }}>
-                                        {application.groom_rep_date_of_birth ? new Date(application.groom_rep_date_of_birth).toLocaleDateString('en-GB') : ''}<br/>
-                                        {application.groom_rep_place_of_birth || ''}
+                                        {application.groom_rep_date_of_birth ? new Date(application.groom_rep_date_of_birth).toLocaleDateString('en-GB') : 'NIL'}<br/>
+                                        {application.groom_rep_place_of_birth || 'NIL'}
                                     </td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_address || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_address || 'NIL'}</td>
                                     <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
                                     <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
                                 </tr>
@@ -592,13 +592,13 @@ export default function AdminApplicationDetails() {
                             {application.bride_rep_name && (
                                 <tr>
                                     <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>REPRESENTATIVE OR GUARDIAN OF BRIDE</td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_name}</td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_father_name || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_name || 'NIL'}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_father_name || 'NIL'}</td>
                                     <td style={{ border: '1px solid black', padding: '12px' }}>
-                                        {application.bride_rep_date_of_birth ? new Date(application.bride_rep_date_of_birth).toLocaleDateString('en-GB') : ''}<br/>
-                                        {application.bride_rep_place_of_birth || ''}
+                                        {application.bride_rep_date_of_birth ? new Date(application.bride_rep_date_of_birth).toLocaleDateString('en-GB') : 'NIL'}<br/>
+                                        {application.bride_rep_place_of_birth || 'NIL'}
                                     </td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_address || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_address || 'NIL'}</td>
                                     <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
                                     <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
                                 </tr>
@@ -608,13 +608,13 @@ export default function AdminApplicationDetails() {
                             {witnesses.map((witness, i) => (
                                 <tr key={`witness-${i}`}>
                                     <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>WITNESS No {i + 1}</td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_name}</td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_father_name || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_name || 'NIL'}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_father_name || 'NIL'}</td>
                                     <td style={{ border: '1px solid black', padding: '12px' }}>
-                                        {witness.witness_date_of_birth ? new Date(witness.witness_date_of_birth).toLocaleDateString('en-GB') : ''}<br/>
-                                        {witness.witness_place_of_birth || ''}
+                                        {witness.witness_date_of_birth ? new Date(witness.witness_date_of_birth).toLocaleDateString('en-GB') : 'NIL'}<br/>
+                                        {witness.witness_place_of_birth || 'NIL'}
                                     </td>
-                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_address || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_address || 'NIL'}</td>
                                     <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
                                     <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
                                 </tr>
@@ -623,29 +623,61 @@ export default function AdminApplicationDetails() {
                             {/* MAHR */}
                             <tr>
                                 <td style={{ border: '1px solid black', padding: '10px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>Mahr</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }} colSpan="6">{application.mahr_amount || ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }} colSpan="6">{application.mahr_amount || 'NIL'}</td>
                             </tr>
                             <tr>
                                 <td style={{ border: '1px solid black', padding: '10px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>Deferred / Prompt</td>
-                                <td style={{ border: '1px solid black', padding: '12px' }} colSpan="6">{application.mahr_type === 'deferred' ? 'Deferred' : application.mahr_type === 'prompt' ? 'Prompt' : ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }} colSpan="6">{application.mahr_type === 'deferred' ? 'Deferred' : application.mahr_type === 'prompt' ? 'Prompt' : 'NIL'}</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    {/* Bottom Section */}
-                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', gap: '2rem' }}>
-                        {/* Disclaimer */}
-                        <div style={{ flex: '1', fontSize: '9pt', lineHeight: '1.4' }}>
-                            <p>This Nikkah certificate is issued in accordance with Islamic laws and may not be accepted by authorities in the U.K. and other non-Muslim countries. To be married in accordance with British Marriage Laws, both parties are advised to go through a Civil Marriage at the Registration Office in the United Kingdom.</p>
+                    {/* Bottom Section - Three Columns */}
+                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start' }}>
+                        {/* Disclaimer - Left */}
+                        <div style={{ 
+                            flex: '1', 
+                            fontSize: '8pt', 
+                            lineHeight: '1.4',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            minWidth: 0
+                        }}>
+                            <p style={{ margin: 0 }}>This marriage certificate is issued in accordance with Islamic laws and may not be accepted by authorities in the U.K. and other non-Muslim countries. To be married in accordance with British Marriage Laws, both parties are advised to go through a Civil Marriage at the Registration Office in the United Kingdom.</p>
                         </div>
 
-                        {/* Solemnization Details */}
-                        <div style={{ flex: '1' }}>
-                            <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Marriage Solemnized</p>
-                            <p>Date: {application.solemnised_date ? new Date(application.solemnised_date).toLocaleDateString('en-GB') : '................................'}</p>
-                            <p>Place: {application.solemnised_place || '................................'}</p>
-                            <p style={{ fontWeight: 'bold', marginTop: '1rem', marginBottom: '0.5rem' }}>Marriage Solemnized by</p>
-                            <p>Address: {application.solemnised_address || '................................'}</p>
+                        {/* Signature and Seal - Center */}
+                        <div style={{ 
+                            flex: '1', 
+                            textAlign: 'center', 
+                            fontSize: '8pt',
+                            minWidth: 0
+                        }}>
+                            <p style={{ fontWeight: 'bold', margin: '0 0 0.5rem 0', fontSize: '9pt' }}>SIGNATURE AND SEAL OF PRESIDING AUTHORITY SOLEMNIZING MARRIAGE</p>
+                            <div style={{ 
+                                border: '1px solid #000',
+                                padding: '0.5rem', 
+                                margin: '0.5rem 0',
+                                minHeight: '100px',
+                                background: 'white'
+                            }}>
+                                {/* Blank space for manual signature and seal */}
+                            </div>
+                        </div>
+
+                        {/* Solemnization Details - Right */}
+                        <div style={{ 
+                            flex: '1',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            minWidth: 0
+                        }}>
+                            <p style={{ fontWeight: 'bold', marginBottom: '0.5rem', wordBreak: 'break-word' }}>Marriage Solemnized</p>
+                            <p style={{ margin: '0.2rem 0', wordBreak: 'break-word' }}>Date: {application.solemnised_date ? new Date(application.solemnised_date).toLocaleDateString('en-GB') : 'NIL'}</p>
+                            <p style={{ margin: '0.2rem 0', wordBreak: 'break-word' }}>Place: {application.solemnised_place || 'NIL'}</p>
+                            <p style={{ fontWeight: 'bold', marginTop: '1rem', marginBottom: '0.5rem', wordBreak: 'break-word' }}>Marriage Solemnized by</p>
+                            <p style={{ margin: '0.2rem 0', wordBreak: 'break-word' }}>Name: {application.solemnised_by || 'NIL'}</p>
+                            <p style={{ margin: '0.2rem 0', wordBreak: 'break-word' }}>Address: {application.solemnised_address || 'NIL'}</p>
                         </div>
                     </div>
 
