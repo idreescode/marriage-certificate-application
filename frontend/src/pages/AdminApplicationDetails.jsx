@@ -528,6 +528,132 @@ export default function AdminApplicationDetails() {
 
                     </div>
                 </div>
+
+                {/* Print-Only Certificate Table */}
+                <div className="print-certificate-table" style={{ display: 'none' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid black' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'center', fontWeight: 'bold', width: '15%' }}></th>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Full Name</th>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Father's Name</th>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Date & Place Of Birth</th>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Present Address</th>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Marital Status</th>
+                                <th style={{ border: '1px solid black', padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>By Representative or Personally</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* BRIDE GROOM */}
+                            <tr>
+                                <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>BRIDE GROOM</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_full_name}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_father_name || ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>
+                                    {new Date(application.groom_date_of_birth).toLocaleDateString('en-GB')}<br/>
+                                    {application.groom_place_of_birth || ''}
+                                </td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_address}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}></td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_personally ? 'Personally' : application.groom_representative ? 'By Representative' : ''}</td>
+                            </tr>
+
+                            {/* BRIDE */}
+                            <tr>
+                                <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>BRIDE</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_full_name}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_father_name || ''}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>
+                                    {new Date(application.bride_date_of_birth).toLocaleDateString('en-GB')}<br/>
+                                    {application.bride_place_of_birth || ''}
+                                </td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_address}</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}></td>
+                                <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_personally ? 'Personally' : application.bride_representative ? 'By Representative' : ''}</td>
+                            </tr>
+
+                            {/* REPRESENTATIVE OR GUARDIAN OF BRIDE GROOM */}
+                            {application.groom_rep_name && (
+                                <tr>
+                                    <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>REPRESENTATIVE OR GUARDIAN OF BRIDE GROOM</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_name}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_father_name || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>
+                                        {application.groom_rep_date_of_birth ? new Date(application.groom_rep_date_of_birth).toLocaleDateString('en-GB') : ''}<br/>
+                                        {application.groom_rep_place_of_birth || ''}
+                                    </td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.groom_rep_address || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
+                                    <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
+                                </tr>
+                            )}
+
+                            {/* REPRESENTATIVE OR GUARDIAN OF BRIDE */}
+                            {application.bride_rep_name && (
+                                <tr>
+                                    <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>REPRESENTATIVE OR GUARDIAN OF BRIDE</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_name}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_father_name || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>
+                                        {application.bride_rep_date_of_birth ? new Date(application.bride_rep_date_of_birth).toLocaleDateString('en-GB') : ''}<br/>
+                                        {application.bride_rep_place_of_birth || ''}
+                                    </td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{application.bride_rep_address || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
+                                    <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
+                                </tr>
+                            )}
+
+                            {/* WITNESSES */}
+                            {witnesses.map((witness, i) => (
+                                <tr key={`witness-${i}`}>
+                                    <td style={{ border: '1px solid black', padding: '12px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>WITNESS No {i + 1}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_name}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_father_name || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>
+                                        {witness.witness_date_of_birth ? new Date(witness.witness_date_of_birth).toLocaleDateString('en-GB') : ''}<br/>
+                                        {witness.witness_place_of_birth || ''}
+                                    </td>
+                                    <td style={{ border: '1px solid black', padding: '12px' }}>{witness.witness_address || ''}</td>
+                                    <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
+                                    <td style={{ border: '1px solid black', padding: '12px', textAlign: 'center', fontSize: '20pt' }}>/</td>
+                                </tr>
+                            ))}
+
+                            {/* MAHR */}
+                            <tr>
+                                <td style={{ border: '1px solid black', padding: '10px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>Mahr</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }} colSpan="6">{application.mahr_amount || ''}</td>
+                            </tr>
+                            <tr>
+                                <td style={{ border: '1px solid black', padding: '10px', fontWeight: 'bold', textAlign: 'center', verticalAlign: 'middle' }}>Deferred / Prompt</td>
+                                <td style={{ border: '1px solid black', padding: '12px' }} colSpan="6">{application.mahr_type === 'deferred' ? 'Deferred' : application.mahr_type === 'prompt' ? 'Prompt' : ''}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {/* Bottom Section */}
+                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', gap: '2rem' }}>
+                        {/* Disclaimer */}
+                        <div style={{ flex: '1', fontSize: '9pt', lineHeight: '1.4' }}>
+                            <p>This Nikkah certificate is issued in accordance with Islamic laws and may not be accepted by authorities in the U.K. and other non-Muslim countries. To be married in accordance with British Marriage Laws, both parties are advised to go through a Civil Marriage at the Registration Office in the United Kingdom.</p>
+                        </div>
+
+                        {/* Solemnization Details */}
+                        <div style={{ flex: '1' }}>
+                            <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Marriage Solemnized</p>
+                            <p>Date: {application.solemnised_date ? new Date(application.solemnised_date).toLocaleDateString('en-GB') : '................................'}</p>
+                            <p>Place: {application.solemnised_place || '................................'}</p>
+                            <p style={{ fontWeight: 'bold', marginTop: '1rem', marginBottom: '0.5rem' }}>Marriage Solemnized by</p>
+                            <p>Address: {application.solemnised_address || '................................'}</p>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #ccc', textAlign: 'center', fontWeight: 'bold', fontSize: '10pt' }}>
+                        <p>Issued by: Jamiyat Tabligh-ul-Islam, Central Mosque, Darfield Street, Westgate, Bradford, BD1 3RU</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
