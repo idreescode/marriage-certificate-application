@@ -1,16 +1,23 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Home, LayoutDashboard } from 'lucide-react';
+import { LogOut, Home, LayoutDashboard, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 export default function ApplicantNavbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
     navigate('/login');
+    setMobileMenuOpen(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const NavLink = ({ to, label }) => {
@@ -19,6 +26,7 @@ export default function ApplicantNavbar() {
       <Link 
         to={to} 
         className="d-flex items-center gap-2"
+        onClick={() => setMobileMenuOpen(false)}
         style={{ 
           textDecoration: 'none', 
           padding: '0.5rem 1rem', 
@@ -43,15 +51,25 @@ export default function ApplicantNavbar() {
             {/* Logo area */}
             <div className="d-flex items-center">
               <Link to="/applicant/dashboard" className="nav-brand" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.svg" alt="Jamiyat" style={{ height: '50px', width: 'auto' }} />
-                <div style={{ height: '30px', width: '1px', background: '#e2e8f0', margin: '0 1rem' }}></div>
-                <span style={{ color: '#64748b', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }}>Applicant Portal</span>
+                <img src="/logo.svg" alt="Jamiyat" style={{ height: '80px', width: 'auto' }} />
+                <div style={{ height: '30px', width: '1px', background: '#e2e8f0', margin: '0 1rem' }} className="hide-on-mobile"></div>
+                <span style={{ color: '#64748b', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }} className="hide-on-mobile">Applicant Portal</span>
               </Link>
             </div>
 
+            {/* Mobile Menu Toggle */}
+            <button 
+              className="nav-mobile-toggle" 
+              onClick={toggleMobileMenu} 
+              aria-label="Toggle menu"
+              style={{ color: 'var(--brand-900)' }}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
             {/* Navigation Menu */}
-            <div className="d-flex items-center">
-               <div className="d-flex" style={{ marginRight: '2rem' }}>
+            <div className={`d-flex items-center admin-nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+               <div className="d-flex admin-nav-links" style={{ marginRight: '2rem' }}>
                   <NavLink to="/applicant/dashboard" label="Dashboard" />
                </div>
 
@@ -60,7 +78,7 @@ export default function ApplicantNavbar() {
                    onClick={handleLogout} 
                    className="btn btn-sm btn-outline-brand"
                   >
-                     <LogOut size={16} /> <span className="hide-mobile">Logout</span>
+                     <LogOut size={16} /> <span>Logout</span>
                   </button>
                </div>
             </div>

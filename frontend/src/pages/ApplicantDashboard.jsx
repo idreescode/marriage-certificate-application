@@ -189,7 +189,7 @@ export default function ApplicantDashboard() {
    return (
          <>
             {/* Hero Header */}
-            <div style={{
+            <div className="applicant-dashboard-hero" style={{
                background: 'linear-gradient(135deg, #b05a33 0%, #8f4728 100%)',
                padding: '2rem 2.5rem',
                borderRadius: 'var(--radius-lg)',
@@ -207,20 +207,51 @@ export default function ApplicantDashboard() {
                   background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
                   borderRadius: '50%',
                   transform: 'translate(30%, -30%)'
-               }}></div>
-               <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                     <h1 style={{ fontSize: '2.1rem', margin: 0, color: 'white', fontWeight: 700, letterSpacing: '-0.02em' }}>My Application Dashboard</h1>
-                     <p style={{ color: 'rgba(255,255,255,0.9)', margin: 0, marginTop: '0.5rem', fontSize: '1rem' }}>Track your marriage certificate application</p>
-                     <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+               }} className="hide-mobile"></div>
+               <div style={{ 
+                  position: 'relative', 
+                  zIndex: 1, 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start',
+                  flexWrap: 'wrap',
+                  gap: '1rem'
+               }}>
+                  <div style={{ flex: 1, minWidth: '280px' }}>
+                     <h1 style={{ 
+                        fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', 
+                        margin: 0, 
+                        color: 'white', 
+                        fontWeight: 700, 
+                        letterSpacing: '-0.02em' 
+                     }}>
+                        My Application Dashboard
+                     </h1>
+                     <p style={{ 
+                        color: 'rgba(255,255,255,0.9)', 
+                        margin: 0, 
+                        marginTop: '0.5rem', 
+                        fontSize: 'clamp(0.9rem, 2vw, 1rem)' 
+                     }}>
+                        Track your marriage certificate application
+                     </p>
+                     <div style={{ 
+                        marginTop: '1rem', 
+                        display: 'flex', 
+                        alignItems: 'flex-start',
+                        flexWrap: 'wrap',
+                        gap: '1rem' 
+                     }}>
                         <div>
                            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Application ID</span>
-                           <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', margin: 0, marginTop: '0.25rem' }}>#{app.application_number}</p>
+                           <p style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)', fontWeight: 700, color: 'white', margin: 0, marginTop: '0.25rem' }}>#{app.application_number}</p>
                         </div>
-                        <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.2)' }}></div>
+                        <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.2)' }} className="hide-mobile"></div>
                         <div>
                            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Submitted</span>
-                           <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'white', margin: 0, marginTop: '0.25rem' }}>{new Date(app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                           <p style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', fontWeight: 600, color: 'white', margin: 0, marginTop: '0.25rem' }}>
+                              {new Date(app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                           </p>
                         </div>
                      </div>
                   </div>
@@ -272,7 +303,12 @@ export default function ApplicantDashboard() {
             </div>
 
             {/* Main Content Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginTop: '2rem' }}>
+            <div className="applicant-content-grid" style={{ 
+               display: 'grid', 
+               gridTemplateColumns: '2fr 1fr', 
+               gap: '2rem', 
+               marginTop: '2rem' 
+            }}>
 
                {/* Left Column: Actions & Details */}
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

@@ -5,7 +5,7 @@ import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import { getAllApplications, verifyDocuments as verifyDocumentsAPI, setDepositAmount as setDepositAPI, verifyPayment as verifyPaymentAPI, scheduleAppointment as scheduleAPI, generateCertificate as generateCertAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { Search, Filter, CheckCircle, Clock, Banknote, Calendar, Eye, FileText, User, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, Clock, Banknote, Calendar, Eye, FileText, User, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useSearchParams } from 'react-router-dom';
 
@@ -166,19 +166,11 @@ export default function AdminApplications() {
         background: 'var(--brand-600)',
         padding: '1.5rem 2rem',
         borderRadius: 'var(--radius-lg)',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        marginBottom: '1.5rem'
       }}>
         <div>
           <h1 style={{ fontSize: '2rem', margin: 0, color: 'white' }}>Applications</h1>
           <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0, marginTop: '0.25rem' }}>Manage and track all nikkah applications.</p>
-        </div>
-        <div className="d-flex gap-2">
-          <button className="btn btn-sm" style={{ background: 'white', color: 'var(--brand-600)', border: 'none', fontWeight: 600 }}>
-            <CheckCircle size={16} /> Export CSV
-          </button>
         </div>
       </div>
 

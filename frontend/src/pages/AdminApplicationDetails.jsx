@@ -132,7 +132,7 @@ export default function AdminApplicationDetails() {
             <div className="max-w-6xl mx-auto px-6" style={{ paddingTop: '2rem' }}>
 
                 {/* Header Hero Section */}
-                <div style={{
+                <div className="app-detail-header" style={{
                     background: 'linear-gradient(135deg, var(--brand-600) 0%, var(--brand-800) 100%)',
                     padding: '2.5rem',
                     borderRadius: '20px',
@@ -144,61 +144,110 @@ export default function AdminApplicationDetails() {
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                 }}>
                     {/* Breadcrumb / Top Row */}
-                    <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-2">
+                    <div className="header-top-row" style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        borderBottom: '1px solid rgba(255,255,255,0.1)', 
+                        paddingBottom: '1rem', 
+                        marginBottom: '0.5rem',
+                        flexWrap: 'wrap',
+                        gap: '0.75rem'
+                    }}>
                         <button
                             onClick={() => navigate('/admin/applications')}
                             className="btn-back-nav"
                         >
-                            <ArrowLeft size={16} /> Back to Applications
+                            <ArrowLeft size={16} /> <span>Back to Applications</span>
                         </button>
-                        <span className="font-mono text-white/80 text-sm bg-white/10 px-3 py-1 rounded-full">
+                        <span className="font-mono text-white/80 text-sm bg-white/10 px-3 py-1 rounded-full" style={{ whiteSpace: 'nowrap' }}>
                             ID: #{application.application_number}
                         </span>
                     </div>
 
-                    <div className="flex flex-col md:flex-row justify-between md:items-start gap-6">
-                        <div>
-                            <div className="flex items-center gap-4 mb-2">
-                                <h1 style={{ color: 'white', margin: 0 }} className="text-3xl font-bold tracking-tight">Nikkah Application</h1>
-                                <div className="bg-white rounded-full px-2 py-1">
-                                    <StatusBadge status={application.status} />
+                    <div className="header-content-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                                    <h1 style={{ color: 'white', margin: 0, fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 'bold' }}>
+                                        Nikkah Application
+                                    </h1>
+                                    <div className="bg-white rounded-full px-2 py-1">
+                                        <StatusBadge status={application.status} />
+                                    </div>
                                 </div>
                             </div>
-                            <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.125rem' }}>
+                            <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 'clamp(0.95rem, 2.5vw, 1.125rem)', marginBottom: '1rem' }}>
                                 <span className="font-semibold">{application.groom_full_name}</span>
                                 <span className="mx-2">&</span>
                                 <span className="font-semibold">{application.bride_full_name}</span>
                             </p>
-                            <div className="flex items-center gap-6 mt-4 text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                                <span className="flex items-center gap-1.5"><Clock size={16} /> Applied on {new Date(application.created_at).toLocaleDateString()}</span>
+                            <div style={{ 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                gap: '0.5rem',
+                                fontSize: '0.875rem',
+                                color: 'rgba(255, 255, 255, 0.8)'
+                            }}>
+                                <span className="flex items-center gap-1.5">
+                                    <Clock size={16} /> Applied on {new Date(application.created_at).toLocaleDateString()}
+                                </span>
                                 {application.preferred_date && (
-                                    <span className="flex items-center gap-1.5"><Calendar size={16} /> Preferred Date: {new Date(application.preferred_date).toLocaleDateString()}</span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Calendar size={16} /> Preferred: {new Date(application.preferred_date).toLocaleDateString()}
+                                    </span>
                                 )}
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: '200px', gap: '0.75rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-end' }}>
-                                {application.status === 'appointment_scheduled' && (
-                                    <button onClick={handleGenerateCertificate} className="btn bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                                        <CheckCircle size={18} className="mr-2" /> Mark Completed
-                                    </button>
-                                )}
+                        <div className="header-actions" style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            gap: '0.75rem',
+                            width: '100%'
+                        }}>
+                            {application.status === 'appointment_scheduled' && (
                                 <button 
-                                    onClick={handlePrint} 
-                                    className="btn-back-nav print-button"
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                    onClick={handleGenerateCertificate} 
+                                    className="btn"
+                                    style={{
+                                        background: '#059669',
+                                        color: 'white',
+                                        border: 'none',
+                                        width: '100%',
+                                        justifyContent: 'center'
+                                    }}
                                 >
-                                    <Printer size={16} /> Print Application
+                                    <CheckCircle size={18} /> Mark Completed
                                 </button>
-                            </div>
+                            )}
+                            <button 
+                                onClick={handlePrint} 
+                                className="btn-back-nav print-button"
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    gap: '0.5rem',
+                                    width: '100%'
+                                }}
+                            >
+                                <Printer size={16} /> Print Application
+                            </button>
                             {application.certificate_url && (
                                 <a
                                     href={getFileUrl(application.certificate_url)}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="btn-back-nav"
-                                    style={{ textDecoration: 'none', marginTop: 'auto' }}
+                                    style={{ 
+                                        textDecoration: 'none',
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem'
+                                    }}
                                 >
                                     <Download size={16} /> Download Certificate
                                 </a>

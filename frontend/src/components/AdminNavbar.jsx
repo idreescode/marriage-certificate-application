@@ -1,16 +1,23 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, Settings, LogOut, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Settings, LogOut, FileText, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 export default function AdminNavbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
     navigate('/login');
+    setMobileMenuOpen(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const NavLink = ({ to, icon: Icon, label }) => {
@@ -19,6 +26,7 @@ export default function AdminNavbar() {
       <Link
         to={to}
         className="d-flex items-center gap-2"
+        onClick={() => setMobileMenuOpen(false)}
         style={{
           textDecoration: 'none',
           padding: '0.5rem 1rem',
@@ -36,22 +44,80 @@ export default function AdminNavbar() {
   };
 
   return (
-    <nav className="navbar" style={{ background: 'white', borderBottom: '1px solid #eee', height: '80px', padding: '0' }}>
-      <div className="container" style={{ maxWidth: '1200px', height: '100%' }}>
-        <div className="d-flex justify-between items-center w-full" style={{ height: '100%' }}>
-
+    <nav
+      className="navbar"
+      style={{
+        background: "white",
+        borderBottom: "1px solid #eee",
+        height: "80px",
+        padding: "0",
+      }}
+    >
+      <div className="container" style={{ maxWidth: "1200px", height: "100%" }}>
+        <div
+          className="d-flex justify-between items-center w-full"
+          style={{ height: "100%" }}
+        >
           {/* Logo area */}
           <div className="d-flex items-center">
-            <Link to="/admin/dashboard" className="nav-brand" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-              <img src="/logo.svg" alt="Jamiyat" style={{ height: '50px', width: 'auto' }} />
-              <div style={{ height: '30px', width: '1px', background: '#e2e8f0', margin: '0 1rem' }}></div>
-              <span style={{ color: '#64748b', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }}>Nikkah Portal</span>
+            <Link
+              to="/admin/dashboard"
+              className="nav-brand"
+              style={{
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <img
+                src="/logo.svg"
+                alt="Jamiyat"
+                style={{ height: "80px", width: "auto" }}
+              />
+              <div
+                style={{
+                  height: "30px",
+                  width: "1px",
+                  background: "#e2e8f0",
+                  margin: "0 1rem",
+                }}
+                className="hide-on-mobile"
+              ></div>
+              <span
+                style={{
+                  color: "#64748b",
+                  fontSize: "0.85rem",
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                }}
+                className="hide-on-mobile"
+              >
+                Nikkah Portal
+              </span>
             </Link>
           </div>
 
+          {/* Mobile Menu Toggle */}
+          <button
+            className="nav-mobile-toggle"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+            style={{ color: "var(--brand-900)" }}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
           {/* Navigation Menu + Actions */}
-          <div className="d-flex items-center">
-            <div className="d-flex" style={{ marginRight: '2rem' }}>
+          <div
+            className={`d-flex items-center admin-nav-menu ${
+              mobileMenuOpen ? "mobile-open" : ""
+            }`}
+          >
+            <div
+              className="d-flex admin-nav-links"
+              style={{ marginRight: "2rem" }}
+            >
               <NavLink to="/admin/dashboard" label="Dashboard" />
               <NavLink to="/admin/applications" label="Applications" />
               {/* <NavLink to="/admin/payments" label="Payments" /> */}
@@ -64,11 +130,10 @@ export default function AdminNavbar() {
                 onClick={handleLogout}
                 className="btn btn-sm btn-outline-brand"
               >
-                <LogOut size={16} /> <span className="hide-mobile">Logout</span>
+                <LogOut size={16} /> <span>Logout</span>
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </nav>
