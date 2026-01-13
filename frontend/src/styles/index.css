@@ -1934,7 +1934,7 @@ td {
 @media print {
   /* Reset page margins - smaller margins to fit more content */
   @page {
-    margin: 1cm 1.5cm;
+    margin: 0.8cm 1cm;
     size: A4 portrait;
   }
 
@@ -1944,6 +1944,9 @@ td {
     font-size: 9pt;
     line-height: 1.2;
     font-family: 'Arial', 'Helvetica', sans-serif !important;
+    position: relative;
+    min-height: auto !important;
+    height: auto !important;
   }
 
   /* Improve text rendering for print */
@@ -1993,18 +1996,41 @@ td {
     padding: 0 !important;
   }
 
-  /* Add certificate number at top right - compact */
+  /* Print Header Container */
+  .max-w-6xl {
+    position: relative;
+  }
+
+  /* Logo row with app number */
   body::before {
-    content: "No. " attr(data-app-number);
+    content: '';
+    display: block;
+    width: 120px;
+    height: 90px;
+    margin: 0.5rem auto 0.5rem auto;
+    background-image: url('/logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+  }
+
+  /* Application number in right corner (same row as logo) */
+  body::after {
+    content: "Application No. #" attr(data-app-number);
     display: block;
     text-align: right;
     font-size: 10pt;
-    color: #d32f2f;
     font-weight: bold;
-    margin-bottom: 0.2rem;
+    color: #d32f2f;
+    font-family: 'Arial', sans-serif;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    margin: 0;
   }
 
-  /* Add official header - compact */
+  /* Certificate title below logo */
   .max-w-6xl::before {
     content: "NIKKAH CERTIFICATE ACCORDING TO ISLAMIC LAWS";
     display: block;
@@ -2013,10 +2039,11 @@ td {
     font-weight: bold;
     color: #000;
     font-family: 'Georgia', 'Times New Roman', serif;
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.2rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid #000;
   }
 
   /* Hide all card-based layout for print */
@@ -2097,11 +2124,15 @@ td {
   }
 
   /* Scale down to fit on one page if needed */
-  @media print {
-    .print-certificate-table {
-      transform: scale(0.95);
-      transform-origin: top center;
-    }
+  .print-certificate-table {
+    transform: scale(0.95);
+    transform-origin: top center;
+  }
+
+  /* Prevent page breaks */
+  body, .max-w-6xl {
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
   }
 
   /* Clean typography */

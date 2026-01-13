@@ -50,10 +50,9 @@ export default function AdminApplicationDetails() {
     };
 
     const handlePrint = () => {
-        // Add application data to body for print header
+        // Set application number for print header
         if (application) {
             document.body.setAttribute('data-app-number', application.application_number || '');
-            document.body.setAttribute('data-app-date', application.created_at ? new Date(application.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '');
         }
         window.print();
     };
