@@ -1292,10 +1292,12 @@ td {
     display: none !important; /* Hide divider on mobile */
   }
 
-  /* Main content grid - stack vertically */
-  .applicant-content-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
+  /* Main content grid - keep two columns on laptop, single on mobile */
+  @media (max-width: 640px) {
+    .applicant-content-grid {
+      grid-template-columns: 1fr !important;
+      gap: 1.5rem !important;
+    }
   }
 
   /* Action cards */

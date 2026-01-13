@@ -1,12 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getApplicationById, generateCertificate as generateCertAPI, getFileUrl } from '../services/api';
+import { getApplicationById, getFileUrl } from '../services/api';
 import Loader from '../components/Loader';
 import toast from 'react-hot-toast';
 import {
     ArrowLeft, User, Calendar, Phone, Mail, MapPin,
-    FileText, CheckCircle, Clock, Globe, Shield, Download,
+    FileText, Clock, Globe, Shield,
     CreditCard, MoreVertical, ExternalLink, Printer
 } from 'lucide-react';
 
@@ -35,17 +35,6 @@ export default function AdminApplicationDetails() {
             navigate('/admin/applications');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleGenerateCertificate = async () => {
-        const toastId = toast.loading('Generating certificate...');
-        try {
-            await generateCertAPI(id);
-            toast.success('Certificate generated successfully!', { id: toastId });
-            fetchApplicationDetails();
-        } catch (error) {
-            toast.error('Failed to generate certificate', { id: toastId });
         }
     };
 
@@ -205,21 +194,6 @@ export default function AdminApplicationDetails() {
                             gap: '0.75rem',
                             width: '100%'
                         }}>
-                            {application.status === 'appointment_scheduled' && (
-                                <button 
-                                    onClick={handleGenerateCertificate} 
-                                    className="btn"
-                                    style={{
-                                        background: '#059669',
-                                        color: 'white',
-                                        border: 'none',
-                                        width: '100%',
-                                        justifyContent: 'center'
-                                    }}
-                                >
-                                    <CheckCircle size={18} /> Mark Completed
-                                </button>
-                            )}
                             <button 
                                 onClick={handlePrint} 
                                 className="btn-back-nav print-button"
@@ -233,24 +207,6 @@ export default function AdminApplicationDetails() {
                             >
                                 <Printer size={16} /> Print Application
                             </button>
-                            {application.certificate_url && (
-                                <a
-                                    href={getFileUrl(application.certificate_url)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="btn-back-nav"
-                                    style={{ 
-                                        textDecoration: 'none',
-                                        width: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem'
-                                    }}
-                                >
-                                    <Download size={16} /> Download Certificate
-                                </a>
-                            )}
                         </div>
                     </div>
                 </div>

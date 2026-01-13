@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Loader from '../components/Loader';
 import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession, getFileUrl } from '../services/api';
 import toast from 'react-hot-toast';
-import { FileText, Calendar, CreditCard, Download, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight } from 'lucide-react';
+import { FileText, Calendar, CreditCard, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight } from 'lucide-react';
 
 
 export default function ApplicantDashboard() {
@@ -233,7 +233,7 @@ export default function ApplicantDashboard() {
                         marginTop: '0.5rem', 
                         fontSize: 'clamp(0.9rem, 2vw, 1rem)' 
                      }}>
-                        Track your marriage certificate application
+                        Track your marriage application
                      </p>
                      <div style={{ 
                         marginTop: '1rem', 
@@ -613,69 +613,6 @@ export default function ApplicantDashboard() {
                      </div>
                   </div>
 
-                  {/* Certificate Download */}
-                  {app.certificate_url && (
-                     <div style={{
-                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                        borderRadius: 'var(--radius-lg)',
-                        overflow: 'hidden',
-                        boxShadow: '0 8px 24px rgba(5, 150, 105, 0.35)',
-                        border: '1px solid #059669',
-                        position: 'relative',
-                        transition: 'all 0.3s ease'
-                     }}
-                     onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(5, 150, 105, 0.45)';
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                     }}
-                     onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(5, 150, 105, 0.35)';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                     }}
-                     >
-                        <div style={{
-                           position: 'absolute',
-                           top: '-50px',
-                           right: '-50px',
-                           width: '200px',
-                           height: '200px',
-                           background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)',
-                           borderRadius: '50%'
-                        }}></div>
-                        <div style={{ padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-                           <div>
-                              <h3 style={{ color: 'white', margin: 0, fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.01em' }}>
-                                 <CheckCircle size={28} style={{ display: 'inline', marginRight: '0.75rem', verticalAlign: 'middle' }} />
-                                 Certificate Ready
-                              </h3>
-                              <p style={{ color: 'rgba(255,255,255,0.95)', margin: 0, fontSize: '0.95rem', paddingLeft: '2.5rem' }}>Your digital nikkah certificate is available for download.</p>
-                           </div>
-                           <a 
-                              href={getFileUrl(app.certificate_url)} 
-                              target="_blank" 
-                              className="btn" 
-                              style={{ 
-                                 backgroundColor: 'white', 
-                                 color: '#059669', 
-                                 border: 'none', 
-                                 fontWeight: 600,
-                                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                 transition: 'all 0.2s ease'
-                              }}
-                              onMouseEnter={(e) => {
-                                 e.currentTarget.style.transform = 'scale(1.05)';
-                                 e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
-                              }}
-                              onMouseLeave={(e) => {
-                                 e.currentTarget.style.transform = 'scale(1)';
-                                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-                              }}
-                           >
-                              <Download size={18} /> Download PDF
-                           </a>
-                        </div>
-                     </div>
-                  )}
                </div>
 
                {/* Right Column: Progress & Info */}
@@ -749,19 +686,11 @@ export default function ApplicantDashboard() {
                               </p>
                            </div>
 
-                           <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                           <div style={{ position: 'relative' }}>
                               <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.appointment_date ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.appointment_date ? '0 0 0 3px #2563eb' : 'none' }}></div>
                               <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.appointment_date ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Nikkah Scheduled</h4>
                               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
                                  {app.appointment_date ? new Date(app.appointment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Awaiting Confirmation'}
-                              </p>
-                           </div>
-
-                           <div style={{ position: 'relative' }}>
-                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.status === 'completed' ? '#059669' : '#cbd5e1', border: '3px solid white', boxShadow: app.status === 'completed' ? '0 0 0 3px #059669' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.status === 'completed' ? '#065f46' : '#94a3b8', fontWeight: 600 }}>Certificate Issued</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {app.status === 'completed' ? 'Available for Download' : 'Pending Completion'}
                               </p>
                            </div>
 
