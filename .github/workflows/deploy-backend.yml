@@ -80,8 +80,10 @@ jobs:
             git remote set-url origin $REPO_URL
           fi
           
-          # Backup current .env if exists
+          # Backup current .env if exists (CRITICAL: .env is untracked, so git clean will remove it)
+          ENV_CONTENT=""
           if [ -f .env ]; then
+            ENV_CONTENT=\$(cat .env)
             cp .env .env.backup.\$(date +%Y%m%d_%H%M%S)
             echo "✅ Backed up existing .env"
           fi
@@ -105,8 +107,30 @@ jobs:
           git checkout -f \$BRANCH_NAME 2>/dev/null || git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME
           git reset --hard origin/\$BRANCH_NAME
           
-          # Clean any untracked files that might interfere
+          # Clean any untracked files that might interfere (but .env will be restored after)
           git clean -fd
+          
+          # CRITICAL: Restore .env file after git clean (git clean removes untracked files including .env)
+          if [ -n "\$ENV_CONTENT" ]; then
+            echo "\$ENV_CONTENT" > .env
+            echo "✅ Restored .env file after git clean"
+          elif [ -f .env.backup.* ]; then
+            # If backup exists, restore from most recent backup
+            LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -1)
+            if [ -n "\$LATEST_BACKUP" ]; then
+              cp "\$LATEST_BACKUP" .env
+              echo "✅ Restored .env from backup: \$LATEST_BACKUP"
+            fi
+          fi
+          
+          # Verify .env exists and has content
+          if [ ! -f .env ] || [ ! -s .env ]; then
+            echo "❌ ERROR: .env file is missing or empty after git operations!"
+            echo "⚠️  This will cause migration and server startup to fail."
+            echo "⚠️  The .env file should have been copied from GitHub Actions."
+          else
+            echo "✅ .env file verified (size: \$(wc -l < .env) lines)"
+          fi
           
           echo "✅ Latest code pulled. New commit:"
           git log -1 --oneline
