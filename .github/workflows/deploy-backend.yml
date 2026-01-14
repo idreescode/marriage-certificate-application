@@ -75,7 +75,6 @@ jobs:
             git init
             git remote add origin $REPO_URL || git remote set-url origin $REPO_URL
           fi
-          EOF
           
           # Create uploads directory if it doesn't exist
           if [ ! -d "uploads" ]; then
@@ -86,7 +85,7 @@ jobs:
           
           # Backup current .env if exists
           if [ -f .env ]; then
-            cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
+            cp .env .env.backup.\$(date +%Y%m%d_%H%M%S)
             echo "✅ Backed up existing .env"
           fi
           
@@ -97,7 +96,12 @@ jobs:
           
           # Install/update dependencies
           echo "📦 Installing dependencies..."
-          npm ci --production
+          if [ -f "package-lock.json" ]; then
+            npm ci --omit=dev
+          else
+            echo "⚠️  package-lock.json not found, using npm install..."
+            npm install --omit=dev
+          fi
           
           # Run database migrations (if needed)
           echo "🗄️  Running database migrations..."
@@ -110,7 +114,7 @@ jobs:
           
           echo "✅ Backend deployment completed!"
           pm2 status
-          DEPLOYSCRIPT
+          EOF
           
           # Ensure /var/www directory exists
           echo "📁 Ensuring /var/www directory exists..."
