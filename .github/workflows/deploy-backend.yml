@@ -42,7 +42,10 @@ jobs:
 
       - name: 🔍 Add server to known hosts
         run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
       - name: 📤 Deploy to server
         env:
