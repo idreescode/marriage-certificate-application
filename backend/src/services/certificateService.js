@@ -20,17 +20,17 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
 
     // Format dates
     const formatDate = (dateString) => {
-      if (!dateString) return 'N/A';
-      return new Date(dateString).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
+      if (!dateString) return '';
+      try {
+        return new Date(dateString).toLocaleDateString('en-GB');
+      } catch (e) {
+        return '';
+      }
     };
 
     const formatDateFull = (dateString) => {
-      if (!dateString) return 'N/A';
-      return new Date(dateString).toLocaleDateString('en-US', { 
+      if (!dateString) return '';
+      return new Date(dateString).toLocaleDateString('en-GB', { 
         weekday: 'long',
         year: 'numeric', 
         month: 'long', 
@@ -38,90 +38,130 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       });
     };
 
-    // Prepare data for replacement
+
+    // Prepare replacements
     const replacements = {
       application_number: applicationData.application_number || 'N/A',
-      groom_full_name: applicationData.groom_full_name || 'N/A',
-      groom_father_name: applicationData.groom_father_name || 'N/A',
-      groom_id_number: applicationData.groom_id_number || 'N/A',
-      groom_date_of_birth_formatted: formatDate(applicationData.groom_date_of_birth),
-      groom_place_of_birth_html: applicationData.groom_place_of_birth 
-        ? `<div class="person-detail"><strong>POB:</strong> ${applicationData.groom_place_of_birth}</div>`
-        : '',
-      groom_address: applicationData.groom_address || 'N/A',
-      bride_full_name: applicationData.bride_full_name || 'N/A',
-      bride_father_name: applicationData.bride_father_name || 'N/A',
-      bride_id_number: applicationData.bride_id_number || 'N/A',
-      bride_date_of_birth_formatted: formatDate(applicationData.bride_date_of_birth),
-      bride_place_of_birth_html: applicationData.bride_place_of_birth 
-        ? `<div class="person-detail"><strong>POB:</strong> ${applicationData.bride_place_of_birth}</div>`
-        : '',
-      bride_address: applicationData.bride_address || 'N/A',
-      appointment_date_formatted: formatDateFull(applicationData.appointment_date),
-      appointment_location: applicationData.appointment_location || 'Designated Venue'
+      
+      // Groom
+      groom_full_name: applicationData.groom_full_name || '',
+      groom_father_name: applicationData.groom_father_name || '',
+      groom_date_place_of_birth: (() => {
+        const dob = formatDate(applicationData.groom_date_of_birth);
+        const pob = applicationData.groom_place_of_birth || '';
+        if (!dob && !pob) return '';
+        if (dob && pob) return `${dob}<br/>${pob}`;
+        return dob || pob;
+      })(),
+      groom_address: applicationData.groom_address || '',
+      groom_personally_text: applicationData.groom_personally ? 'Personally' : (applicationData.groom_representative ? 'Representative' : ''),
+      
+      // Bride
+      bride_full_name: applicationData.bride_full_name || '',
+      bride_father_name: applicationData.bride_father_name || '',
+      bride_date_place_of_birth: (() => {
+        const dob = formatDate(applicationData.bride_date_of_birth);
+        const pob = applicationData.bride_place_of_birth || '';
+        if (!dob && !pob) return '';
+        if (dob && pob) return `${dob}<br/>${pob}`;
+        return dob || pob;
+      })(),
+      bride_address: applicationData.bride_address || '',
+      bride_personally_text: applicationData.bride_personally ? 'Personally' : (applicationData.bride_representative ? 'Representative' : ''),
+      
+      // Groom Representative
+      groom_rep_name: applicationData.groom_rep_name || '',
+      groom_rep_father_name: applicationData.groom_rep_father_name || '',
+      groom_rep_address: applicationData.groom_rep_address || '',
+      groom_rep_signature: applicationData.groom_rep_name ? '' : '',
+      
+      // Bride Representative
+      bride_rep_name: applicationData.bride_rep_name || '',
+      bride_rep_father_name: applicationData.bride_rep_father_name || '',
+      bride_rep_address: applicationData.bride_rep_address || '',
+      bride_rep_signature: applicationData.bride_rep_name ? '' : '',
+      
+      // Mahr
+      mahr_amount: applicationData.mahr_amount || '',
+      mahr_type_text: applicationData.mahr_type === 'deferred' ? 'Deferred' : (applicationData.mahr_type === 'prompt' ? 'Prompt' : ''),
+      
+      // Solemnization
+      solemnised_date_formatted: applicationData.solemnised_date 
+        ? formatDateFull(applicationData.solemnised_date) 
+        : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date) : ''),
+      solemnised_place: applicationData.solemnised_place || applicationData.appointment_location || '',
+      solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed
+      solemnised_address: applicationData.solemnised_address || '',
+      
+      // Witness 1
+      witness1_name: (witnesses && witnesses[0] && witnesses[0].witness_name) ? witnesses[0].witness_name : '',
+      witness1_father_name: (witnesses && witnesses[0] && witnesses[0].witness_father_name) ? witnesses[0].witness_father_name : '',
+      witness1_date_place_of_birth: (() => {
+        if (!witnesses || !witnesses[0]) return '';
+        const dob = formatDate(witnesses[0].witness_date_of_birth);
+        const pob = witnesses[0].witness_place_of_birth || '';
+        if (!dob && !pob) return '';
+        if (dob && pob) return `${dob}<br/>${pob}`;
+        return dob || pob;
+      })(),
+      witness1_address: (witnesses && witnesses[0] && witnesses[0].witness_address) ? witnesses[0].witness_address : '',
+      witness1_signature: (witnesses && witnesses[0] && witnesses[0].witness_name) ? '' : '',
+      
+      // Witness 2
+      witness2_name: (witnesses && witnesses[1] && witnesses[1].witness_name) ? witnesses[1].witness_name : '',
+      witness2_father_name: (witnesses && witnesses[1] && witnesses[1].witness_father_name) ? witnesses[1].witness_father_name : '',
+      witness2_date_place_of_birth: (() => {
+        if (!witnesses || !witnesses[1]) return '';
+        const dob = formatDate(witnesses[1].witness_date_of_birth);
+        const pob = witnesses[1].witness_place_of_birth || '';
+        if (!dob && !pob) return '';
+        if (dob && pob) return `${dob}<br/>${pob}`;
+        return dob || pob;
+      })(),
+      witness2_address: (witnesses && witnesses[1] && witnesses[1].witness_address) ? witnesses[1].witness_address : '',
+      witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? '' : ''
     };
 
-    // Replace placeholders
+    // Replace simple placeholders
     Object.keys(replacements).forEach(key => {
       const regex = new RegExp(`{{${key}}}`, 'g');
       html = html.replace(regex, replacements[key] || '');
     });
 
-    // Handle witnesses section
-    if (witnesses && witnesses.length > 0) {
-      let witnessesHtml = '<div class="witnesses-section"><div class="witnesses-title">Witnesses:</div>';
-      
-      witnesses.forEach((witness, index) => {
-        witnessesHtml += `
-    <div class="witness-item">
-      <div class="witness-name">${index + 1}. ${witness.witness_name || 'N/A'}</div>`;
-        
-        if (witness.witness_father_name) {
-          witnessesHtml += `
-      <div class="witness-detail">Father: ${witness.witness_father_name}</div>`;
-        }
-        
-        if (witness.witness_date_of_birth) {
-          witnessesHtml += `
-      <div class="witness-detail">DOB: ${formatDate(witness.witness_date_of_birth)}</div>`;
-        }
-        
-        if (witness.witness_place_of_birth) {
-          witnessesHtml += `
-      <div class="witness-detail">POB: ${witness.witness_place_of_birth}</div>`;
-        }
-        
-        if (witness.witness_address) {
-          witnessesHtml += `
-      <div class="witness-detail">Address: ${witness.witness_address}</div>`;
-        }
-        
-        witnessesHtml += `
-    </div>`;
-      });
-      
-      witnessesHtml += '</div>';
-      html = html.replace('{{witnesses_html}}', witnessesHtml);
-    } else {
-      html = html.replace('{{witnesses_html}}', '');
-    }
-
     // Launch Puppeteer and generate PDF
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage'
+      ]
     });
 
     const page = await browser.newPage();
     
-    // Set content and wait for fonts/styles to load
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    // Set viewport for A4 size
+    await page.setViewport({
+      width: 794,  // 210mm in pixels at 96 DPI
+      height: 1123, // 297mm in pixels at 96 DPI
+      deviceScaleFactor: 1
+    });
+    
+    // Set content and wait for fonts/styles/images to load
+    await page.setContent(html, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000
+    });
+    
+    // Wait a bit more for any external resources (like logo)
+    await page.waitForTimeout(1000);
     
     // Generate PDF
     await page.pdf({
       path: filePath,
       format: 'A4',
       printBackground: true,
+      preferCSSPageSize: true,
       margin: {
         top: '0mm',
         right: '0mm',
