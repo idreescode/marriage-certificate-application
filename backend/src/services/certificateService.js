@@ -140,10 +140,10 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
 
     const page = await browser.newPage();
     
-    // Set viewport for A4 size
+    // Set viewport for A3 Landscape size (wider page)
     await page.setViewport({
-      width: 794,  // 210mm in pixels at 96 DPI
-      height: 1123, // 297mm in pixels at 96 DPI
+      width: 1587,  // 420mm in pixels at 96 DPI (A3 landscape width)
+      height: 1123, // 297mm in pixels at 96 DPI (A3 landscape height)
       deviceScaleFactor: 1
     });
     
@@ -157,10 +157,11 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     // Using Promise-based delay instead of deprecated waitForTimeout
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Generate PDF
+    // Generate PDF in A3 Landscape orientation (wider page)
     await page.pdf({
       path: filePath,
-      format: 'A4',
+      format: 'A3',
+      landscape: true,  // Landscape orientation
       printBackground: true,
       preferCSSPageSize: true,
       margin: {
