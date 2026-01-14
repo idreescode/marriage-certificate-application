@@ -45,4 +45,39 @@ const verifyApplicant = (req, res, next) => {
   next();
 };
 
-module.exports = { verifyToken, verifyAdmin, verifyApplicant };
+// Middleware to verify API token (for public endpoints like application submission)
+const verifyApiToken = (req, res, next) => {
+  // Check for token in X-API-Token header or Authorization header
+  const apiToken = req.headers['x-api-token'] || req.headers['authorization']?.replace('Bearer ', '');
+
+  if (!apiToken) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'API token required. Please provide X-API-Token header.' 
+    });
+  }
+
+  // Get the expected API token from environment variable
+  const expectedToken = process.env.API_TOKEN;
+
+  if (!expectedToken) {
+    console.error('⚠️  API_TOKEN not configured in environment variables');
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Server configuration error' 
+    });
+  }
+
+  // Validate the token
+  if (apiToken !== expectedToken) {
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Invalid API token' 
+    });
+  }
+
+  // Token is valid, proceed
+  next();
+};
+
+module.exports = { verifyToken, verifyAdmin, verifyApplicant, verifyApiToken };

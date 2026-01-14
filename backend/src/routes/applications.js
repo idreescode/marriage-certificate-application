@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { submitApplication } = require('../controllers/applicationController');
 const { pool } = require('../config/database');
+const { verifyApiToken } = require('../middleware/auth');
 
-// POST /api/applications - Submit new application
-router.post('/', submitApplication);
+// POST /api/applications - Submit new application (requires API token)
+router.post('/', verifyApiToken, submitApplication);
 
 //GET /api/applications/:id/status - Get application status
 router.get('/:id/status', async (req, res) => {

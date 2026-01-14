@@ -28,6 +28,7 @@ jobs:
         run: |
           cat > .env << EOF
           VITE_API_URL=${{ secrets.VITE_API_URL || 'https://api.jamiyat.org' }}
+          VITE_API_TOKEN=${{ secrets.API_TOKEN }}
           EOF
           echo "✅ .env file created"
 
@@ -40,6 +41,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://api.jamiyat.org' }}
+          VITE_API_TOKEN: ${{ secrets.API_TOKEN }}
 
       - name: ✅ Verify build
         run: |

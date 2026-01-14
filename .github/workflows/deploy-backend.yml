@@ -32,6 +32,7 @@ jobs:
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
           FRONTEND_URL=${{ secrets.FRONTEND_URL || 'https://nikahapp.jamiyat.org' }}
+          API_TOKEN=${{ secrets.API_TOKEN }}
           EOF
           echo "✅ .env file created"
 

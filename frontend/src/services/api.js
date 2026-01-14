@@ -61,12 +61,20 @@ const api = axios.create({
 // INTERCEPTORS
 // -----------------------------------------------------------------------------
 
-// Add auth token to requests
+// Add auth token and API token to requests
 api.interceptors.request.use((config) => {
+  // Add JWT token for authenticated requests
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Add API token for application submission endpoint
+  const apiToken = import.meta.env.VITE_API_TOKEN;
+  if (apiToken && config.url?.includes('/applications') && config.method === 'post') {
+    config.headers['X-API-Token'] = apiToken;
+  }
+  
   return config;
 });
 
