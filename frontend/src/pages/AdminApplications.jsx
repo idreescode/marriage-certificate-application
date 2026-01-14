@@ -390,8 +390,14 @@ export default function AdminApplications() {
                             <button
                               onClick={() => openSetDeposit(app.id)}
                               className="btn btn-sm btn-primary"
-                              style={{ whiteSpace: "nowrap" }}
+                              style={{ 
+                                whiteSpace: "nowrap",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.4rem"
+                              }}
                             >
+                              <Banknote size={14} />
                               Set Deposit
                             </button>
                           ) : null}
@@ -428,9 +434,18 @@ export default function AdminApplications() {
                       {app.status === "payment_verified" && (
                         <button
                           onClick={() => openSchedule(app.id)}
-                          className="btn btn-sm btn-secondary"
-                          style={{ whiteSpace: "nowrap" }}
+                          className="btn btn-sm"
+                          style={{ 
+                            whiteSpace: "nowrap",
+                            backgroundColor: "var(--brand-500)",
+                            color: "white",
+                            border: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.4rem"
+                          }}
                         >
+                          <Calendar size={14} />
                           Schedule
                         </button>
                       )}
@@ -497,16 +512,37 @@ export default function AdminApplications() {
         onClose={closeModal}
         title="Verify Documents"
       >
-        <p className="text-slate-600 mb-6">
-          Have you reviewed and verified all the uploaded documents?
-          <br />
-          This will allow you to proceed with setting the deposit amount.
-        </p>
-        <div className="flex justify-end gap-2">
-          <button onClick={closeModal} className="btn btn-secondary">
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p style={{ 
+            color: 'var(--slate-700)', 
+            fontSize: '0.95rem', 
+            lineHeight: '1.6',
+            margin: 0 
+          }}>
+            Have you reviewed and verified all the uploaded documents?
+          </p>
+          <p style={{ 
+            color: 'var(--slate-500)', 
+            fontSize: '0.875rem', 
+            marginTop: '0.5rem',
+            margin: 0 
+          }}>
+            This will allow you to proceed with setting the deposit amount.
+          </p>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
+          <button 
+            onClick={closeModal} 
+            className="btn btn-secondary"
+            style={{ minWidth: '100px' }}
+          >
             Cancel
           </button>
-          <button onClick={handleVerifyDocuments} className="btn btn-primary">
+          <button 
+            onClick={handleVerifyDocuments} 
+            className="btn btn-primary"
+            style={{ minWidth: '140px' }}
+          >
             Verify Documents
           </button>
         </div>
@@ -518,8 +554,10 @@ export default function AdminApplications() {
         title="Set Deposit Amount"
       >
         <form onSubmit={handleSetDeposit}>
-          <div className="form-group">
-            <label className="form-label">Amount (PKR)</label>
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+              Amount (PKR)
+            </label>
             <input
               type="number"
               className="form-input"
@@ -527,17 +565,23 @@ export default function AdminApplications() {
               onChange={(e) => setDepositAmount(e.target.value)}
               placeholder="e.g. 5000"
               required
+              style={{ width: '100%' }}
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
             <button
               type="button"
               onClick={closeModal}
               className="btn btn-secondary"
+              style={{ minWidth: '100px' }}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button 
+              type="submit" 
+              className="btn btn-primary"
+              style={{ minWidth: '120px' }}
+            >
               Set Amount
             </button>
           </div>
@@ -549,14 +593,37 @@ export default function AdminApplications() {
         onClose={closeModal}
         title="Verify Payment"
       >
-        <p className="text-slate-600 mb-6">
-          Are you sure you want to verify the payment receipt?
-        </p>
-        <div className="flex justify-end gap-2">
-          <button onClick={closeModal} className="btn btn-secondary">
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p style={{ 
+            color: 'var(--slate-700)', 
+            fontSize: '0.95rem', 
+            lineHeight: '1.6',
+            margin: 0 
+          }}>
+            Are you sure you want to verify the payment receipt?
+          </p>
+          <p style={{ 
+            color: 'var(--slate-500)', 
+            fontSize: '0.875rem', 
+            marginTop: '0.5rem',
+            margin: 0 
+          }}>
+            This action will mark the payment as verified and allow scheduling the appointment.
+          </p>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
+          <button 
+            onClick={closeModal} 
+            className="btn btn-secondary"
+            style={{ minWidth: '100px' }}
+          >
             Cancel
           </button>
-          <button onClick={handleVerifyPayment} className="btn btn-primary">
+          <button 
+            onClick={handleVerifyPayment} 
+            className="btn btn-primary"
+            style={{ minWidth: '100px' }}
+          >
             Verify
           </button>
         </div>
@@ -568,8 +635,10 @@ export default function AdminApplications() {
         title="Schedule Appointment"
       >
         <form onSubmit={handleScheduleAppointment}>
-          <div className="form-group">
-            <label className="form-label">Date</label>
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+              Date
+            </label>
             <input
               type="date"
               className="form-input"
@@ -578,10 +647,13 @@ export default function AdminApplications() {
                 setAppointmentData({ ...appointmentData, date: e.target.value })
               }
               required
+              style={{ width: '100%' }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Time</label>
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+              Time
+            </label>
             <input
               type="time"
               className="form-input"
@@ -590,10 +662,13 @@ export default function AdminApplications() {
                 setAppointmentData({ ...appointmentData, time: e.target.value })
               }
               required
+              style={{ width: '100%' }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Location</label>
+          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+              Location
+            </label>
             <input
               type="text"
               className="form-input"
@@ -606,17 +681,33 @@ export default function AdminApplications() {
               }
               placeholder="e.g. Main Hall"
               required
+              style={{ width: '100%' }}
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
             <button
               type="button"
               onClick={closeModal}
               className="btn btn-secondary"
+              style={{ minWidth: '100px' }}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button 
+              type="submit" 
+              className="btn"
+              style={{
+                backgroundColor: "var(--brand-500)",
+                color: "white",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                minWidth: '130px',
+                justifyContent: 'center'
+              }}
+            >
+              <Calendar size={16} />
               Schedule
             </button>
           </div>
