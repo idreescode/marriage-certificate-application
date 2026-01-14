@@ -394,7 +394,10 @@ export default function AdminApplications() {
                                 whiteSpace: "nowrap",
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "0.4rem"
+                                justifyContent: "center",
+                                gap: "0.4rem",
+                                minWidth: "130px",
+                                padding: "0.5rem 1rem"
                               }}
                             >
                               <Banknote size={14} />
@@ -442,7 +445,10 @@ export default function AdminApplications() {
                             border: "none",
                             display: "flex",
                             alignItems: "center",
-                            gap: "0.4rem"
+                            justifyContent: "center",
+                            gap: "0.4rem",
+                            minWidth: "130px",
+                            padding: "0.5rem 1rem"
                           }}
                         >
                           <Calendar size={14} />
@@ -458,6 +464,11 @@ export default function AdminApplications() {
                             border: "none",
                             color: "white",
                             whiteSpace: "nowrap",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minWidth: "130px",
+                            padding: "0.5rem 1rem"
                           }}
                         >
                           Complete
