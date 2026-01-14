@@ -3,77 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <title>Marriage Certificate</title>
+
 <style>
-  body{
-    font-family: "Times New Roman", serif;
-    font-size:14px;
-  }
-  table{
-    width:100%;
-    border-collapse:collapse;
-  }
-  td, th{
-    border:1px solid #000;
-    padding:6px;
-    vertical-align:top;
-  }
-  .no-border{
-    border:none;
-  }
-  .center{
-    text-align:center;
-  }
-  .bold{
-    font-weight:bold;
-  }
-  .title{
-    font-size:22px;
-    font-style:italic;
-  }
-  .small{
-    font-size:12px;
-  }
-  .height-lg{
-    height:45px;
-  }
-  .height-xl{
-    height:60px;
-  }
-  .logo-cell{
-    width:120px;
-    vertical-align:middle;
-    padding:10px;
-  }
-  .logo-img{
-    max-width:100px;
-    max-height:80px;
-    height:auto;
-  }
-  .header-title{
-    vertical-align:middle;
-  }
-  .certificate-container{
-    width: 1300px;
-    margin: 0 auto;
-  }
+/* ===== PDF PAGE SETUP ===== */
+@page{
+  size: A3 landscape;
+  margin: 10mm;
+}
+
+body{
+  margin:0;
+  padding:0;
+  font-family: "Times New Roman", serif;
+  font-size:13px;
+}
+
+/* ===== CONTAINER ===== */
+.certificate-container{
+  width: 1587px;
+    margin: 0 auto; /* A3 Landscape width */
+}
+
+/* ===== TABLE RESET ===== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+
+td, th{
+  border:1px solid #000;
+  padding:4px 6px;
+  vertical-align:top;
+}
+
+.no-border{ border:none !important; }
+.center{ text-align:center; }
+.bold{ font-weight:bold; }
+.small{ font-size:11px; }
+
+/* ===== HEADER ===== */
+.title{
+  font-size:16px;
+  font-style:italic;
+  letter-spacing:-0.5px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.logo-cell{
+  width:80px;
+  text-align:center;
+  padding:4px !important;
+}
+
+.logo-img{
+  max-width:65px;
+  max-height:60px;
+}
+
+.cert-number{
+  width:130px;
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+/* ===== ROW HEIGHTS ===== */
+.height-lg{ height:40px; }
+.height-xl{ height:55px; }
+
+/* ===== COLUMN WIDTHS (MAIN TABLE) ===== */
+.col-role{ width:18%; }
+.col-name{ width:16%; }
+.col-father{ width:14%; }
+.col-dob{ width:12%; }
+.col-address{ width:20%; }
+.col-marital{ width:6%; }
+.col-rep{ width:7%; }
+.col-sign{ width:7%; }
+
+/* ===== FOOTER ===== */
+.footer{
+  font-size:14px;
+  font-weight:bold;
+  text-align:center;
+}
 </style>
 </head>
+
 <body>
 <div class="certificate-container">
 
-<table>
+<!-- ===== HEADER ===== -->
+<table style="table-layout:fixed;">
+  <colgroup>
+    <col style="width:80px;">
+    <col style="width:auto;">
+    <col style="width:130px;">
+  </colgroup>
   <tr>
     <td class="no-border logo-cell">
-      <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" alt="Logo" class="logo-img">
+      <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" class="logo-img">
     </td>
-    <td colspan="6" class="center no-border title bold header-title">
+    <td class="no-border center bold title" style="padding:6px 4px; white-space:nowrap;">
       MARRIAGE CERTIFICATE ACCORDING TO ISLAMIC LAWS
     </td>
-    <td class="center no-border bold header-title">No. <span style="color:red">{{application_number}}</span></td>
+    <td class="no-border center bold cert-number" style="padding:6px 4px; white-space:nowrap;">
+      No. <span style="color:red; white-space:nowrap;">{{application_number}}</span>
+    </td>
   </tr>
 </table>
 
+<!-- ===== MAIN DETAILS TABLE ===== -->
 <table>
+  <colgroup>
+    <col class="col-role">
+    <col class="col-name">
+    <col class="col-father">
+    <col class="col-dob">
+    <col class="col-address">
+    <col class="col-marital">
+    <col class="col-rep">
+    <col class="col-sign">
+  </colgroup>
+
   <tr class="bold center">
     <td></td>
     <td>Full Name</td>
@@ -154,6 +209,7 @@
 
 <br>
 
+<!-- ===== BOTTOM SECTION ===== -->
 <table>
   <tr>
     <td width="45%">
@@ -188,9 +244,10 @@
 
 <br>
 
+<!-- ===== FOOTER ===== -->
 <table>
   <tr>
-    <td class="center bold">
+    <td class="footer">
       Issued by: Jamiyat Tabligh-ul-Islam, Central Mosque, Darfield Street,
       Westgate, Bradford, BD1 3RU
     </td>
