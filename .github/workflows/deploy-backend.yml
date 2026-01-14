@@ -137,6 +137,47 @@ jobs:
             chmod -R 755 uploads
           fi
           
+          # Install Puppeteer system dependencies (required for PDF generation)
+          echo "🔧 Installing Puppeteer system dependencies..."
+          if command -v apt-get &> /dev/null; then
+            sudo apt-get update -qq || true
+            sudo apt-get install -y -qq \
+              libatk-bridge2.0-0 \
+              libatk1.0-0 \
+              libcups2 \
+              libdrm2 \
+              libgtk-3-0 \
+              libgbm1 \
+              libasound2 \
+              libxcomposite1 \
+              libxdamage1 \
+              libxfixes3 \
+              libxrandr2 \
+              libxss1 \
+              libxkbcommon0 \
+              libpango-1.0-0 \
+              libcairo2 \
+              libatspi2.0-0 \
+              libxshmfence1 \
+              libnss3 \
+              libx11-xcb1 \
+              libxcb-dri3-0 \
+              libdrm-common \
+              libxcb1 \
+              libx11-6 \
+              libxext6 \
+              ca-certificates \
+              fonts-liberation \
+              libappindicator3-1 \
+              libu2f-udev \
+              xdg-utils \
+              || echo "⚠️  Some packages may already be installed or unavailable"
+            echo "✅ System dependencies installed"
+          else
+            echo "⚠️  apt-get not found, skipping system dependency installation"
+            echo "⚠️  You may need to install Puppeteer dependencies manually"
+          fi
+          
           # Install/update dependencies
           echo "📦 Installing dependencies..."
           # Clear npm cache to ensure fresh install
