@@ -76,13 +76,6 @@ jobs:
             git remote add origin $REPO_URL || git remote set-url origin $REPO_URL
           fi
           
-          # Create uploads directory if it doesn't exist
-          if [ ! -d "uploads" ]; then
-            echo "📁 Creating uploads directory..."
-            mkdir -p uploads/receipts uploads/certificates
-            chmod -R 755 uploads
-          fi
-          
           # Backup current .env if exists
           if [ -f .env ]; then
             cp .env .env.backup.\$(date +%Y%m%d_%H%M%S)
@@ -92,7 +85,44 @@ jobs:
           # Pull latest code
           echo "📥 Pulling latest code..."
           git fetch origin
-          git reset --hard origin/main || git reset --hard origin/master
+          BRANCH_NAME="main"
+          if ! git ls-remote --heads origin main | grep -q main; then
+            BRANCH_NAME="master"
+          fi
+          git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME 2>/dev/null || git checkout \$BRANCH_NAME
+          git reset --hard origin/\$BRANCH_NAME
+          
+          # Move backend files to current directory if they're in a subdirectory
+          if [ -d "backend" ] && [ ! -f "package.json" ]; then
+            echo "📦 Moving backend files to root directory..."
+            # Enable moving hidden files
+            shopt -s dotglob nullglob
+            # Move all files from backend/ to current directory
+            mv backend/* . 2>/dev/null || true
+            # Remove empty backend directory
+            rmdir backend 2>/dev/null || true
+            shopt -u dotglob nullglob
+            echo "✅ Backend files moved successfully"
+          fi
+          
+          # Verify package.json exists
+          if [ ! -f "package.json" ]; then
+            echo "❌ Error: package.json not found!"
+            echo "Current directory contents:"
+            ls -la
+            echo "Checking for backend subdirectory:"
+            ls -la backend/ 2>/dev/null || echo "No backend directory found"
+            exit 1
+          fi
+          
+          echo "✅ Verified: package.json found at $(pwd)/package.json"
+          
+          # Create uploads directory if it doesn't exist
+          if [ ! -d "uploads" ]; then
+            echo "📁 Creating uploads directory..."
+            mkdir -p uploads/receipts uploads/certificates
+            chmod -R 755 uploads
+          fi
           
           # Install/update dependencies
           echo "📦 Installing dependencies..."
