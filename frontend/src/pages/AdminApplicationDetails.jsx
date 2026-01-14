@@ -1,14 +1,13 @@
 
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getApplicationById, getFileUrl, generateCertificate, deleteApplication as deleteApplicationAPI } from '../services/api';
+import { getApplicationById, getFileUrl, generateCertificate } from '../services/api';
 import Loader from '../components/Loader';
-import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
 import {
     ArrowLeft, User, Calendar, Phone, Mail, MapPin,
     FileText, Clock, Globe, Shield,
-    CreditCard, MoreVertical, ExternalLink, Printer, Trash2, AlertTriangle
+    CreditCard, MoreVertical, ExternalLink, Printer
 } from 'lucide-react';
 
 export default function AdminApplicationDetails() {
@@ -19,7 +18,6 @@ export default function AdminApplicationDetails() {
     const [loading, setLoading] = useState(true);
     const [application, setApplication] = useState(null);
     const [witnesses, setWitnesses] = useState([]);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         fetchApplicationDetails();
@@ -129,28 +127,6 @@ export default function AdminApplicationDetails() {
         }
     };
 
-    const handleDelete = async () => {
-        if (!application) {
-            toast.error('Application data not loaded');
-            return;
-        }
-
-        const toastId = toast.loading('Deleting application...');
-        
-        try {
-            await deleteApplicationAPI(id);
-            toast.success('Application deleted successfully', { id: toastId });
-            setShowDeleteModal(false);
-            // Navigate back to applications list
-            navigate('/admin/applications');
-        } catch (error) {
-            console.error('Error deleting application:', error);
-            toast.error(
-                error.response?.data?.message || 'Failed to delete application',
-                { id: toastId }
-            );
-        }
-    };
 
     const StatusBadge = ({ status }) => {
         const config = {
@@ -222,7 +198,6 @@ export default function AdminApplicationDetails() {
     );
 
     return (
-        <Fragment>
         <div className="min-h-screen pb-12">
             <div className="max-w-6xl mx-auto px-6" style={{ paddingTop: '2rem' }}>
 
@@ -313,30 +288,6 @@ export default function AdminApplicationDetails() {
                                 }}
                             >
                                 <Printer size={16} /> Print Application
-                            </button>
-                            <button 
-                                onClick={() => setShowDeleteModal(true)} 
-                                className="btn-back-nav"
-                                style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center',
-                                    gap: '0.5rem',
-                                    width: '100%',
-                                    background: 'rgba(239, 68, 68, 0.1)',
-                                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                                    color: '#ef4444'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                                }}
-                            >
-                                <Trash2 size={16} /> Delete Application
                             </button>
                         </div>
                     </div>
@@ -823,79 +774,5 @@ export default function AdminApplicationDetails() {
                 </div>
             </div>
         </div>
-
-        {/* Delete Confirmation Modal */}
-        <Modal
-            isOpen={showDeleteModal}
-            onClose={() => setShowDeleteModal(false)}
-            title="Delete Application"
-        >
-            <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '1rem',
-                    padding: '1rem',
-                    background: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '8px',
-                    marginBottom: '1.25rem'
-                }}>
-                    <AlertTriangle size={24} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <div style={{ flex: 1 }}>
-                        <p style={{ 
-                            color: '#991b1b', 
-                            fontSize: '1rem', 
-                            fontWeight: 600,
-                            margin: 0,
-                            marginBottom: '0.5rem'
-                        }}>
-                            Are you sure you want to delete application #{application?.application_number}?
-                        </p>
-                        <p style={{ 
-                            color: '#7f1d1d', 
-                            fontSize: '0.875rem', 
-                            lineHeight: '1.6',
-                            margin: 0 
-                        }}>
-                            This will deactivate the application and prevent the applicant from logging in.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
-                <button 
-                    onClick={() => setShowDeleteModal(false)} 
-                    className="btn btn-secondary"
-                    style={{ minWidth: '100px' }}
-                >
-                    Cancel
-                </button>
-                <button 
-                    onClick={handleDelete} 
-                    className="btn"
-                    style={{ 
-                        minWidth: '120px',
-                        backgroundColor: '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#dc2626';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#ef4444';
-                    }}
-                >
-                    <Trash2 size={16} />
-                    Delete
-                </button>
-            </div>
-        </Modal>
-        </Fragment>
     );
 }
