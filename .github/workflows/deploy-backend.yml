@@ -106,8 +106,11 @@ jobs:
           git reset --hard origin/\$BRANCH_NAME
           
           # Note: We don't run git clean -fd to preserve .env and other untracked files
-          echo "✅ Latest code pulled. New commit:"
-          git log -1 --oneline
+          echo "✅ Latest code pulled. Latest commit details:"
+          echo "📝 Commit: \$(git log -1 --oneline)"
+          echo "👤 Author: \$(git log -1 --format='%an <%ae>')"
+          echo "📅 Date: \$(git log -1 --format='%ad' --date=format:'%Y-%m-%d %H:%M:%S')"
+          echo "💬 Message: \$(git log -1 --format='%s')"
           
           # Move backend files from subdirectory to root if needed
           if [ -d "backend" ] && [ ! -f "package.json" ]; then
@@ -229,8 +232,11 @@ jobs:
           pm2 startup 2>/dev/null || true
           
           echo "✅ Backend deployment completed!"
-          echo "📊 Current deployed commit:"
-          git log -1 --oneline
+          echo "📊 Current deployed commit details:"
+          echo "📝 Commit: \$(git log -1 --oneline)"
+          echo "👤 Author: \$(git log -1 --format='%an <%ae>')"
+          echo "📅 Date: \$(git log -1 --format='%ad' --date=format:'%Y-%m-%d %H:%M:%S')"
+          echo "💬 Message: \$(git log -1 --format='%s')"
           echo "📊 PM2 Status:"
           pm2 status
           echo "📋 PM2 Logs (last 20 lines):"
