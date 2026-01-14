@@ -75,6 +75,9 @@ jobs:
             echo "🔧 Initializing git repository..."
             git init
             git remote add origin $REPO_URL || git remote set-url origin $REPO_URL
+          else
+            # Ensure remote is correct
+            git remote set-url origin $REPO_URL
           fi
           
           # Backup current .env if exists
@@ -85,13 +88,30 @@ jobs:
           
           # Pull latest code
           echo "📥 Pulling latest code..."
-          git fetch origin
+          echo "📌 Current commit before pull:"
+          git log -1 --oneline 2>/dev/null || echo "No previous commits"
+          
+          # Fetch latest changes
+          git fetch origin --force --prune
+          
+          # Determine branch name
           BRANCH_NAME="main"
           if ! git ls-remote --heads origin main | grep -q main; then
             BRANCH_NAME="master"
           fi
-          git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME 2>/dev/null || git checkout \$BRANCH_NAME
+          
+          echo "📌 Switching to branch: \$BRANCH_NAME"
+          # Force checkout and reset to ensure we have latest code
+          git checkout -f \$BRANCH_NAME 2>/dev/null || git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME
           git reset --hard origin/\$BRANCH_NAME
+          
+          # Clean any untracked files that might interfere
+          git clean -fd
+          
+          echo "✅ Latest code pulled. New commit:"
+          git log -1 --oneline
+          echo "📅 Files changed:"
+          git diff HEAD~1 --name-only 2>/dev/null | head -10 || echo "First deployment or no changes to show"
           
           # Remove frontend folder if it exists (we don't need it for backend deployment)
           if [ -d "frontend" ]; then
@@ -132,8 +152,11 @@ jobs:
           
           # Install/update dependencies
           echo "📦 Installing dependencies..."
+          # Clear npm cache to ensure fresh install
+          npm cache clean --force 2>/dev/null || true
           # Always use npm install (simpler, handles lock file sync automatically)
           npm install --omit=dev
+          echo "✅ Dependencies installed"
           
           # Run database migrations (if needed)
           echo "🗄️  Running database migrations..."
@@ -141,20 +164,29 @@ jobs:
           
           # Restart/Start PM2 process
           echo "🔄 Starting/Restarting backend with PM2..."
-          # Stop existing process if it exists
+          # Stop and delete existing process to ensure clean restart
           pm2 delete nikah-backend 2>/dev/null || true
-          # Start the server
-          pm2 start server.js --name nikah-backend
+          # Clear PM2 cache
+          pm2 flush nikah-backend 2>/dev/null || true
+          # Start the server with updated code
+          pm2 start server.js --name nikah-backend --update-env
+          # Reload to ensure latest code is loaded
+          sleep 2
+          pm2 reload nikah-backend --update-env || pm2 restart nikah-backend --update-env
           # Save PM2 process list
           pm2 save
           # Setup PM2 to start on system boot
           pm2 startup 2>/dev/null || true
           
           echo "✅ Backend deployment completed!"
+          echo "📊 Current deployed commit:"
+          git log -1 --oneline
           echo "📊 PM2 Status:"
           pm2 status
           echo "📋 PM2 Logs (last 20 lines):"
           pm2 logs nikah-backend --lines 20 --nostream || true
+          echo "📁 Verifying key files are updated:"
+          ls -lh server.js src/middleware/auth.js src/controllers/applicationController.js 2>/dev/null || echo "⚠️  Some files not found"
           EOF
           
           # Ensure /var/www directory exists
