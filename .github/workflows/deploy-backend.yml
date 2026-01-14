@@ -88,12 +88,8 @@ jobs:
           
           # Pull latest code
           echo "📥 Pulling latest code..."
-          echo "📌 Current commit before pull:"
-          git log -1 --oneline 2>/dev/null || echo "No previous commits"
-          echo "📌 Current branch:"
-          git branch --show-current 2>/dev/null || echo "No branch checked out"
           
-          # Determine branch name from GitHub Actions context
+          # Determine branch name
           BRANCH_NAME="main"
           if ! git ls-remote --heads origin main 2>/dev/null | grep -q "refs/heads/main"; then
             BRANCH_NAME="master"
@@ -101,89 +97,28 @@ jobs:
           
           echo "📌 Target branch: \$BRANCH_NAME"
           
-          # Fetch all latest changes with full history
-          echo "🔄 Fetching latest changes from origin..."
-          git fetch origin --force --prune --all
+          # Fetch latest changes
+          git fetch origin --force --prune
           git fetch origin \$BRANCH_NAME --force
           
-          # Show what we're about to checkout
-          echo "📌 Latest commit on origin/\$BRANCH_NAME:"
-          git log -1 origin/\$BRANCH_NAME --oneline 2>/dev/null || echo "Could not find origin/\$BRANCH_NAME"
-          
-          # Force checkout and reset to ensure we have latest code
-          echo "📌 Checking out and resetting to origin/\$BRANCH_NAME..."
-          git checkout -B \$BRANCH_NAME origin/\$BRANCH_NAME 2>/dev/null || {
-            echo "⚠️  Checkout failed, trying alternative method..."
-            git checkout -f \$BRANCH_NAME 2>/dev/null || git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME
-            git reset --hard origin/\$BRANCH_NAME
-          }
-          
-          # Double-check we're on the latest
+          # Checkout and reset to latest
+          git checkout -f \$BRANCH_NAME 2>/dev/null || git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME
           git reset --hard origin/\$BRANCH_NAME
           
           # Note: We don't run git clean -fd to preserve .env and other untracked files
           echo "✅ Latest code pulled. New commit:"
           git log -1 --oneline
-          echo "📅 Current branch:"
-          git branch --show-current
-          echo "📅 Files in current directory (before moving):"
-          ls -la | head -20
           
-          # CRITICAL: The repo structure is monorepo: root/backend/package.json
-          # We need to move all backend/ files to /var/www/backend/ root
-          if [ -d "backend" ]; then
-            if [ ! -f "package.json" ] || [ -f "backend/package.json" ]; then
-              echo "📦 Moving backend files from backend/ subdirectory to root..."
-              echo "📋 Contents of backend/ directory:"
-              ls -la backend/ | head -15
-              
-              # Use rsync to move everything (including hidden files) more reliably
-              if command -v rsync &> /dev/null; then
-                rsync -av --remove-source-files backend/ ./ || {
-                  echo "⚠️  rsync failed, trying cp method..."
-                  cp -a backend/. . 2>/dev/null || cp -r backend/* . 2>/dev/null || true
-                  rm -rf backend
-                }
-              else
-                echo "⚠️  rsync not available, using cp method..."
-                cp -a backend/. . 2>/dev/null || {
-                  # Fallback: move files one by one
-                  shopt -s dotglob nullglob
-                  for file in backend/* backend/.[!.]*; do
-                    [ -e "$file" ] && mv "$file" . 2>/dev/null || true
-                  done
-                  shopt -u dotglob nullglob
-                }
-                rm -rf backend
-              fi
-              echo "✅ Backend files moved successfully"
-            else
-              echo "✅ Backend files already in root directory"
-            fi
+          # Move backend files from subdirectory to root if needed
+          if [ -d "backend" ] && [ ! -f "package.json" ]; then
+            echo "📦 Moving backend files to root..."
+            cp -a backend/. . 2>/dev/null || cp -r backend/* . 2>/dev/null || true
+            rm -rf backend
+            echo "✅ Backend files moved"
           fi
           
-          # Remove frontend folder and other unnecessary files/folders
-          echo "🧹 Cleaning up unnecessary files..."
-          for item in frontend .github README.md DEPLOYMENT_SUMMARY.md DATABASE_SETUP.md QUICKSTART.md MOBILE_HEADER_FIX.md RESPONSIVE_DESIGN.md SSH_PATH_FIX.md APPLICANT_DASHBOARD_MOBILE.md; do
-            if [ -e "$item" ]; then
-              echo "  🗑️  Removing $item..."
-              rm -rf "$item" 2>/dev/null || true
-            fi
-          done
-          echo "✅ Cleanup completed"
-          
-          echo "📅 Files in current directory (after cleanup):"
-          ls -la | head -20
-          echo "📅 Verifying critical backend files exist:"
-          for file in package.json server.js src/controllers/applicationController.js src/utils/helpers.js; do
-            if [ -f "$file" ]; then
-              echo "  ✅ $file exists"
-            else
-              echo "  ❌ $file MISSING!"
-            fi
-          done
-          echo "📅 Recent file changes:"
-          git diff HEAD~1 --name-only 2>/dev/null | head -20 || echo "First deployment or no changes to show"
+          # Remove frontend folder
+          [ -d "frontend" ] && rm -rf frontend
           
           # Verify package.json exists
           if [ ! -f "package.json" ]; then
@@ -260,11 +195,7 @@ jobs:
           echo "📋 PM2 Logs (last 20 lines):"
           pm2 logs nikah-backend --lines 20 --nostream || true
           echo "📁 Verifying key files are updated:"
-          ls -lh server.js src/middleware/auth.js src/controllers/applicationController.js src/utils/helpers.js 2>/dev/null || echo "⚠️  Some files not found"
-          echo "📋 Checking date conversion function in helpers.js:"
-          grep -A 5 "convertDateToMySQL" src/utils/helpers.js 2>/dev/null || echo "⚠️  convertDateToMySQL function not found"
-          echo "📋 Current file modification times:"
-          stat -c "%y %n" src/utils/helpers.js src/controllers/applicationController.js 2>/dev/null || stat -f "%Sm %N" src/utils/helpers.js src/controllers/applicationController.js 2>/dev/null || echo "⚠️  Could not get file stats"
+          ls -lh server.js src/controllers/applicationController.js src/utils/helpers.js 2>/dev/null || echo "⚠️  Some files not found"
           EOF
           
           # Ensure /var/www directory exists
