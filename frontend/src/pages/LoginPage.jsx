@@ -93,7 +93,7 @@ export default function LoginPage() {
 
             <div className="form-group" style={{ marginBottom: '2rem' }}>
               <div className="flex justify-between items-center mb-2">
-                <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                <label className="form-label" style={{ marginBottom: 0 }}>Password32432</label>
                 <Link to="/applicant/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--brand-600)', textDecoration: 'none', fontWeight: 500 }}>Forgot password?</Link>
               </div>
               <div style={{ position: 'relative' }}>
