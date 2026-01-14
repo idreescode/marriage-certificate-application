@@ -80,10 +80,8 @@ jobs:
             git remote set-url origin $REPO_URL
           fi
           
-          # Backup current .env if exists (CRITICAL: .env is untracked, so git clean will remove it)
-          ENV_CONTENT=""
+          # Backup current .env if exists
           if [ -f .env ]; then
-            ENV_CONTENT=\$(cat .env)
             cp .env .env.backup.\$(date +%Y%m%d_%H%M%S)
             echo "✅ Backed up existing .env"
           fi
@@ -107,30 +105,11 @@ jobs:
           git checkout -f \$BRANCH_NAME 2>/dev/null || git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME
           git reset --hard origin/\$BRANCH_NAME
           
-          # Clean any untracked files that might interfere (but .env will be restored after)
-          git clean -fd
-          
-          # CRITICAL: Restore .env file after git clean (git clean removes untracked files including .env)
-          if [ -n "\$ENV_CONTENT" ]; then
-            echo "\$ENV_CONTENT" > .env
-            echo "✅ Restored .env file after git clean"
-          elif [ -f .env.backup.* ]; then
-            # If backup exists, restore from most recent backup
-            LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -1)
-            if [ -n "\$LATEST_BACKUP" ]; then
-              cp "\$LATEST_BACKUP" .env
-              echo "✅ Restored .env from backup: \$LATEST_BACKUP"
-            fi
-          fi
-          
-          # Verify .env exists and has content
-          if [ ! -f .env ] || [ ! -s .env ]; then
-            echo "❌ ERROR: .env file is missing or empty after git operations!"
-            echo "⚠️  This will cause migration and server startup to fail."
-            echo "⚠️  The .env file should have been copied from GitHub Actions."
-          else
-            echo "✅ .env file verified (size: \$(wc -l < .env) lines)"
-          fi
+          # Note: We don't run git clean -fd to preserve .env and other untracked files
+          echo "✅ Latest code pulled. New commit:"
+          git log -1 --oneline
+          echo "📅 Files changed:"
+          git diff HEAD~1 --name-only 2>/dev/null | head -10 || echo "First deployment or no changes to show"
           
           echo "✅ Latest code pulled. New commit:"
           git log -1 --oneline
@@ -182,6 +161,22 @@ jobs:
           npm install --omit=dev
           echo "✅ Dependencies installed"
           
+          # Verify .env file exists before migrations
+          echo "🔍 Verifying .env file before migrations..."
+          if [ ! -f .env ]; then
+            echo "❌ ERROR: .env file is missing! Migrations will fail."
+            echo "⚠️  The .env file should have been copied from GitHub Actions."
+            exit 1
+          fi
+          
+          if ! grep -q "DB_USER=" .env || ! grep -q "DB_PASSWORD=" .env || ! grep -q "DB_HOST=" .env || ! grep -q "DB_NAME=" .env; then
+            echo "❌ ERROR: .env file is missing required database variables!"
+            echo "⚠️  Required: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME"
+            exit 1
+          fi
+          
+          echo "✅ .env file verified with all required database variables"
+          
           # Run database migrations (if needed)
           echo "🗄️  Running database migrations..."
           npm run migrate || echo "⚠️  Migration script not found or failed, continuing..."
@@ -217,10 +212,14 @@ jobs:
           echo "📁 Ensuring /var/www directory exists..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} 'mkdir -p /var/www && chmod 755 /var/www'
           
-          # Copy .env and deploy script to server using password
-          echo "📤 Copying files to server..."
-          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null backend/.env ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/backend/.env || echo "⚠️  .env file copy failed, will be created by script"
+          # Copy deploy script to server first
+          echo "📤 Copying deployment script to server..."
           sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy-backend.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/tmp/deploy-backend.sh
+          
+          # Copy .env file to server BEFORE running deployment script
+          echo "📝 Copying .env file to server..."
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null backend/.env ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/backend/.env
+          echo "✅ .env file copied to server"
           
           # Execute deployment script
           echo "🚀 Executing deployment script..."
