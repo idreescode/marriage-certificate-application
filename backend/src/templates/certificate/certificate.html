@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marriage Certificate</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+      padding: 20mm;
+      background: #ffffff;
+      color: #1e293b;
+      position: relative;
+    }
+    
+    /* Decorative Border */
+    .border-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 3px solid #CA6C40;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    
+    .inner-border {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: calc(100% - 10px);
+      height: calc(100% - 10px);
+      border: 1px solid #b05a33;
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      padding: 30px 20px;
+      text-align: center;
+      margin: -20mm -20mm 30px -20mm;
+      border-bottom: 2px solid #CA6C40;
+    }
+    
+    .bismillah {
+      font-size: 11px;
+      color: #b05a33;
+      font-style: italic;
+      margin-bottom: 15px;
+    }
+    
+    .main-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: #CA6C40;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      color: #1e293b;
+      margin-bottom: 10px;
+    }
+    
+    .cert-number {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      font-size: 10px;
+      color: #64748b;
+    }
+    
+    /* Main Content */
+    .intro-text {
+      text-align: center;
+      font-size: 13px;
+      color: #1e293b;
+      margin-bottom: 30px;
+    }
+    
+    /* Two Column Layout */
+    .couple-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .person-box {
+      flex: 1;
+      background: #fff7ed;
+      border: 2px solid #fed7aa;
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 200px;
+    }
+    
+    .person-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #CA6C40;
+      text-align: center;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+    
+    .person-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    
+    .person-detail {
+      font-size: 10px;
+      color: #64748b;
+      text-align: center;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .person-detail strong {
+      color: #1e293b;
+    }
+    
+    /* Marriage Details */
+    .marriage-details {
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .solemnized-text {
+      font-size: 13px;
+      color: #1e293b;
+      margin-bottom: 15px;
+    }
+    
+    .marriage-date {
+      font-size: 18px;
+      font-weight: 700;
+      color: #CA6C40;
+      margin-bottom: 10px;
+    }
+    
+    .marriage-location {
+      font-size: 12px;
+      color: #1e293b;
+    }
+    
+    .separator {
+      width: 100%;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 30px 0;
+    }
+    
+    /* Witnesses */
+    .witnesses-section {
+      margin: 30px 0;
+    }
+    
+    .witnesses-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #b05a33;
+      margin-bottom: 20px;
+    }
+    
+    .witness-item {
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+    
+    .witness-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    
+    .witness-detail {
+      font-size: 10px;
+      color: #64748b;
+      margin-bottom: 5px;
+      padding-left: 15px;
+    }
+    
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 30px;
+      left: 20mm;
+      right: 20mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .seal-area {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #CA6C40;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .seal-text {
+      font-size: 8px;
+      color: #CA6C40;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    
+    .signature-area {
+      text-align: center;
+      flex: 1;
+      margin-left: 100px;
+    }
+    
+    .signature-line {
+      width: 200px;
+      height: 1px;
+      background: #1e293b;
+      margin: 0 auto 10px;
+    }
+    
+    .signature-label {
+      font-size: 10px;
+      color: #1e293b;
+      margin-bottom: 5px;
+    }
+    
+    .organization-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #CA6C40;
+    }
+  </style>
+</head>
+<body>
+  <div class="border-container">
+    <div class="inner-border"></div>
+  </div>
+  
+  <div class="cert-number">Certificate # {{application_number}}</div>
+  
+  <div class="header">
+    <div class="bismillah">In the name of Allah, the Most Gracious, the Most Merciful</div>
+    <div class="main-title">MARRIAGE CERTIFICATE</div>
+    <div class="subtitle">OFFICIAL RECORD OF NIKAH</div>
+  </div>
+  
+  <div class="intro-text">
+    This certifies that the marriage between
+  </div>
+  
+  <div class="couple-container">
+    <!-- GROOM -->
+    <div class="person-box">
+      <div class="person-title">GROOM</div>
+      <div class="person-name">{{groom_full_name}}</div>
+      <div class="person-detail"><strong>S/O:</strong> {{groom_father_name}}</div>
+      <div class="person-detail"><strong>CNIC:</strong> {{groom_id_number}}</div>
+      <div class="person-detail"><strong>DOB:</strong> {{groom_date_of_birth_formatted}}</div>
+      {{groom_place_of_birth_html}}
+      <div class="person-detail">{{groom_address}}</div>
+    </div>
+    
+    <!-- BRIDE -->
+    <div class="person-box">
+      <div class="person-title">BRIDE</div>
+      <div class="person-name">{{bride_full_name}}</div>
+      <div class="person-detail"><strong>D/O:</strong> {{bride_father_name}}</div>
+      <div class="person-detail"><strong>CNIC:</strong> {{bride_id_number}}</div>
+      <div class="person-detail"><strong>DOB:</strong> {{bride_date_of_birth_formatted}}</div>
+      {{bride_place_of_birth_html}}
+      <div class="person-detail">{{bride_address}}</div>
+    </div>
+  </div>
+  
+  <div class="marriage-details">
+    <div class="solemnized-text">Was solemnized in accordance with Islamic Law on:</div>
+    <div class="marriage-date">{{appointment_date_formatted}}</div>
+    <div class="marriage-location">at {{appointment_location}}</div>
+  </div>
+  
+  <div class="separator"></div>
+  
+  {{witnesses_html}}
+  
+  <div class="footer">
+    <div class="seal-area">
+      <div class="seal-text">OFFICIAL<br>SEAL</div>
+    </div>
+    <div class="signature-area">
+      <div class="signature-line"></div>
+      <div class="signature-label">Registrar Signature</div>
+      <div class="organization-name">Jamiyat Tabligh-ul-Islam</div>
+    </div>
+  </div>
+</body>
+</html>
