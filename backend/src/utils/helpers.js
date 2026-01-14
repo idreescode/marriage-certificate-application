@@ -16,6 +16,36 @@ const generatePassword = (length = 10) => {
   return password;
 };
 
+// Convert date from MM-DD-YYYY to YYYY-MM-DD format (MySQL format)
+const convertDateToMySQL = (dateString) => {
+  if (!dateString) return null;
+  
+  // If already in YYYY-MM-DD format, return as is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  
+  // Try to parse MM-DD-YYYY format
+  const mmddyyyyMatch = dateString.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (mmddyyyyMatch) {
+    const [, month, day, year] = mmddyyyyMatch;
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Try to parse other common formats
+  const date = new Date(dateString);
+  if (!isNaN(date.getTime())) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
+  // If parsing fails, return null
+  console.warn(`Warning: Could not parse date: ${dateString}`);
+  return null;
+};
+
 // Format date for display
 const formatDate = (date) => {
   if (!date) return '';
@@ -52,6 +82,7 @@ const getStatusColor = (status) => {
 module.exports = {
   generateApplicationNumber,
   generatePassword,
+  convertDateToMySQL,
   formatDate,
   formatCurrency,
   getStatusColor

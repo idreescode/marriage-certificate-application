@@ -1,6 +1,6 @@
 const { pool } = require('../config/database');
 const bcrypt = require('bcryptjs');
-const { generateApplicationNumber, generatePassword } = require('../utils/helpers');
+const { generateApplicationNumber, generatePassword, convertDateToMySQL } = require('../utils/helpers');
 const { sendApplicationConfirmation, sendAdminNewApplicationEmail } = require('../services/emailService');
 const { createNotification } = require('./notificationController');
 const { body, validationResult } = require('express-validator');
@@ -34,7 +34,7 @@ const submitApplication = async (req, res) => {
     // Groom
     const groomName = formData.groomName || null;
     const groomFatherName = formData.groomFatherName || null;
-    const groomDateOfBirth = formData.groomDateOfBirth || null;
+    const groomDateOfBirth = convertDateToMySQL(formData.groomDateOfBirth);
     const groomPlaceOfBirth = formData.groomPlaceOfBirth || null;
     const groomIdNumber = formData.groomIdNumber || null;
     const groomAddress = formData.groomAddress || null;
@@ -45,14 +45,14 @@ const submitApplication = async (req, res) => {
     // Groom Representative
     const groomRepName = formData.groomRepName || null;
     const groomRepFatherName = formData.groomRepFatherName || null;
-    const groomRepDateOfBirth = formData.groomRepDateOfBirth || null;
+    const groomRepDateOfBirth = convertDateToMySQL(formData.groomRepDateOfBirth);
     const groomRepPlaceOfBirth = formData.groomRepPlaceOfBirth || null;
     const groomRepAddress = formData.groomRepAddress || null;
 
     // Bride
     const brideName = formData.brideName || null;
     const brideFatherName = formData.brideFatherName || null;
-    const brideDateOfBirth = formData.brideDateOfBirth || null;
+    const brideDateOfBirth = convertDateToMySQL(formData.brideDateOfBirth);
     const bridePlaceOfBirth = formData.bridePlaceOfBirth || null;
     const brideIdNumber = formData.brideIdNumber || null;
     const brideAddress = formData.brideAddress || null;
@@ -63,21 +63,21 @@ const submitApplication = async (req, res) => {
     // Bride Representative
     const brideRepName = formData.brideRepName || null;
     const brideRepFatherName = formData.brideRepFatherName || null;
-    const brideRepDateOfBirth = formData.brideRepDateOfBirth || null;
+    const brideRepDateOfBirth = convertDateToMySQL(formData.brideRepDateOfBirth);
     const brideRepPlaceOfBirth = formData.brideRepPlaceOfBirth || null;
     const brideRepAddress = formData.brideRepAddress || null;
 
     // Witness 1
     const witness1Name = formData.witness1Name || null;
     const witness1FatherName = formData.witness1FatherName || null;
-    const witness1DateOfBirth = formData.witness1DateOfBirth || null;
+    const witness1DateOfBirth = convertDateToMySQL(formData.witness1DateOfBirth);
     const witness1PlaceOfBirth = formData.witness1PlaceOfBirth || null;
     const witness1Address = formData.witness1Address || null;
 
     // Witness 2
     const witness2Name = formData.witness2Name || null;
     const witness2FatherName = formData.witness2FatherName || null;
-    const witness2DateOfBirth = formData.witness2DateOfBirth || null;
+    const witness2DateOfBirth = convertDateToMySQL(formData.witness2DateOfBirth);
     const witness2PlaceOfBirth = formData.witness2PlaceOfBirth || null;
     const witness2Address = formData.witness2Address || null;
 
@@ -86,7 +86,7 @@ const submitApplication = async (req, res) => {
     const mahrType = formData.mahrType || null;
 
     // Solemnised
-    const solemnisedDate = formData.solemnisedDate || null;
+    const solemnisedDate = convertDateToMySQL(formData.solemnisedDate);
     const solemnisedPlace = formData.solemnisedPlace || null;
     const solemnisedAddress = formData.solemnisedAddress || null;
 
