@@ -10,7 +10,8 @@ const {
   verifyPayment,
   scheduleAppointment,
   markComplete,
-  generateCertificate
+  generateCertificate,
+  deleteApplication
 } = require('../controllers/adminController');
 
 // POST /api/admin/login - Admin login
@@ -43,5 +44,8 @@ router.put('/applications/:id/complete', markComplete);
 
 // POST /api/admin/applications/:id/generate-certificate - Generate certificate
 router.post('/applications/:id/generate-certificate', generateCertificate);
+
+// DELETE /api/admin/applications/:id - Delete application
+router.delete('/applications/:id', deleteApplication);
 
 module.exports = router;

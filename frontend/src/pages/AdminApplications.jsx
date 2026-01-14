@@ -9,6 +9,7 @@ import {
   verifyPayment as verifyPaymentAPI,
   scheduleAppointment as scheduleAPI,
   generateCertificate as generateCertAPI,
+  deleteApplication as deleteApplicationAPI,
 } from "../services/api";
 import toast from "react-hot-toast";
 import {
@@ -23,6 +24,8 @@ import {
   MoreVertical,
   ChevronLeft,
   ChevronRight,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 
 import { useSearchParams } from "react-router-dom";
@@ -36,8 +39,9 @@ export default function AdminApplications() {
   );
 
   // Modal States
-  const [activeModal, setActiveModal] = useState(null); // 'documents', 'deposit', 'verify', 'schedule', 'view'
+  const [activeModal, setActiveModal] = useState(null); // 'documents', 'deposit', 'verify', 'schedule', 'view', 'delete'
   const [selectedAppId, setSelectedAppId] = useState(null);
+  const [deleteAppData, setDeleteAppData] = useState(null); // { id, applicationNumber }
 
   // Form States
   const [depositAmount, setDepositAmount] = useState("");
@@ -88,6 +92,7 @@ export default function AdminApplications() {
   const closeModal = () => {
     setActiveModal(null);
     setSelectedAppId(null);
+    setDeleteAppData(null);
   };
 
   // Action Handlers
@@ -132,6 +137,28 @@ export default function AdminApplications() {
       fetchApplications();
     } catch (error) {
       toast.error("Failed to verify payment", { id: toastId });
+    }
+  };
+
+  const openDeleteModal = (appId, applicationNumber) => {
+    setDeleteAppData({ id: appId, applicationNumber });
+    setActiveModal('delete');
+  };
+
+  const handleDeleteApplication = async () => {
+    if (!deleteAppData) return;
+
+    const toastId = toast.loading("Deleting application...");
+    try {
+      await deleteApplicationAPI(deleteAppData.id);
+      toast.success("Application deleted successfully", { id: toastId });
+      closeModal();
+      fetchApplications();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to delete application",
+        { id: toastId }
+      );
     }
   };
 
@@ -370,6 +397,24 @@ export default function AdminApplications() {
                       >
                         <Eye size={16} />
                       </Link>
+
+                      <button
+                        onClick={() => openDeleteModal(app.id, app.application_number)}
+                        className="btn btn-sm btn-secondary"
+                        title="Delete Application"
+                        style={{
+                          color: '#ef4444',
+                          borderColor: '#ef4444'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#fee2e2';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
 
                       {app.status === "admin_review" && (
                         <>
@@ -723,6 +768,75 @@ export default function AdminApplications() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={activeModal === "delete"}
+        onClose={closeModal}
+        title="Delete Application"
+      >
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '1rem',
+            padding: '1rem',
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            marginBottom: '1.25rem'
+          }}>
+            <AlertTriangle size={24} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ flex: 1 }}>
+              <p style={{ 
+                color: '#991b1b', 
+                fontSize: '1rem', 
+                fontWeight: 600,
+                margin: 0,
+                marginBottom: '0.5rem'
+              }}>
+                Are you sure you want to delete application #{deleteAppData?.applicationNumber}?
+              </p>
+              <p style={{ 
+                color: '#7f1d1d', 
+                fontSize: '0.875rem', 
+                lineHeight: '1.6',
+                margin: 0 
+              }}>
+                This will deactivate the application and prevent the applicant from logging in.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
+          <button 
+            onClick={closeModal} 
+            className="btn btn-secondary"
+            style={{ minWidth: '100px' }}
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={handleDeleteApplication} 
+            className="btn"
+            style={{ 
+              minWidth: '120px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#dc2626';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ef4444';
+            }}
+          >
+            <Trash2 size={16} style={{ marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'middle' }} />
+            Delete
+          </button>
+        </div>
       </Modal>
     </div>
   );

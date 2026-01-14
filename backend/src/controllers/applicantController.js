@@ -16,9 +16,9 @@ const getDashboard = async (req, res) => {
   try {
     const userId = req.user.id; // This is now the USER ID from users table
 
-    // Get application details by user_id
+    // Get application details by user_id (exclude deleted)
     const [applications] = await pool.execute(
-      'SELECT * FROM applications WHERE user_id = ?',
+      'SELECT * FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [userId]
     );
 
@@ -67,9 +67,9 @@ const uploadReceipt = async (req, res) => {
       });
     }
 
-    // Find application first
+    // Find application first (exclude deleted)
     const [rows] = await pool.execute(
-      'SELECT id, application_number FROM applications WHERE user_id = ?',
+      'SELECT id, application_number FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [userId]
     );
 
@@ -120,7 +120,7 @@ const downloadCertificate = async (req, res) => {
     const userId = req.user.id;
 
     const [rows] = await pool.execute(
-      'SELECT certificate_url, status, application_number FROM applications WHERE user_id = ?',
+      'SELECT certificate_url, status, application_number FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [userId]
     );
 
@@ -174,8 +174,11 @@ const downloadCertificate = async (req, res) => {
 const requestBankDetails = async (req, res) => {
   try {
     const userId = req.user.id;
-    // Fetch application by user_id to confirm existence
-    const [rows] = await pool.execute('SELECT * FROM applications WHERE user_id = ?', [userId]);
+    // Fetch application by user_id to confirm existence (exclude deleted)
+    const [rows] = await pool.execute(
+      'SELECT * FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)', 
+      [userId]
+    );
 
     if (rows.length === 0) return res.status(404).json({ success: false, message: 'Application not found' });
 
@@ -202,9 +205,9 @@ const uploadDocuments = async (req, res) => {
       });
     }
 
-    // Find application first
+    // Find application first (exclude deleted)
     const [rows] = await pool.execute(
-      'SELECT id FROM applications WHERE user_id = ?',
+      'SELECT id FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [userId]
     );
 

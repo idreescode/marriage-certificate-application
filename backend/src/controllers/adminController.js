@@ -77,7 +77,7 @@ const getAllApplications = async (req, res) => {
     const { status, search, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
-    let query = 'SELECT * FROM applications WHERE 1=1';
+    let query = 'SELECT * FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL';
     const params = [];
 
     if (status) {
@@ -98,7 +98,7 @@ const getAllApplications = async (req, res) => {
     const [applications] = await pool.execute(query, params);
 
     // Get total count
-    let countQuery = 'SELECT COUNT(*) as total FROM applications WHERE 1=1';
+    let countQuery = 'SELECT COUNT(*) as total FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL';
     const countParams = [];
     
     if (status) {
@@ -144,7 +144,7 @@ const getApplicationById = async (req, res) => {
     const { id } = req.params;
 
     const [applications] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      'SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [id]
     );
 
@@ -185,9 +185,9 @@ const verifyDocuments = async (req, res) => {
     const { id } = req.params;
     const adminId = req.user.id;
 
-    // Get application to check if documents exist
+    // Get application to check if documents exist (exclude deleted)
     const [appRows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      'SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [id]
     );
 
@@ -413,9 +413,9 @@ const generateCertificate = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Get application data
+    // Get application data (exclude deleted)
     const [appRows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      'SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
       [id]
     );
 
@@ -484,6 +484,63 @@ const generateCertificate = async (req, res) => {
   }
 };
 
+// Delete Application (Soft Delete)
+// IMPORTANT: This function performs a SOFT DELETE only.
+// Records remain in the database permanently for audit purposes.
+// Only the is_deleted flag is set to TRUE, which:
+// - Hides the application from all queries
+// - Prevents applicant login
+// - Preserves all data (application, witnesses, notifications) in the database
+const deleteApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Get application data first to check if it exists
+    const [appRows] = await pool.execute(
+      'SELECT * FROM applications WHERE id = ?',
+      [id]
+    );
+
+    if (appRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application not found'
+      });
+    }
+
+    const application = appRows[0];
+
+    // Check if already deleted
+    if (application.is_deleted) {
+      return res.status(400).json({
+        success: false,
+        message: 'Application is already deleted'
+      });
+    }
+
+    // SOFT DELETE: Only set is_deleted flag to TRUE
+    // All records (application, witnesses, notifications) remain in database
+    // Files are also preserved for audit purposes
+    await pool.execute(
+      'UPDATE applications SET is_deleted = TRUE WHERE id = ?',
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Application deleted successfully (soft delete - record preserved in database)'
+    });
+
+  } catch (error) {
+    console.error('Error deleting application:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete application',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   getAllApplications,
@@ -493,5 +550,6 @@ module.exports = {
   verifyPayment,
   scheduleAppointment,
   markComplete,
-  generateCertificate
+  generateCertificate,
+  deleteApplication
 };

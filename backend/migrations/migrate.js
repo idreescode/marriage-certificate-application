@@ -18,6 +18,7 @@ const migrations = [
   require('./015_drop_documents_table'),
   require('./016_add_document_path_columns'),
   require('./017_add_documents_verified'),
+  require('./018_add_is_deleted_to_applications'),
 ];
 
 // Run migrations

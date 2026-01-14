@@ -24,7 +24,7 @@ const createPaymentIntent = async (req, res) => {
     const userId = req.user.id; // Correct: users.id
 
     const [rows] = await pool.execute(
-      "SELECT id, deposit_amount, status FROM applications WHERE user_id = ?",
+      "SELECT id, deposit_amount, status FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [userId]
     );
 
@@ -100,7 +100,7 @@ const confirmPayment = async (req, res) => {
     // We need key application details to verify ownership?
     // Actually, we can just get the application ID from the user's record to compare.
     const [appRows] = await pool.execute(
-      "SELECT id FROM applications WHERE user_id = ?",
+      "SELECT id FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [userId]
     );
 
@@ -162,7 +162,7 @@ const confirmPayment = async (req, res) => {
         `SELECT a.*, u.email as portal_email 
          FROM applications a 
          JOIN users u ON a.user_id = u.id 
-         WHERE a.id = ?`,
+         WHERE a.id = ? AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)`,
         [applicationId]
       );
       if (appRows.length > 0) {

@@ -125,6 +125,7 @@ export const verifyPayment = (id) => api.put(`/admin/applications/${id}/verify-p
 export const scheduleAppointment = (id, data) => api.put(`/admin/applications/${id}/schedule-appointment`, data);
 export const markComplete = (id) => api.put(`/admin/applications/${id}/complete`);
 export const generateCertificate = (id) => api.post(`/admin/applications/${id}/generate-certificate`);
+export const deleteApplication = (id) => api.delete(`/admin/applications/${id}`);
 
 // Payment APIs
 export const createCheckoutSession = () => api.post('/payment/create-checkout-session');

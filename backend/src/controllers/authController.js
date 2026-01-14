@@ -32,6 +32,21 @@ const login = async (req, res) => {
       });
     }
 
+    // For applicants, check if their application is deleted
+    if (user.role === 'applicant') {
+      const [appRows] = await pool.execute(
+        'SELECT id, is_deleted FROM applications WHERE user_id = ?',
+        [user.id]
+      );
+
+      if (appRows.length > 0 && appRows[0].is_deleted) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account has been deactivated. Please contact the administrator.'
+        });
+      }
+    }
+
     // Generate Token
     const token = jwt.sign(
       { 
