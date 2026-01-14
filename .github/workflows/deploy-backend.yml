@@ -138,13 +138,22 @@ jobs:
           echo "🗄️  Running database migrations..."
           npm run migrate || echo "⚠️  Migration script not found or failed, continuing..."
           
-          # Restart PM2 process
-          echo "🔄 Restarting backend with PM2..."
-          pm2 restart nikah-backend || pm2 start server.js --name nikah-backend
+          # Restart/Start PM2 process
+          echo "🔄 Starting/Restarting backend with PM2..."
+          # Stop existing process if it exists
+          pm2 delete nikah-backend 2>/dev/null || true
+          # Start the server
+          pm2 start server.js --name nikah-backend
+          # Save PM2 process list
           pm2 save
+          # Setup PM2 to start on system boot
+          pm2 startup 2>/dev/null || true
           
           echo "✅ Backend deployment completed!"
+          echo "📊 PM2 Status:"
           pm2 status
+          echo "📋 PM2 Logs (last 20 lines):"
+          pm2 logs nikah-backend --lines 20 --nostream || true
           EOF
           
           # Ensure /var/www directory exists
