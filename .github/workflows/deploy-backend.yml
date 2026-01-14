@@ -52,14 +52,37 @@ jobs:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
           # Create deployment script
-          cat > deploy-backend.sh << 'DEPLOYSCRIPT'
+          REPO_URL="https://github.com/${{ github.repository }}.git"
+          cat > deploy-backend.sh << EOF
           #!/bin/bash
           set -e
           
           echo "🚀 Starting backend deployment..."
           
+          # Create backend directory if it doesn't exist
+          if [ ! -d "/var/www/backend" ]; then
+            echo "📁 Creating /var/www/backend directory..."
+            mkdir -p /var/www/backend
+            chmod 755 /var/www/backend
+          fi
+          
           # Navigate to backend directory
           cd /var/www/backend || exit 1
+          
+          # Initialize git repository if it doesn't exist
+          if [ ! -d ".git" ]; then
+            echo "🔧 Initializing git repository..."
+            git init
+            git remote add origin $REPO_URL || git remote set-url origin $REPO_URL
+          fi
+          EOF
+          
+          # Create uploads directory if it doesn't exist
+          if [ ! -d "uploads" ]; then
+            echo "📁 Creating uploads directory..."
+            mkdir -p uploads/receipts uploads/certificates
+            chmod -R 755 uploads
+          fi
           
           # Backup current .env if exists
           if [ -f .env ]; then
@@ -89,11 +112,17 @@ jobs:
           pm2 status
           DEPLOYSCRIPT
           
+          # Ensure /var/www directory exists
+          echo "📁 Ensuring /var/www directory exists..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} 'mkdir -p /var/www && chmod 755 /var/www'
+          
           # Copy .env and deploy script to server using password
-          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null backend/.env ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/backend/.env
+          echo "📤 Copying files to server..."
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null backend/.env ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/backend/.env || echo "⚠️  .env file copy failed, will be created by script"
           sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy-backend.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/tmp/deploy-backend.sh
           
           # Execute deployment script
+          echo "🚀 Executing deployment script..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} 'bash /tmp/deploy-backend.sh && rm /tmp/deploy-backend.sh'
 
       - name: ✅ Verify deployment

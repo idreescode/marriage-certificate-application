@@ -72,6 +72,13 @@ jobs:
           
           echo "🚀 Starting frontend deployment..."
           
+          # Create frontend directory if it doesn't exist
+          if [ ! -d "/var/www/frontend" ]; then
+            echo "📁 Creating /var/www/frontend directory..."
+            mkdir -p /var/www/frontend
+            chmod 755 /var/www/frontend
+          fi
+          
           # Navigate to frontend directory
           cd /var/www/frontend || exit 1
           
@@ -87,10 +94,16 @@ jobs:
           echo "✅ Ready for deployment"
           DEPLOYSCRIPT
           
+          # Ensure /var/www directory exists
+          echo "📁 Ensuring /var/www directory exists..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} 'mkdir -p /var/www && chmod 755 /var/www'
+          
           # Copy deployment script to server using password
+          echo "📤 Copying deployment script to server..."
           sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy-frontend.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/tmp/deploy-frontend.sh
           
           # Execute pre-deployment script
+          echo "🚀 Running pre-deployment script..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} 'bash /tmp/deploy-frontend.sh'
           
           # Deploy build files using rsync with password authentication
