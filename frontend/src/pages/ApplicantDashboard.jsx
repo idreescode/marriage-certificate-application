@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Loader from '../components/Loader';
-import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession, getFileUrl } from '../services/api';
+import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession, getFileUrl, getCertificate } from '../services/api';
+import api from '../services/api';
 import toast from 'react-hot-toast';
-import { FileText, Calendar, CreditCard, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight } from 'lucide-react';
+import { FileText, Calendar, CreditCard, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight, Download } from 'lucide-react';
 
 
 export default function ApplicantDashboard() {
@@ -100,6 +101,48 @@ export default function ApplicantDashboard() {
 
 
       setPaymentMethod('bank');
+   };
+
+   const handleDownloadCertificate = async () => {
+      if (!app || !app.certificate_url || app.status !== 'completed') {
+         toast.error('Certificate not yet available');
+         return;
+      }
+
+      const toastId = toast.loading('Preparing certificate download...');
+      try {
+         // Fetch the certificate file as a blob
+         const response = await api.get('/applicants/certificate', {
+            responseType: 'blob'
+         });
+         
+         // Create a blob URL and trigger download
+         const blob = new Blob([response.data], { type: 'application/pdf' });
+         const url = window.URL.createObjectURL(blob);
+         const link = document.createElement('a');
+         link.href = url;
+         link.download = `marriage-certificate-${app.application_number || 'certificate'}.pdf`;
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+         window.URL.revokeObjectURL(url);
+         
+         toast.success('Certificate downloaded successfully!', { id: toastId });
+      } catch (error) {
+         console.error('Error downloading certificate:', error);
+         // Try to parse error message from blob response
+         if (error.response?.data instanceof Blob) {
+            const text = await error.response.data.text();
+            try {
+               const errorData = JSON.parse(text);
+               toast.error('Failed to download certificate: ' + (errorData.message || 'Unknown error'), { id: toastId });
+            } catch {
+               toast.error('Failed to download certificate', { id: toastId });
+            }
+         } else {
+            toast.error('Failed to download certificate: ' + (error.response?.data?.message || error.message), { id: toastId });
+         }
+      }
    };
 
    if (loading) return <Loader fullscreen />;
@@ -259,6 +302,40 @@ export default function ApplicantDashboard() {
                      <StatusPill status={app.status} />
                   </div>
                </div>
+               {app.status === 'completed' && app.certificate_url && (
+                  <button
+                     onClick={handleDownloadCertificate}
+                     className="btn btn-primary"
+                     style={{
+                        position: 'absolute',
+                        bottom: '1.5rem',
+                        right: '1.5rem',
+                        background: 'rgba(255,255,255,0.95)',
+                        color: '#b05a33',
+                        border: 'none',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                        transition: 'all 0.2s ease',
+                        zIndex: 2
+                     }}
+                     onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'white';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+                     }}
+                     onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.95)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                     }}
+                  >
+                     <Download size={18} />
+                     Download Certificate
+                  </button>
+               )}
             </div>
 
 

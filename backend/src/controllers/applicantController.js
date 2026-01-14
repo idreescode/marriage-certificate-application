@@ -2,6 +2,7 @@ const { pool } = require('../config/database');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const fs = require('fs');
 const { sendReceiptUploadedNotification, sendBankDetailsRequestEmail } = require('../services/emailService');
 const { createNotification } = require('./notificationController');
 
@@ -119,7 +120,7 @@ const downloadCertificate = async (req, res) => {
     const userId = req.user.id;
 
     const [rows] = await pool.execute(
-      'SELECT certificate_url, status FROM applications WHERE user_id = ?',
+      'SELECT certificate_url, status, application_number FROM applications WHERE user_id = ?',
       [userId]
     );
 
@@ -130,7 +131,7 @@ const downloadCertificate = async (req, res) => {
       });
     }
 
-    const { certificate_url, status } = rows[0];
+    const { certificate_url, status, application_number } = rows[0];
 
     if (status !== 'completed' || !certificate_url) {
       return res.status(400).json({
@@ -139,12 +140,25 @@ const downloadCertificate = async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      data: {
-        certificateUrl: certificate_url
-      }
-    });
+    // Construct the full file path
+    // certificate_url is stored as /uploads/certificates/cert-{id}-{timestamp}.pdf
+    const filePath = path.join(__dirname, '../../', certificate_url);
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Certificate file not found'
+      });
+    }
+
+    // Set headers for file download
+    const fileName = `marriage-certificate-${application_number || 'certificate'}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+    // Send the file
+    res.sendFile(path.resolve(filePath));
 
   } catch (error) {
     console.error('Error downloading certificate:', error);
