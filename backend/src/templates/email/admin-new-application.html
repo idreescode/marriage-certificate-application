@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 700px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          
+          <!-- Header with Logo -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #CA6C40 0%, #b05a33 100%); padding: 40px 30px; text-align: center;">
+              <table role="presentation" style="width: 100%;">
+                <tr>
+                  <td align="center" style="padding-bottom: 20px;">
+                    <!-- White background container for logo visibility -->
+                    <table role="presentation" style="margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 10px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+                      <tr>
+                        <td align="center">
+                          <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" alt="Jamiyat" style="height: 70px; display: block; margin: 0 auto; max-width: 180px;" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">🆕 New Application Received</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Admin Notification</p>
+            </td>
+          </tr>
+          
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="font-size: 16px; color: #1f2937; margin: 0 0 20px 0; line-height: 1.6;">Assalamu Alaikum Admin,</p>
+              
+              <p style="font-size: 15px; color: #4b5563; margin: 0 0 30px 0; line-height: 1.6;">
+                A new nikah certificate application has been submitted and requires your review.
+              </p>
+              
+              <!-- Application Number -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 2px solid #CA6C40; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <p style="margin: 0; color: #6b7280; font-size: 14px;">Application Number</p>
+                    <h2 style="margin: 10px 0 0 0; color: #CA6C40; font-size: 24px; font-weight: 700;">{{application_number}}</h2>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Groom Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Groom Information</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 45%; font-weight: 600;">Full Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_full_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Father's Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_father_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Date of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_date_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Place of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_place_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">ID Number:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_id_number}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Address:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_address}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Email:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_email}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Phone:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_phone}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Confirms:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_confirm}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Personally Present:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_personally}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Representative:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_representative}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Groom Representative -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Groom Representative Information</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 45%; font-weight: 600;">Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_rep_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Father's Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_rep_father_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Date of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_rep_date_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Place of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_rep_place_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Address:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{groom_rep_address}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Bride Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Bride Information</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 45%; font-weight: 600;">Full Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_full_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Father's Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_father_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Date of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_date_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Place of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_place_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">ID Number:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_id_number}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Address:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_address}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Email:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_email}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Phone:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_phone}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Confirms:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_confirm}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Personally Present:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_personally}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Representative:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_representative}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Bride Representative -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Bride Representative Information</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 45%; font-weight: 600;">Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_rep_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Father's Name:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_rep_father_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Date of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_rep_date_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Place of Birth:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_rep_place_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Address:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{bride_rep_address}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Witnesses Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Witnesses Information</h3>
+                    
+                    <!-- Witness 1 -->
+                    <h4 style="margin: 15px 0 10px 0; color: #b05a33; font-size: 16px; font-weight: 600;">Witness 1</h4>
+                    <table role="presentation" style="width: 100%; margin-bottom: 20px;">
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; width: 45%; font-weight: 600;">Name:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness1_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Father's Name:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness1_father_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Date of Birth:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness1_date_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Place of Birth:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness1_place_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Address:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness1_address}}</td>
+                      </tr>
+                    </table>
+
+                    <!-- Witness 2 -->
+                    <h4 style="margin: 15px 0 10px 0; color: #b05a33; font-size: 16px; font-weight: 600;">Witness 2</h4>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; width: 45%; font-weight: 600;">Name:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness2_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Father's Name:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness2_father_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Date of Birth:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness2_date_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Place of Birth:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness2_place_of_birth}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; color: #6b7280; font-size: 13px; font-weight: 600;">Address:</td>
+                        <td style="padding: 6px 0; color: #1f2937; font-size: 13px;">{{witness2_address}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Mahr Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Mahr Information</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 45%; font-weight: 600;">Amount:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{mahr_amount}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Type:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{mahr_type}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Solemnised Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #CA6C40; font-size: 18px; font-weight: 700; border-bottom: 2px solid #CA6C40; padding-bottom: 10px;">Solemnised Information</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 45%; font-weight: 600;">Date:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{solemnised_date}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Place:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{solemnised_place}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Address:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px;">{{solemnised_address}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Next Steps Box -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #b05a33; font-size: 14px; font-weight: 600;">Next Steps:</h4>
+                    <ol style="margin: 0; padding-left: 20px; color: #b05a33; font-size: 13px; line-height: 1.8;">
+                      <li>Review the application details</li>
+                      <li>Set the deposit amount</li>
+                      <li>Send payment instructions to the applicant</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- CTA Button -->
+              <table role="presentation" style="width: 100%; margin: 35px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{frontend_url}}/admin/applications/{{application_id}}" style="display: inline-block; background-color: #CA6C40; color: #ffffff; padding: 14px 40px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(202, 108, 64, 0.3);">View Application</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 25px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280;">Jamiyat Tabligh-ul-Islam</p>
+              <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">Nikah Certificate Services</p>
+              <p style="margin: 10px 0 0 0; font-size: 11px; color: #9ca3af;">&copy; 2024 Jamiyat.org. All rights reserved.</p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

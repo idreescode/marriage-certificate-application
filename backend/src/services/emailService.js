@@ -1,6 +1,31 @@
+const fs = require('fs');
+const path = require('path');
 const { transporter } = require('../config/email');
 const { pool } = require('../config/database');
 const { formatDate, formatCurrency } = require('../utils/helpers');
+
+// Template helper function
+const loadTemplate = (templateName) => {
+  const templatePath = path.join(__dirname, '../templates/email', templateName);
+  return fs.readFileSync(templatePath, 'utf8');
+};
+
+const renderTemplate = (templateName, data) => {
+  let template = loadTemplate(templateName);
+  // Replace all placeholders {{key}} with values from data object
+  Object.keys(data).forEach(key => {
+    const regex = new RegExp(`{{${key}}}`, 'g');
+    template = template.replace(regex, data[key] || '');
+  });
+  return template;
+};
+
+// Get admin emails from environment variable (supports comma-separated multiple emails)
+const getAdminEmails = () => {
+  const adminEmails = process.env.ADMIN_EMAILS || 'admin@jamiyat.org';
+  // Split by comma, trim whitespace, and filter out empty strings
+  return adminEmails.split(',').map(email => email.trim()).filter(email => email.length > 0);
+};
 
 // Log email to database
 const logEmail = async (applicationId, emailType, recipient, subject, status = 'sent') => {
@@ -242,30 +267,28 @@ const sendDepositAmountEmail = async (applicationData) => {
 };
 
 // 3. Payment Receipt Uploaded (to Admin)
-const sendReceiptUploadedNotification = async (applicationData, adminEmail = 'admin@jamiyat.org') => {
+const sendReceiptUploadedNotification = async (applicationData) => {
   const { application_number, groom_full_name, bride_full_name, id } = applicationData;
+  const adminEmails = getAdminEmails();
+
+  const html = renderTemplate('admin-payment-receipt.html', {
+    application_number,
+    groom_full_name,
+    bride_full_name,
+    application_id: id,
+    frontend_url: process.env.FRONTEND_URL
+  });
 
   const mailOptions = {
     from: `"Jamiyat.org System" <${process.env.EMAIL_USER}>`,
-    to: adminEmail,
+    to: adminEmails.join(', '),
     subject: `Payment Receipt Received - #${application_number}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #16a34a;">📄 New Payment Receipt Uploaded</h2>
-        <p><strong>Application:</strong> ${application_number}</p>
-        <p><strong>Applicant:</strong> ${groom_full_name} & ${bride_full_name}</p>
-        <p>A payment receipt has been uploaded and is pending your verification.</p>
-        <a href="${process.env.FRONTEND_URL}/admin/applications/${id}" 
-           style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px;">
-          Review Receipt
-        </a>
-      </div>
-    `
+    html
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('✅ Admin notification sent');
+    console.log('✅ Admin notification sent to:', adminEmails.join(', '));
   } catch (error) {
     console.error('❌ Error sending admin notification:', error);
   }
@@ -466,67 +489,138 @@ const sendCertificateReadyEmail = async (applicationData) => {
 };
 
 // 7. Send Bank Details Request Notification to Admin
-const sendBankDetailsRequestEmail = async (applicationData, adminEmail = 'admin@jamiyat.org') => {
+const sendBankDetailsRequestEmail = async (applicationData) => {
   const { application_number, groom_full_name, bride_full_name, id } = applicationData;
+  const adminEmails = getAdminEmails();
+
+  const html = renderTemplate('admin-bank-details.html', {
+    application_number,
+    groom_full_name,
+    bride_full_name,
+    application_id: id,
+    frontend_url: process.env.FRONTEND_URL
+  });
 
   const mailOptions = {
     from: `"Jamiyat.org System" <${process.env.EMAIL_USER}>`,
-    to: adminEmail,
+    to: adminEmails.join(', '),
     subject: `Bank Details Requested - #${application_number}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #2563eb;">🏦 Bank Details Requested</h2>
-        <p><strong>Application:</strong> ${application_number}</p>
-        <p><strong>Applicant:</strong> ${groom_full_name} & ${bride_full_name}</p>
-        <p>The applicant has requested to pay via Bank Transfer. Please send them the bank details.</p>
-        <a href="${process.env.FRONTEND_URL}/admin/applications/${id}" 
-           style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px;">
-          View Application
-        </a>
-      </div>
-    `
+    html
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    await logEmail(id, 'bank_details_requested', adminEmail, mailOptions.subject, 'sent');
-    console.log('✅ Bank details request sent to admin');
+    // Log for each admin email
+    for (const email of adminEmails) {
+      await logEmail(id, 'bank_details_requested', email, mailOptions.subject, 'sent');
+    }
+    console.log('✅ Bank details request sent to:', adminEmails.join(', '));
   } catch (error) {
     console.error('❌ Error sending bank details request:', error);
   }
 };
 
 // 8. Admin New Application Notification
-const sendAdminNewApplicationEmail = async (applicationData, adminEmail = 'admin@jamiyat.org') => {
-  const { application_number, groom_full_name, bride_full_name, id } = applicationData;
+const sendAdminNewApplicationEmail = async (applicationData) => {
+  const { id } = applicationData;
+  const adminEmails = getAdminEmails();
+
+  // Fetch full application data from database
+  const [applications] = await pool.execute(
+    'SELECT * FROM applications WHERE id = ?',
+    [id]
+  );
+
+  if (applications.length === 0) {
+    console.error('Application not found for email:', id);
+    return;
+  }
+
+  const application = applications[0];
+
+  // Fetch witnesses
+  const [witnesses] = await pool.execute(
+    'SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order',
+    [id]
+  );
+
+  // Format dates
+  const formatDateForEmail = (date) => {
+    if (!date) return 'N/A';
+    try {
+      return new Date(date).toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    } catch {
+      return date;
+    }
+  };
+
+    const html = renderTemplate('admin-new-application.html', {
+    application_number: application.application_number,
+    groom_full_name: application.groom_full_name || 'N/A',
+    groom_father_name: application.groom_father_name || 'N/A',
+    groom_date_of_birth: formatDateForEmail(application.groom_date_of_birth),
+    groom_place_of_birth: application.groom_place_of_birth || 'N/A',
+    groom_id_number: application.groom_id_number || 'N/A',
+    groom_address: application.groom_address || 'N/A',
+    groom_email: application.groom_email || 'N/A',
+    groom_phone: application.groom_phone || 'N/A',
+    groom_confirm: application.groom_confirm ? 'Yes' : 'No',
+    groom_personally: application.groom_personally ? 'Yes' : 'No',
+    groom_representative: application.groom_representative ? 'Yes' : 'No',
+    groom_rep_name: application.groom_rep_name || 'N/A',
+    groom_rep_father_name: application.groom_rep_father_name || 'N/A',
+    groom_rep_date_of_birth: formatDateForEmail(application.groom_rep_date_of_birth),
+    groom_rep_place_of_birth: application.groom_rep_place_of_birth || 'N/A',
+    groom_rep_address: application.groom_rep_address || 'N/A',
+    bride_full_name: application.bride_full_name || 'N/A',
+    bride_father_name: application.bride_father_name || 'N/A',
+    bride_date_of_birth: formatDateForEmail(application.bride_date_of_birth),
+    bride_place_of_birth: application.bride_place_of_birth || 'N/A',
+    bride_id_number: application.bride_id_number || 'N/A',
+    bride_address: application.bride_address || 'N/A',
+    bride_email: application.bride_email || 'N/A',
+    bride_phone: application.bride_phone || 'N/A',
+    bride_confirm: application.bride_confirm ? 'Yes' : 'No',
+    bride_personally: application.bride_personally ? 'Yes' : 'No',
+    bride_representative: application.bride_representative ? 'Yes' : 'No',
+    bride_rep_name: application.bride_rep_name || 'N/A',
+    bride_rep_father_name: application.bride_rep_father_name || 'N/A',
+    bride_rep_date_of_birth: formatDateForEmail(application.bride_rep_date_of_birth),
+    bride_rep_place_of_birth: application.bride_rep_place_of_birth || 'N/A',
+    bride_rep_address: application.bride_rep_address || 'N/A',
+    mahr_amount: application.mahr_amount || 'N/A',
+    mahr_type: application.mahr_type || 'N/A',
+    solemnised_date: formatDateForEmail(application.solemnised_date),
+    solemnised_place: application.solemnised_place || 'N/A',
+    solemnised_address: application.solemnised_address || 'N/A',
+    witness1_name: witnesses[0]?.witness_name || 'N/A',
+    witness1_father_name: witnesses[0]?.witness_father_name || 'N/A',
+    witness1_date_of_birth: formatDateForEmail(witnesses[0]?.witness_date_of_birth),
+    witness1_place_of_birth: witnesses[0]?.witness_place_of_birth || 'N/A',
+    witness1_address: witnesses[0]?.witness_address || 'N/A',
+    witness2_name: witnesses[1]?.witness_name || 'N/A',
+    witness2_father_name: witnesses[1]?.witness_father_name || 'N/A',
+    witness2_date_of_birth: formatDateForEmail(witnesses[1]?.witness_date_of_birth),
+    witness2_place_of_birth: witnesses[1]?.witness_place_of_birth || 'N/A',
+    witness2_address: witnesses[1]?.witness_address || 'N/A',
+    application_id: id,
+    frontend_url: process.env.FRONTEND_URL
+  });
 
   const mailOptions = {
     from: `"Jamiyat.org System" <${process.env.EMAIL_USER}>`,
-    to: adminEmail,
-    subject: `New Application Received - #${application_number}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background-color: #3b82f6; padding: 15px; border-radius: 8px 8px 0 0; text-align: center;">
-          <h2 style="color: white; margin: 0;">🆕 New Application</h2>
-        </div>
-        <div style="border: 1px solid #e5e7eb; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
-          <p><strong>Application:</strong> ${application_number}</p>
-          <p><strong>Applicants:</strong> ${groom_full_name} & ${bride_full_name}</p>
-          <p>A new nikah certificate application has been submitted.</p>
-          <div style="text-align: center; margin-top: 20px;">
-            <a href="${process.env.FRONTEND_URL}/admin/applications/${id}" 
-               style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              View Application
-            </a>
-          </div>
-        </div>
-      </div>
-    `
+    to: adminEmails.join(', '),
+    subject: `New Application Received - #${application.application_number}`,
+    html
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('✅ Admin notification sent for new application');
+    console.log('✅ Admin notification sent for new application to:', adminEmails.join(', '));
   } catch (error) {
     console.error('❌ Error sending admin notification:', error);
   }
