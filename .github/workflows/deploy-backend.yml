@@ -111,11 +111,6 @@ jobs:
           echo "📅 Files changed:"
           git diff HEAD~1 --name-only 2>/dev/null | head -10 || echo "First deployment or no changes to show"
           
-          echo "✅ Latest code pulled. New commit:"
-          git log -1 --oneline
-          echo "📅 Files changed:"
-          git diff HEAD~1 --name-only 2>/dev/null | head -10 || echo "First deployment or no changes to show"
-          
           # Remove frontend folder if it exists (we don't need it for backend deployment)
           if [ -d "frontend" ]; then
             echo "🗑️  Removing frontend folder..."
