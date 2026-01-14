@@ -92,6 +92,13 @@ jobs:
           git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME 2>/dev/null || git checkout \$BRANCH_NAME
           git reset --hard origin/\$BRANCH_NAME
           
+          # Remove frontend folder if it exists (we don't need it for backend deployment)
+          if [ -d "frontend" ]; then
+            echo "🗑️  Removing frontend folder..."
+            rm -rf frontend
+            echo "✅ Frontend folder removed"
+          fi
+          
           # Move backend files to current directory if they're in a subdirectory
           if [ -d "backend" ] && [ ! -f "package.json" ]; then
             echo "📦 Moving backend files to root directory..."
@@ -110,12 +117,10 @@ jobs:
             echo "❌ Error: package.json not found!"
             echo "Current directory contents:"
             ls -la
-            echo "Checking for backend subdirectory:"
-            ls -la backend/ 2>/dev/null || echo "No backend directory found"
             exit 1
           fi
           
-          echo "✅ Verified: package.json found at $(pwd)/package.json"
+          echo "✅ Verified: package.json found at \$(pwd)/package.json"
           
           # Create uploads directory if it doesn't exist
           if [ ! -d "uploads" ]; then
@@ -126,12 +131,8 @@ jobs:
           
           # Install/update dependencies
           echo "📦 Installing dependencies..."
-          if [ -f "package-lock.json" ]; then
-            npm ci --omit=dev
-          else
-            echo "⚠️  package-lock.json not found, using npm install..."
-            npm install --omit=dev
-          fi
+          # Always use npm install (simpler, handles lock file sync automatically)
+          npm install --omit=dev
           
           # Run database migrations (if needed)
           echo "🗄️  Running database migrations..."
