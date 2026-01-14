@@ -1,0 +1,120 @@
+name: Deploy Frontend to IONOS Server
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 📝 Create .env file
+        working-directory: ./frontend
+        run: |
+          cat > .env << EOF
+          VITE_API_URL=${{ secrets.VITE_API_URL || 'https://api.jamiyat.org' }}
+          EOF
+          echo "✅ .env file created"
+
+      - name: 📦 Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: 🏗️ Build frontend
+        working-directory: ./frontend
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://api.jamiyat.org' }}
+
+      - name: ✅ Verify build
+        run: |
+          if [ ! -d "frontend/dist" ]; then
+            echo "❌ Build directory not found!"
+            exit 1
+          fi
+          echo "✅ Build verified - $(du -sh frontend/dist | cut -f1)"
+
+      - name: 🔧 Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: 🔍 Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📤 Deploy to server
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          # Create deployment script
+          cat > deploy-frontend.sh << 'DEPLOYSCRIPT'
+          #!/bin/bash
+          set -e
+          
+          echo "🚀 Starting frontend deployment..."
+          
+          # Navigate to frontend directory
+          cd /var/www/frontend || exit 1
+          
+          # Backup current build if exists
+          if [ -d "build" ]; then
+            mv build build.backup.$(date +%Y%m%d_%H%M%S)
+            echo "✅ Backed up existing build"
+          fi
+          
+          # Create build directory
+          mkdir -p build
+          
+          echo "✅ Ready for deployment"
+          DEPLOYSCRIPT
+          
+          # Copy deployment script to server using password
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deploy-frontend.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/tmp/deploy-frontend.sh
+          
+          # Execute pre-deployment script
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} 'bash /tmp/deploy-frontend.sh'
+          
+          # Deploy build files using rsync with password authentication
+          echo "📤 Uploading build files..."
+          sshpass -p "$SSH_PASSWORD" rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            frontend/dist/ \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/frontend/build/
+          
+          # Cleanup and reload nginx
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_HOST }} << 'ENDSSH'
+            # Remove old backups (keep only last 3)
+            cd /var/www/frontend
+            ls -dt build.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+            
+            # Test and reload nginx
+            nginx -t && systemctl reload nginx
+            
+            echo "✅ Frontend deployment completed!"
+            echo "✅ Nginx reloaded"
+          ENDSSH
+          
+          # Cleanup local script
+          rm deploy-frontend.sh
+
+      - name: ✅ Verify deployment
+        run: |
+          sleep 3
+          echo "✅ Frontend deployment completed successfully"
+          echo "🌐 Frontend URL: https://nikahapp.jamiyat.org"
