@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getApplicationById, getFileUrl } from '../services/api';
+import { getApplicationById, getFileUrl, generateCertificate } from '../services/api';
 import Loader from '../components/Loader';
 import toast from 'react-hot-toast';
 import {
@@ -38,12 +38,93 @@ export default function AdminApplicationDetails() {
         }
     };
 
-    const handlePrint = () => {
-        // Set application number for print header
-        if (application) {
-            document.body.setAttribute('data-app-number', application.application_number || '');
+    const handlePrint = async () => {
+        if (!application) {
+            console.error('❌ No application data available');
+            toast.error('Application data not loaded');
+            return;
         }
-        window.print();
+
+        console.log('🖨️ Print button clicked for application:', application.id);
+        console.log('📋 Application status:', application.status);
+        console.log('📅 Appointment date:', application.appointment_date);
+        console.log('📄 Certificate URL:', application.certificate_url);
+
+        try {
+            let certificateUrl = application.certificate_url;
+
+            // If certificate doesn't exist, generate it first
+            if (!certificateUrl) {
+                // Check if appointment is scheduled
+                if (!application.appointment_date) {
+                    const errorMsg = 'Appointment must be scheduled before generating certificate';
+                    console.error('❌', errorMsg);
+                    toast.error(errorMsg, { duration: 5000 });
+                    return;
+                }
+
+                console.log('🔄 Generating certificate...');
+                const toastId = toast.loading("Generating certificate...");
+                
+                try {
+                    const response = await generateCertificate(id);
+                    console.log('✅ Certificate generation response:', response.data);
+                    
+                    if (response.data.success) {
+                        certificateUrl = response.data.data.certificateUrl;
+                        console.log('📄 Generated certificate URL:', certificateUrl);
+                        
+                        // Update application state with new certificate URL
+                        setApplication(prev => ({
+                            ...prev,
+                            certificate_url: certificateUrl
+                        }));
+                        toast.success("Certificate generated successfully!", { id: toastId });
+                    } else {
+                        console.error('❌ Certificate generation failed:', response.data.message);
+                        toast.error(response.data.message || "Failed to generate certificate", { id: toastId });
+                        return;
+                    }
+                } catch (error) {
+                    console.error('❌ Certificate generation error:', error);
+                    console.error('Error response:', error.response?.data);
+                    console.error('Error status:', error.response?.status);
+                    console.error('Error message:', error.message);
+                    
+                    const errorMessage = error.response?.data?.message 
+                        || error.message 
+                        || "Failed to generate certificate";
+                    
+                    toast.error(errorMessage, { 
+                        id: toastId,
+                        duration: 5000 
+                    });
+                    return;
+                }
+            }
+
+            // Open the certificate PDF in a new tab
+            if (certificateUrl) {
+                const fullUrl = getFileUrl(certificateUrl);
+                console.log('🔗 Opening certificate URL:', fullUrl);
+                
+                const newWindow = window.open(fullUrl, '_blank');
+                
+                if (!newWindow) {
+                    console.error('❌ Popup blocked. Please allow popups for this site.');
+                    toast.error('Popup blocked. Please allow popups to view certificate.', { duration: 5000 });
+                } else {
+                    console.log('✅ Certificate opened in new tab');
+                }
+            } else {
+                console.error('❌ No certificate URL available');
+                toast.error('Certificate URL not found');
+            }
+        } catch (error) {
+            console.error('❌ Unexpected error in handlePrint:', error);
+            console.error('Error stack:', error.stack);
+            toast.error(`Error: ${error.message || 'Failed to open certificate'}`, { duration: 5000 });
+        }
     };
 
     const StatusBadge = ({ status }) => {

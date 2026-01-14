@@ -82,7 +82,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       bride_rep_signature: applicationData.bride_rep_name ? '' : '',
       
       // Mahr
-      mahr_amount: applicationData.mahr_amount || '',
+      mahr_amount: applicationData.mahr_amount ? `£${applicationData.mahr_amount}` : '',
       mahr_type_text: applicationData.mahr_type === 'deferred' ? 'Deferred' : (applicationData.mahr_type === 'prompt' ? 'Prompt' : ''),
       
       // Solemnization
@@ -154,7 +154,8 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     });
     
     // Wait a bit more for any external resources (like logo)
-    await page.waitForTimeout(1000);
+    // Using Promise-based delay instead of deprecated waitForTimeout
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Generate PDF
     await page.pdf({
