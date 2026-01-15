@@ -1,27 +1,26 @@
-const { pool } = require('../config/database');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const { 
-  sendDepositAmountEmail, 
-  sendPaymentVerifiedEmail, 
+const { pool } = require("../config/database");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const {
+  sendDepositAmountEmail,
+  sendPaymentVerifiedEmail,
   sendAppointmentEmail,
-  sendCertificateReadyEmail
-} = require('../services/emailService');
+  sendCertificateReadyEmail,
+} = require("../services/emailService");
 
 // Admin Login
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const [rows] = await pool.execute(
-      'SELECT * FROM users WHERE email = ?',
-      [email.toLowerCase()]
-    );
+    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [
+      email.toLowerCase(),
+    ]);
 
     if (rows.length === 0) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: "Invalid credentials",
       });
     }
 
@@ -31,42 +30,41 @@ const adminLogin = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: "Invalid credentials",
       });
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
-        id: user.id, 
-        email: user.email, 
+      {
+        id: user.id,
+        email: user.email,
         role: user.role,
-        type: 'admin'
+        type: "admin",
       },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: "24h" }
     );
 
     res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: {
         token,
         user: {
           id: user.id,
           email: user.email,
           fullName: user.full_name,
-          role: user.role
-        }
-      }
+          role: user.role,
+        },
+      },
     });
-
   } catch (error) {
-    console.error('Error in admin login:', error);
+    console.error("Error in admin login:", error);
     res.status(500).json({
       success: false,
-      message: 'Login failed',
-      error: error.message
+      message: "Login failed",
+      error: error.message,
     });
   }
 };
@@ -77,37 +75,43 @@ const getAllApplications = async (req, res) => {
     const { status, search, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
-    let query = 'SELECT * FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL';
+    let query =
+      "SELECT * FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL";
     const params = [];
 
     if (status) {
-      query += ' AND status = ?';
+      query += " AND status = ?";
       params.push(status);
     }
 
     if (search) {
-      query += ' AND (application_number LIKE ? OR groom_full_name LIKE ? OR bride_full_name LIKE ?)';
+      query +=
+        " AND (application_number LIKE ? OR groom_full_name LIKE ? OR bride_full_name LIKE ?)";
       const searchTerm = `%${search}%`;
       params.push(searchTerm, searchTerm, searchTerm);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+    query += ` ORDER BY created_at DESC LIMIT ${parseInt(
+      limit
+    )} OFFSET ${parseInt(offset)}`;
     // params for limit/offset removed because they are now injected
     // params.push(parseInt(limit), parseInt(offset));
 
     const [applications] = await pool.execute(query, params);
 
     // Get total count
-    let countQuery = 'SELECT COUNT(*) as total FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL';
+    let countQuery =
+      "SELECT COUNT(*) as total FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL";
     const countParams = [];
-    
+
     if (status) {
-      countQuery += ' AND status = ?';
+      countQuery += " AND status = ?";
       countParams.push(status);
     }
-    
+
     if (search) {
-      countQuery += ' AND (application_number LIKE ? OR groom_full_name LIKE ? OR bride_full_name LIKE ?)';
+      countQuery +=
+        " AND (application_number LIKE ? OR groom_full_name LIKE ? OR bride_full_name LIKE ?)";
       const searchTerm = `%${search}%`;
       countParams.push(searchTerm, searchTerm, searchTerm);
     }
@@ -123,17 +127,16 @@ const getAllApplications = async (req, res) => {
           page: parseInt(page),
           limit: parseInt(limit),
           total,
-          pages: Math.ceil(total / limit)
-        }
-      }
+          pages: Math.ceil(total / limit),
+        },
+      },
     });
-
   } catch (error) {
-    console.error('Error getting applications:', error);
+    console.error("Error getting applications:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch applications',
-      error: error.message
+      message: "Failed to fetch applications",
+      error: error.message,
     });
   }
 };
@@ -144,20 +147,20 @@ const getApplicationById = async (req, res) => {
     const { id } = req.params;
 
     const [applications] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
+      "SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [id]
     );
 
     if (applications.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
     // Get witnesses
     const [witnesses] = await pool.execute(
-      'SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order',
+      "SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order",
       [id]
     );
 
@@ -165,16 +168,15 @@ const getApplicationById = async (req, res) => {
       success: true,
       data: {
         application: applications[0],
-        witnesses
-      }
+        witnesses,
+      },
     });
-
   } catch (error) {
-    console.error('Error getting application:', error);
+    console.error("Error getting application:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch application',
-      error: error.message
+      message: "Failed to fetch application",
+      error: error.message,
     });
   }
 };
@@ -188,14 +190,14 @@ const verifyDocuments = async (req, res) => {
 
     // Get application to check if documents exist (exclude deleted)
     const [appRows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
+      "SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [id]
     );
 
     if (appRows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
@@ -205,7 +207,7 @@ const verifyDocuments = async (req, res) => {
     if (!app.groom_id_path || !app.bride_id_path) {
       return res.status(400).json({
         success: false,
-        message: 'Required documents are not uploaded yet'
+        message: "Required documents are not uploaded yet",
       });
     }
 
@@ -240,15 +242,14 @@ const verifyDocuments = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Documents verified successfully and deposit amount set to £200'
+      message: "Documents verified successfully and deposit amount set to £200",
     });
-
   } catch (error) {
-    console.error('Error verifying documents:', error);
+    console.error("Error verifying documents:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to verify documents',
-      error: error.message
+      message: "Failed to verify documents",
+      error: error.message,
     });
   }
 };
@@ -263,7 +264,7 @@ const setDepositAmount = async (req, res) => {
     if (!depositAmount || depositAmount <= 0) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid deposit amount'
+        message: "Invalid deposit amount",
       });
     }
 
@@ -295,15 +296,14 @@ const setDepositAmount = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Deposit amount set successfully'
+      message: "Deposit amount set successfully",
     });
-
   } catch (error) {
-    console.error('Error setting deposit amount:', error);
+    console.error("Error setting deposit amount:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to set deposit amount',
-      error: error.message
+      message: "Failed to set deposit amount",
+      error: error.message,
     });
   }
 };
@@ -341,15 +341,14 @@ const verifyPayment = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Payment verified successfully'
+      message: "Payment verified successfully",
     });
-
   } catch (error) {
-    console.error('Error verifying payment:', error);
+    console.error("Error verifying payment:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to verify payment',
-      error: error.message
+      message: "Failed to verify payment",
+      error: error.message,
     });
   }
 };
@@ -387,15 +386,14 @@ const scheduleAppointment = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Appointment scheduled successfully'
+      message: "Appointment scheduled successfully",
     });
-
   } catch (error) {
-    console.error('Error scheduling appointment:', error);
+    console.error("Error scheduling appointment:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to schedule appointment',
-      error: error.message
+      message: "Failed to schedule appointment",
+      error: error.message,
     });
   }
 };
@@ -413,39 +411,38 @@ const markComplete = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Application marked as completed'
+      message: "Application marked as completed",
     });
-
   } catch (error) {
-    console.error('Error marking complete:', error);
+    console.error("Error marking complete:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to mark application as complete',
-      error: error.message
+      message: "Failed to mark application as complete",
+      error: error.message,
     });
   }
 };
 
 // Generate Certificate
 const generateCertificate = async (req, res) => {
-  const { generateCertificatePDF } = require('../services/certificateService');
-  
+  const { generateCertificatePDF } = require("../services/certificateService");
+
   try {
     const { id } = req.params;
     // Check if email notification should be sent (default: true)
     // If notify=false is passed, skip sending email (e.g., when admin just wants to print)
-    const shouldNotify = req.query.notify !== 'false';
+    const shouldNotify = req.query.notify !== "false";
 
     // Get application data (exclude deleted)
     const [appRows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
+      "SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [id]
     );
 
     if (appRows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
@@ -453,7 +450,7 @@ const generateCertificate = async (req, res) => {
 
     // Get witnesses
     const [witnesses] = await pool.execute(
-      'SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order',
+      "SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order",
       [id]
     );
 
@@ -487,18 +484,17 @@ const generateCertificate = async (req, res) => {
 
     res.json({
       success: true,
-      message: shouldNotify 
-        ? 'Certificate generated successfully' 
-        : 'Certificate generated successfully (no notification sent)',
-      data: { certificateUrl }
+      message: shouldNotify
+        ? "Certificate generated successfully"
+        : "Certificate generated successfully (no notification sent)",
+      data: { certificateUrl },
     });
-
   } catch (error) {
-    console.error('Error generating certificate:', error);
+    console.error("Error generating certificate:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate certificate',
-      error: error.message
+      message: "Failed to generate certificate",
+      error: error.message,
     });
   }
 };
@@ -516,14 +512,14 @@ const deleteApplication = async (req, res) => {
 
     // Get application data first to check if it exists
     const [appRows] = await pool.execute(
-      'SELECT * FROM applications WHERE id = ?',
+      "SELECT * FROM applications WHERE id = ?",
       [id]
     );
 
     if (appRows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
@@ -533,7 +529,7 @@ const deleteApplication = async (req, res) => {
     if (application.is_deleted) {
       return res.status(400).json({
         success: false,
-        message: 'Application is already deleted'
+        message: "Application is already deleted",
       });
     }
 
@@ -541,21 +537,21 @@ const deleteApplication = async (req, res) => {
     // All records (application, witnesses, notifications) remain in database
     // Files are also preserved for audit purposes
     await pool.execute(
-      'UPDATE applications SET is_deleted = TRUE WHERE id = ?',
+      "UPDATE applications SET is_deleted = TRUE WHERE id = ?",
       [id]
     );
 
     res.json({
       success: true,
-      message: 'Application deleted successfully (soft delete - record preserved in database)'
+      message:
+        "Application deleted successfully (soft delete - record preserved in database)",
     });
-
   } catch (error) {
-    console.error('Error deleting application:', error);
+    console.error("Error deleting application:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete application',
-      error: error.message
+      message: "Failed to delete application",
+      error: error.message,
     });
   }
 };
@@ -570,5 +566,5 @@ module.exports = {
   scheduleAppointment,
   markComplete,
   generateCertificate,
-  deleteApplication
+  deleteApplication,
 };
