@@ -10,6 +10,20 @@ if (
 const { sendPaymentVerifiedEmail } = require("../services/emailService");
 const { createNotification } = require("./notificationController");
 
+// Helper function to get frontend URL based on environment
+const getFrontendUrl = () => {
+  // If FRONTEND_URL is explicitly set, use it
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL;
+  }
+  // Otherwise, determine based on NODE_ENV
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:5173';
+  }
+  // Default to production URL
+  return 'https://nikahapp.jamiyat.org';
+};
+
 // Create Payment Intent
 // Create Checkout Session
 const createPaymentIntent = async (req, res) => {
@@ -60,12 +74,8 @@ const createPaymentIntent = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${
-        process.env.FRONTEND_URL || "http://localhost:5173"
-      }/applicant/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${
-        process.env.FRONTEND_URL || "http://localhost:5173"
-      }/applicant/dashboard?payment_cancelled=true`,
+      success_url: `${getFrontendUrl()}/applicant/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${getFrontendUrl()}/applicant/dashboard?payment_cancelled=true`,
       metadata: {
         applicationId: applicationId.toString(),
       },
