@@ -4,7 +4,7 @@ const { transporter } = require('../config/email');
 const { pool } = require('../config/database');
 const { formatDate, formatCurrency } = require('../utils/helpers');
 
-// Get logo URL - uses frontend URL where logo.svg is hosted
+// Get logo URL - uses frontend URL where logo (2).png is hosted
 const getLogoUrl = () => {
   let frontendUrl;
   if (process.env.FRONTEND_URL) {
@@ -16,7 +16,8 @@ const getLogoUrl = () => {
   }
   // Remove trailing slash to prevent double slashes
   frontendUrl = frontendUrl.replace(/\/+$/, "");
-  return `${frontendUrl}/logo.svg`;
+  // URL encode the filename to handle spaces
+  return `${frontendUrl}/logo%20(2).png`;
 };
 
 // Template helper function
