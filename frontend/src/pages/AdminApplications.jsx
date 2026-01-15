@@ -9,6 +9,7 @@ import {
   scheduleAppointment as scheduleAPI,
   generateCertificate as generateCertAPI,
   deleteApplication as deleteApplicationAPI,
+  updateApplicationNumber,
 } from "../services/api";
 import toast from "react-hot-toast";
 import {
@@ -24,6 +25,9 @@ import {
   ChevronRight,
   Trash2,
   AlertTriangle,
+  Plus,
+  Check,
+  X,
 } from "lucide-react";
 
 import { useSearchParams } from "react-router-dom";
@@ -40,6 +44,10 @@ export default function AdminApplications() {
   const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'schedule', 'view', 'delete'
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [deleteAppData, setDeleteAppData] = useState(null); // { id, applicationNumber }
+
+  // Edit Application Number State
+  const [editingAppId, setEditingAppId] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
 
   // Form States
   const [appointmentData, setAppointmentData] = useState({
@@ -167,6 +175,38 @@ export default function AdminApplications() {
     }
   };
 
+  // Edit Application Number Handlers
+  const startEditing = (appId, currentNumber) => {
+    setEditingAppId(appId);
+    setEditingValue(currentNumber);
+  };
+
+  const cancelEditing = () => {
+    setEditingAppId(null);
+    setEditingValue("");
+  };
+
+  const handleSaveApplicationNumber = async (appId) => {
+    if (!editingValue.trim()) {
+      toast.error("Application number cannot be empty");
+      return;
+    }
+
+    const toastId = toast.loading("Updating application number...");
+    try {
+      await updateApplicationNumber(appId, editingValue.trim());
+      toast.success("Application number updated successfully!", { id: toastId });
+      setEditingAppId(null);
+      setEditingValue("");
+      fetchApplications();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update application number",
+        { id: toastId }
+      );
+    }
+  };
+
   const StatusBadge = ({ status }) => {
     const styles = {
       submitted: "badge-info",
@@ -199,6 +239,9 @@ export default function AdminApplications() {
           padding: "1.5rem 2rem",
           borderRadius: "var(--radius-lg)",
           marginBottom: "1.5rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <div>
@@ -215,6 +258,32 @@ export default function AdminApplications() {
             Manage and track all nikkah applications.
           </p>
         </div>
+        <Link
+          to="/admin/applications/manual"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.75rem 1.5rem",
+            background: "rgba(255,255,255,0.15)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: "var(--radius-md)",
+            color: "white",
+            textDecoration: "none",
+            fontWeight: 500,
+            fontSize: "0.875rem",
+            transition: "all 0.2s",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.25)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.15)";
+          }}
+        >
+          <Plus size={18} />
+          Add Manual Application
+        </Link>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
@@ -332,7 +401,95 @@ export default function AdminApplications() {
                       color: "var(--slate-500)",
                     }}
                   >
-                    #{app.application_number}
+                    {editingAppId === app.id ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={editingValue}
+                          onChange={(e) => setEditingValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSaveApplicationNumber(app.id);
+                            } else if (e.key === "Escape") {
+                              cancelEditing();
+                            }
+                          }}
+                          style={{
+                            fontFamily: "monospace",
+                            padding: "0.25rem 0.5rem",
+                            border: "1px solid var(--brand-500)",
+                            borderRadius: "4px",
+                            fontSize: "0.875rem",
+                            width: "200px",
+                          }}
+                          autoFocus
+                        />
+                        <Check
+                          size={16}
+                          onClick={() => handleSaveApplicationNumber(app.id)}
+                          style={{
+                            color: "var(--success)",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.2)";
+                            e.currentTarget.style.opacity = "0.8";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
+                            e.currentTarget.style.opacity = "1";
+                          }}
+                          title="Save"
+                        />
+                        <X
+                          size={16}
+                          onClick={cancelEditing}
+                          style={{
+                            color: "#ef4444",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.2)";
+                            e.currentTarget.style.opacity = "0.8";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
+                            e.currentTarget.style.opacity = "1";
+                          }}
+                          title="Cancel"
+                        />
+                      </div>
+                    ) : (
+                      <span
+                        onClick={() => startEditing(app.id, app.application_number)}
+                        style={{
+                          display: "inline-block",
+                          cursor: "pointer",
+                          padding: "0.25rem 0.5rem",
+                          borderRadius: "4px",
+                          transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+                          e.currentTarget.style.color = "var(--brand-600)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.color = "var(--slate-500)";
+                        }}
+                        title="Click to edit application number"
+                      >
+                        #{app.application_number}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{app.groom_full_name}</div>

@@ -207,8 +207,8 @@ const submitApplication = async (req, res) => {
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
-          status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          payment_status, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber, userId,
           groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
@@ -223,6 +223,7 @@ const submitApplication = async (req, res) => {
           brideRepPlaceOfBirth || null, brideRepAddress || null,
           mahrAmount || null, mahrType || null,
           solemnisedDate || null, solemnisedPlace || null, solemnisedAddress || null,
+          'pending_admin_review',  // payment_status default for user-submitted applications
           'admin_review'  // status value
         ]
       );

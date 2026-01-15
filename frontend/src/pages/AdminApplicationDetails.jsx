@@ -881,6 +881,18 @@ export default function AdminApplicationDetails() {
                       path={application.bride_id_path}
                     />
                   )}
+                  {application.witness1_id_path && (
+                    <DocumentCard
+                      title="Witness 1 ID"
+                      path={application.witness1_id_path}
+                    />
+                  )}
+                  {application.witness2_id_path && (
+                    <DocumentCard
+                      title="Witness 2 ID"
+                      path={application.witness2_id_path}
+                    />
+                  )}
                   {application.mahr_declaration_path && (
                     <DocumentCard
                       title="Mahr Declaration"
@@ -899,6 +911,18 @@ export default function AdminApplicationDetails() {
                       path={application.islamic_divorce_doc_path}
                     />
                   )}
+                  {application.groom_conversion_cert_path && (
+                    <DocumentCard
+                      title="Groom Conversion Certificate"
+                      path={application.groom_conversion_cert_path}
+                    />
+                  )}
+                  {application.bride_conversion_cert_path && (
+                    <DocumentCard
+                      title="Bride Conversion Certificate"
+                      path={application.bride_conversion_cert_path}
+                    />
+                  )}
                   {application.statutory_declaration_path && (
                     <DocumentCard
                       title="Statutory Decl."
@@ -911,9 +935,13 @@ export default function AdminApplicationDetails() {
                   application.payment_receipt_url,
                   application.groom_id_path,
                   application.bride_id_path,
+                  application.witness1_id_path,
+                  application.witness2_id_path,
                   application.mahr_declaration_path,
                   application.civil_divorce_doc_path,
                   application.islamic_divorce_doc_path,
+                  application.groom_conversion_cert_path,
+                  application.bride_conversion_cert_path,
                   application.statutory_declaration_path,
                 ].some(Boolean) && (
                   <p className="text-center text-slate-400 text-sm py-8 italic">

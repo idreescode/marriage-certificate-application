@@ -136,7 +136,20 @@ export const generateCertificate = (id, notify = true) => {
   const url = `/admin/applications/${id}/generate-certificate${notify ? '' : '?notify=false'}`;
   return api.post(url);
 };
+export const updateApplicationNumber = (id, applicationNumber) => 
+  api.put(`/admin/applications/${id}/application-number`, { applicationNumber });
 export const deleteApplication = (id) => api.delete(`/admin/applications/${id}`);
+export const createManualApplication = (data) => {
+  // Check if data is FormData (for file uploads)
+  if (data instanceof FormData) {
+    return api.post('/admin/applications/manual', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+  return api.post('/admin/applications/manual', data);
+};
 
 // Payment APIs
 export const createCheckoutSession = () => api.post('/payment/create-checkout-session');

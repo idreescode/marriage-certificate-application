@@ -11,8 +11,11 @@ const {
   scheduleAppointment,
   markComplete,
   generateCertificate,
-  deleteApplication
+  updateApplicationNumber,
+  deleteApplication,
+  createManualApplication
 } = require('../controllers/adminController');
+const { uploadDocuments } = require('../middleware/upload');
 
 // POST /api/admin/login - Admin login
 router.post('/login', adminLogin);
@@ -45,7 +48,27 @@ router.put('/applications/:id/complete', markComplete);
 // POST /api/admin/applications/:id/generate-certificate - Generate certificate
 router.post('/applications/:id/generate-certificate', generateCertificate);
 
+// PUT /api/admin/applications/:id/application-number - Update application number
+router.put('/applications/:id/application-number', updateApplicationNumber);
+
 // DELETE /api/admin/applications/:id - Delete application
 router.delete('/applications/:id', deleteApplication);
+
+// POST /api/admin/applications/manual - Create application manually (admin only)
+router.post('/applications/manual', 
+  uploadDocuments.fields([
+    { name: 'groomId', maxCount: 1 },
+    { name: 'brideId', maxCount: 1 },
+    { name: 'witness1Id', maxCount: 1 },
+    { name: 'witness2Id', maxCount: 1 },
+    { name: 'mahrDeclaration', maxCount: 1 },
+    { name: 'civilDivorceDoc', maxCount: 1 },
+    { name: 'islamicDivorceDoc', maxCount: 1 },
+    { name: 'groomConversionCert', maxCount: 1 },
+    { name: 'brideConversionCert', maxCount: 1 },
+    { name: 'statutoryDeclaration', maxCount: 1 }
+  ]),
+  createManualApplication
+);
 
 module.exports = router;
