@@ -849,7 +849,7 @@ const createManualApplication = async (req, res) => {
           userId = existingUser[0].id;
           console.log("Using existing user with ID:", userId);
         } else {
-          // Create User
+          // Create User (inside transaction - will be rolled back if application fails)
           console.log("Creating user with email:", portalEmail);
           const [userResult] = await connection.execute(
             'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
@@ -1273,11 +1273,13 @@ const createManualApplication = async (req, res) => {
       }
     } catch (transactionError) {
       // Rollback transaction if any error occurred
+      // This will undo user creation if application insertion failed
       try {
         // Check if connection is still active before rollback
         if (connection && !connection._fatalError) {
           await connection.rollback();
           console.error("Transaction Rolled Back due to:", transactionError);
+          console.error("User creation has been rolled back - no user was created");
         }
       } catch (rollbackError) {
         console.error("Error during rollback:", rollbackError);

@@ -189,7 +189,7 @@ const submitApplication = async (req, res) => {
         });
       }
 
-      // 1. Create User
+      // 1. Create User (inside transaction - will be rolled back if application fails)
       console.log("Creating user with email:", portalEmail);
       const [userResult] = await connection.execute(
         'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
@@ -199,6 +199,7 @@ const submitApplication = async (req, res) => {
       console.log("User created with ID:", userId);
 
       // 2. Insert Application (linked to user_id)
+      // If this fails, the transaction will rollback and the user will NOT be created
       console.log("Attempting to insert application for user_id:", userId);
       const [result] = await connection.execute(
         `INSERT INTO applications (
@@ -354,8 +355,10 @@ const submitApplication = async (req, res) => {
         },
       });
     } catch (transactionError) {
+      // Rollback transaction - this will undo user creation if application insertion failed
       await connection.rollback();
       console.error("Transaction Rolled Back due to:", transactionError);
+      console.error("User creation has been rolled back - no user was created");
       throw transactionError;
     } finally {
       connection.release();
