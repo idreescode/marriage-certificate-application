@@ -208,11 +208,11 @@ const submitApplication = async (req, res) => {
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
           payment_status, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber, userId,
           groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
-          groomIdNumber || null, groomAddress || null, portalEmail,
+          groomIdNumber || null, groomAddress || null,
           groomConfirm || false, groomPersonally || false, groomRepresentative || false,
           groomRepName || null, groomRepFatherName || null, groomRepDateOfBirth || null,
           groomRepPlaceOfBirth || null, groomRepAddress || null,

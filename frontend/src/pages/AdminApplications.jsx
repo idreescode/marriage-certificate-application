@@ -30,6 +30,8 @@ import {
   X,
   Pencil,
 } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { useSearchParams } from "react-router-dom";
 
@@ -56,6 +58,8 @@ export default function AdminApplications() {
     time: "",
     location: "",
   });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
 
   useEffect(() => {
     fetchApplications();
@@ -86,6 +90,8 @@ export default function AdminApplications() {
   const openSchedule = (id) => {
     setSelectedAppId(id);
     setAppointmentData({ date: "", time: "", location: "" });
+    setSelectedDate(null);
+    setSelectedTime(null);
     setActiveModal("schedule");
   };
 
@@ -775,31 +781,161 @@ export default function AdminApplications() {
             <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
               Date
             </label>
-            <input
-              type="date"
-              className="form-input"
-              value={appointmentData.date}
-              onChange={(e) =>
-                setAppointmentData({ ...appointmentData, date: e.target.value })
-              }
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => {
+                setSelectedDate(date);
+                // Format date as YYYY-MM-DD for backend
+                const formattedDate = date ? date.toISOString().split('T')[0] : "";
+                setAppointmentData({ ...appointmentData, date: formattedDate });
+              }}
+              dateFormat="dd/MM/yyyy"
+              minDate={new Date()}
+              placeholderText="Select appointment date"
               required
+              className="form-input"
               style={{ width: '100%' }}
+              wrapperClassName="date-picker-wrapper"
             />
+            <style>{`
+              .date-picker-wrapper {
+                width: 100%;
+              }
+              .date-picker-wrapper .react-datepicker-wrapper {
+                width: 100%;
+              }
+              .date-picker-wrapper .react-datepicker__input-container input {
+                width: 100%;
+                height: 38px;
+                padding: 8px 12px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 0.875rem;
+                font-family: inherit;
+                color: #334155;
+                background: white;
+                outline: none;
+                transition: all 0.2s;
+              }
+              .date-picker-wrapper .react-datepicker__input-container input:focus {
+                border-color: var(--brand-500);
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+              }
+              .react-datepicker {
+                font-family: inherit;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              }
+              .react-datepicker__header {
+                background-color: var(--brand-600);
+                border-bottom: none;
+                border-radius: 8px 8px 0 0;
+                padding-top: 0.75rem;
+              }
+              .react-datepicker__current-month {
+                color: white;
+                font-weight: 600;
+                padding-bottom: 0.5rem;
+              }
+              .react-datepicker__day-name {
+                color: rgba(255, 255, 255, 0.9);
+                font-weight: 500;
+              }
+              .react-datepicker__day--selected,
+              .react-datepicker__day--keyboard-selected {
+                background-color: var(--brand-600);
+                border-radius: 4px;
+              }
+              .react-datepicker__day:hover {
+                background-color: var(--brand-100);
+                border-radius: 4px;
+              }
+              .react-datepicker__day--today {
+                font-weight: 600;
+              }
+              .react-datepicker__navigation-icon::before {
+                border-color: white;
+              }
+              .react-datepicker__navigation:hover *::before {
+                border-color: rgba(255, 255, 255, 0.8);
+              }
+            `}</style>
           </div>
           <div className="form-group" style={{ marginBottom: '1.25rem' }}>
             <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
               Time
             </label>
-            <input
-              type="time"
-              className="form-input"
-              value={appointmentData.time}
-              onChange={(e) =>
-                setAppointmentData({ ...appointmentData, time: e.target.value })
-              }
+            <DatePicker
+              selected={selectedTime}
+              onChange={(time) => {
+                setSelectedTime(time);
+                // Format time as HH:MM for backend
+                if (time) {
+                  const hours = String(time.getHours()).padStart(2, '0');
+                  const minutes = String(time.getMinutes()).padStart(2, '0');
+                  const formattedTime = `${hours}:${minutes}`;
+                  setAppointmentData({ ...appointmentData, time: formattedTime });
+                } else {
+                  setAppointmentData({ ...appointmentData, time: "" });
+                }
+              }}
+              showTimeSelect
+              showTimeSelectOnly
+              timeIntervals={15}
+              dateFormat="h:mm aa"
+              placeholderText="Select appointment time"
               required
+              className="form-input"
               style={{ width: '100%' }}
+              wrapperClassName="time-picker-wrapper"
             />
+            <style>{`
+              .time-picker-wrapper {
+                width: 100%;
+              }
+              .time-picker-wrapper .react-datepicker-wrapper {
+                width: 100%;
+              }
+              .time-picker-wrapper .react-datepicker__input-container input {
+                width: 100%;
+                height: 38px;
+                padding: 8px 12px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 0.875rem;
+                font-family: inherit;
+                color: #334155;
+                background: white;
+                outline: none;
+                transition: all 0.2s;
+              }
+              .time-picker-wrapper .react-datepicker__input-container input:focus {
+                border-color: var(--brand-500);
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+              }
+              .react-datepicker__time-container {
+                border-left: 1px solid #e2e8f0;
+              }
+              .react-datepicker__time-container .react-datepicker__time {
+                background: white;
+              }
+              .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+                width: 100%;
+                border-radius: 0 0 8px 8px;
+              }
+              .react-datepicker__time-list-item--selected {
+                background-color: var(--brand-600) !important;
+                color: white !important;
+                font-weight: 600;
+              }
+              .react-datepicker__time-list-item:hover {
+                background-color: var(--brand-100);
+              }
+              .react-datepicker__time-list-item--disabled {
+                color: #cbd5e1;
+              }
+            `}</style>
           </div>
           <div className="form-group" style={{ marginBottom: '1.25rem' }}>
             <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
