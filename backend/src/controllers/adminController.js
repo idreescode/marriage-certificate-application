@@ -1171,8 +1171,15 @@ const createManualApplication = async (req, res) => {
 
         // Send confirmation email if email is provided
         console.log("📧 ========== EMAIL SENDING PROCESS START ==========");
-        console.log("📧 Email sending check - portalEmail:", portalEmail, "isNewUser:", isNewUser, "applicationId:", applicationId);
-        
+        console.log(
+          "📧 Email sending check - portalEmail:",
+          portalEmail,
+          "isNewUser:",
+          isNewUser,
+          "applicationId:",
+          applicationId
+        );
+
         if (portalEmail && portalEmail.trim()) {
           try {
             console.log("📧 Email is provided, fetching application data...");
@@ -1182,14 +1189,17 @@ const createManualApplication = async (req, res) => {
                FROM applications WHERE id = ?`,
               [applicationId]
             );
-            
-            console.log("📧 Application data fetched:", appData.length > 0 ? "Found" : "Not found");
+
+            console.log(
+              "📧 Application data fetched:",
+              appData.length > 0 ? "Found" : "Not found"
+            );
             if (appData.length > 0) {
               console.log("📧 Application data:", {
                 id: appData[0].id,
                 application_number: appData[0].application_number,
                 groom_full_name: appData[0].groom_full_name,
-                bride_full_name: appData[0].bride_full_name
+                bride_full_name: appData[0].bride_full_name,
               });
             }
 
@@ -1200,22 +1210,28 @@ const createManualApplication = async (req, res) => {
                 groom_full_name: appData[0].groom_full_name,
                 bride_full_name: appData[0].bride_full_name,
                 portal_email: portalEmail.trim(),
-                portalPassword: isNewUser ? portalPassword : '', // Empty string for existing users (they use their existing password)
+                portalPassword: isNewUser ? portalPassword : "", // Empty string for existing users (they use their existing password)
                 isManualApplication: true, // Flag to indicate this is a manual application
               };
-              
+
               console.log("📧 Calling sendApplicationConfirmation with data:", {
                 id: emailData.id,
                 application_number: emailData.application_number,
                 portal_email: emailData.portal_email,
-                has_portalPassword: !!emailData.portalPassword
+                has_portalPassword: !!emailData.portalPassword,
               });
-              
+
               const emailResult = await sendApplicationConfirmation(emailData);
-              console.log("✅ Application confirmation email sent successfully:", emailResult);
+              console.log(
+                "✅ Application confirmation email sent successfully:",
+                emailResult
+              );
               console.log("✅ Email sent to:", portalEmail);
             } else {
-              console.error("❌ Application data not found for email sending, applicationId:", applicationId);
+              console.error(
+                "❌ Application data not found for email sending, applicationId:",
+                applicationId
+              );
             }
           } catch (emailError) {
             // Don't fail the request if email fails, just log it
@@ -1231,12 +1247,14 @@ const createManualApplication = async (req, res) => {
               command: emailError.command,
               response: emailError.response,
               portalEmail: portalEmail,
-              applicationId: applicationId
+              applicationId: applicationId,
             });
             console.error("❌ ==========================================");
           }
         } else {
-          console.log("⚠️ No email provided or email is empty, skipping email notification");
+          console.log(
+            "⚠️ No email provided or email is empty, skipping email notification"
+          );
           console.log("⚠️ portalEmail value:", portalEmail);
         }
         console.log("📧 ========== EMAIL SENDING PROCESS END ==========");
