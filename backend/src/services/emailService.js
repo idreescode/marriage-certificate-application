@@ -4,6 +4,21 @@ const { transporter } = require('../config/email');
 const { pool } = require('../config/database');
 const { formatDate, formatCurrency } = require('../utils/helpers');
 
+// Get logo URL - uses frontend URL where logo.svg is hosted
+const getLogoUrl = () => {
+  let frontendUrl;
+  if (process.env.FRONTEND_URL) {
+    frontendUrl = process.env.FRONTEND_URL;
+  } else if (process.env.NODE_ENV === "development") {
+    frontendUrl = "http://localhost:5173";
+  } else {
+    frontendUrl = "https://nikahapp.jamiyat.org";
+  }
+  // Remove trailing slash to prevent double slashes
+  frontendUrl = frontendUrl.replace(/\/+$/, "");
+  return `${frontendUrl}/logo.svg`;
+};
+
 // Template helper function
 const loadTemplate = (templateName) => {
   const templatePath = path.join(__dirname, '../templates/email', templateName);
@@ -12,10 +27,15 @@ const loadTemplate = (templateName) => {
 
 const renderTemplate = (templateName, data) => {
   let template = loadTemplate(templateName);
+  // Always include logo_url in the data
+  const templateData = {
+    logo_url: getLogoUrl(),
+    ...data
+  };
   // Replace all placeholders {{key}} with values from data object
-  Object.keys(data).forEach(key => {
+  Object.keys(templateData).forEach(key => {
     const regex = new RegExp(`{{${key}}}`, 'g');
-    template = template.replace(regex, data[key] || '');
+    template = template.replace(regex, templateData[key] || '');
   });
   return template;
 };
