@@ -1279,7 +1279,9 @@ const createManualApplication = async (req, res) => {
         if (connection && !connection._fatalError) {
           await connection.rollback();
           console.error("Transaction Rolled Back due to:", transactionError);
-          console.error("User creation has been rolled back - no user was created");
+          console.error(
+            "User creation has been rolled back - no user was created"
+          );
         }
       } catch (rollbackError) {
         console.error("Error during rollback:", rollbackError);
@@ -1427,7 +1429,10 @@ const updateApplication = async (req, res) => {
     }
 
     // Check application number uniqueness if changed
-    if (applicationNumber && applicationNumber !== application.application_number) {
+    if (
+      applicationNumber &&
+      applicationNumber !== application.application_number
+    ) {
       const [existingNumber] = await pool.execute(
         "SELECT id FROM applications WHERE application_number = ? AND id != ?",
         [applicationNumber, id]
@@ -1441,15 +1446,33 @@ const updateApplication = async (req, res) => {
     }
 
     // Normalize dates
-    const normalizedGroomDob = groomDateOfBirth ? normalizeDate(groomDateOfBirth) : null;
-    const normalizedBrideDob = brideDateOfBirth ? normalizeDate(brideDateOfBirth) : null;
-    const normalizedGroomRepDob = groomRepDateOfBirth ? normalizeDate(groomRepDateOfBirth) : null;
-    const normalizedBrideRepDob = brideRepDateOfBirth ? normalizeDate(brideRepDateOfBirth) : null;
-    const normalizedWitness1Dob = witness1DateOfBirth ? normalizeDate(witness1DateOfBirth) : null;
-    const normalizedWitness2Dob = witness2DateOfBirth ? normalizeDate(witness2DateOfBirth) : null;
-    const normalizedSolemnisedDate = solemnisedDate ? normalizeDate(solemnisedDate) : null;
-    const normalizedPreferredDate = preferredDate ? normalizeDate(preferredDate) : null;
-    const normalizedAppointmentDate = appointmentDate ? normalizeDate(appointmentDate) : null;
+    const normalizedGroomDob = groomDateOfBirth
+      ? normalizeDate(groomDateOfBirth)
+      : null;
+    const normalizedBrideDob = brideDateOfBirth
+      ? normalizeDate(brideDateOfBirth)
+      : null;
+    const normalizedGroomRepDob = groomRepDateOfBirth
+      ? normalizeDate(groomRepDateOfBirth)
+      : null;
+    const normalizedBrideRepDob = brideRepDateOfBirth
+      ? normalizeDate(brideRepDateOfBirth)
+      : null;
+    const normalizedWitness1Dob = witness1DateOfBirth
+      ? normalizeDate(witness1DateOfBirth)
+      : null;
+    const normalizedWitness2Dob = witness2DateOfBirth
+      ? normalizeDate(witness2DateOfBirth)
+      : null;
+    const normalizedSolemnisedDate = solemnisedDate
+      ? normalizeDate(solemnisedDate)
+      : null;
+    const normalizedPreferredDate = preferredDate
+      ? normalizeDate(preferredDate)
+      : null;
+    const normalizedAppointmentDate = appointmentDate
+      ? normalizeDate(appointmentDate)
+      : null;
 
     // Handle file uploads - only update if new files are provided
     const fileFields = {
@@ -1677,7 +1700,9 @@ const updateApplication = async (req, res) => {
     updateValues.push(id);
 
     // Update application
-    const updateQuery = `UPDATE applications SET ${updateFields.join(", ")} WHERE id = ?`;
+    const updateQuery = `UPDATE applications SET ${updateFields.join(
+      ", "
+    )} WHERE id = ?`;
     await pool.execute(updateQuery, updateValues);
 
     // Update email in users table if provided
@@ -1695,10 +1720,10 @@ const updateApplication = async (req, res) => {
           });
         }
         // Update the email in users table
-        await pool.execute(
-          "UPDATE users SET email = ? WHERE id = ?",
-          [email, application.user_id]
-        );
+        await pool.execute("UPDATE users SET email = ? WHERE id = ?", [
+          email,
+          application.user_id,
+        ]);
       } catch (error) {
         console.error("Error updating user email:", error);
         return res.status(500).json({
