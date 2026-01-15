@@ -31,6 +31,7 @@ jobs:
           EMAIL_PORT=${{ secrets.EMAIL_PORT }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          ADMIN_EMAILS=${{ secrets.ADMIN_EMAILS || 'admin@jamiyat.org' }}
           STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_PUBLISH_KEY=${{ secrets.STRIPE_PUBLISH_KEY }}
           FRONTEND_URL=${{ secrets.FRONTEND_URL || 'https://nikahapp.jamiyat.org' }}
