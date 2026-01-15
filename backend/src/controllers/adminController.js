@@ -152,8 +152,12 @@ const getApplicationById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Join with users table to get portal_email from users.email
     const [applications] = await pool.execute(
-      "SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
+      `SELECT a.*, u.email as portal_email
+       FROM applications a
+       LEFT JOIN users u ON a.user_id = u.id
+       WHERE a.id = ? AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)`,
       [id]
     );
 
@@ -661,7 +665,6 @@ const createManualApplication = async (req, res) => {
       groomDateOfBirth,
       groomPlaceOfBirth,
       groomAddress,
-      groomPhone,
       groomEmail,
       groomIdNumber,
       groomConfirm,
@@ -679,7 +682,6 @@ const createManualApplication = async (req, res) => {
       brideDateOfBirth,
       bridePlaceOfBirth,
       brideAddress,
-      bridePhone,
       brideEmail,
       brideIdNumber,
       brideConfirm,
@@ -697,13 +699,11 @@ const createManualApplication = async (req, res) => {
       witness1DateOfBirth,
       witness1PlaceOfBirth,
       witness1Address,
-      witness1Phone,
       witness2Name,
       witness2FatherName,
       witness2DateOfBirth,
       witness2PlaceOfBirth,
       witness2Address,
-      witness2Phone,
       // Mahr
       mahrAmount,
       mahrType,
@@ -910,12 +910,12 @@ const createManualApplication = async (req, res) => {
             `INSERT INTO applications (
           application_number, user_id,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
-          groom_id_number, groom_address, groom_email, groom_phone,
+          groom_id_number, groom_address,
           groom_confirm, groom_personally, groom_representative,
           groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
           groom_rep_place_of_birth, groom_rep_address,
           bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
-          bride_id_number, bride_address, bride_email, bride_phone,
+          bride_id_number, bride_address,
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
@@ -928,7 +928,7 @@ const createManualApplication = async (req, res) => {
           groom_id_path, bride_id_path, witness1_id_path, witness2_id_path,
           mahr_declaration_path, civil_divorce_doc_path, islamic_divorce_doc_path,
           groom_conversion_cert_path, bride_conversion_cert_path, statutory_declaration_path
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               finalApplicationNumber,
               userId,
@@ -939,7 +939,6 @@ const createManualApplication = async (req, res) => {
               groomIdNumber || null,
               groomAddress || null,
               groomEmail || portalEmail || null,
-              groomPhone || contactNumber || null,
               groomConfirm || false,
               groomPersonally || false,
               groomRepresentative || false,
@@ -954,8 +953,6 @@ const createManualApplication = async (req, res) => {
               bridePlaceOfBirth || null,
               brideIdNumber || null,
               brideAddress || null,
-              brideEmail || portalEmail || null,
-              bridePhone || contactNumber || null,
               brideConfirm || false,
               bridePersonally || false,
               brideRepresentative || false,
@@ -1302,10 +1299,6 @@ const createManualApplication = async (req, res) => {
     // Handle MySQL Duplicate Entry Error
     if (error.code === "ER_DUP_ENTRY") {
       let message = "Duplicate entry found.";
-      if (error.message.includes("groom_email"))
-        message = "This Groom Email is already registered.";
-      if (error.message.includes("bride_email"))
-        message = "This Bride Email is already registered.";
       if (error.message.includes("application_number"))
         message = "Application number collision, please try again.";
       if (error.message.includes("portal_email"))
@@ -1325,6 +1318,495 @@ const createManualApplication = async (req, res) => {
   }
 };
 
+// Update Application (Admin Only)
+const updateApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const files = req.files || {};
+    const adminId = req.user.id;
+
+    // Extract all form data
+    const {
+      // Application Number
+      applicationNumber,
+      // Groom Information
+      groomName,
+      groomFatherName,
+      groomDateOfBirth,
+      groomPlaceOfBirth,
+      groomAddress,
+      groomEmail,
+      groomIdNumber,
+      groomConfirm,
+      groomPersonally,
+      groomRepresentative,
+      // Groom Representative
+      groomRepName,
+      groomRepFatherName,
+      groomRepDateOfBirth,
+      groomRepPlaceOfBirth,
+      groomRepAddress,
+      // Bride Information
+      brideName,
+      brideFatherName,
+      brideDateOfBirth,
+      bridePlaceOfBirth,
+      brideAddress,
+      brideEmail,
+      brideIdNumber,
+      brideConfirm,
+      bridePersonally,
+      brideRepresentative,
+      // Bride Representative
+      brideRepName,
+      brideRepFatherName,
+      brideRepDateOfBirth,
+      brideRepPlaceOfBirth,
+      brideRepAddress,
+      // Witnesses
+      witness1Name,
+      witness1FatherName,
+      witness1DateOfBirth,
+      witness1PlaceOfBirth,
+      witness1Address,
+      witness2Name,
+      witness2FatherName,
+      witness2DateOfBirth,
+      witness2PlaceOfBirth,
+      witness2Address,
+      // Mahr
+      mahrAmount,
+      mahrType,
+      // Solemnisation
+      solemnisedDate,
+      solemnisedPlace,
+      solemnisedAddress,
+      // Contact & Status
+      email,
+      contactNumber,
+      status,
+      depositAmount,
+      paymentStatus,
+      appointmentDate,
+      appointmentTime,
+      appointmentLocation,
+      preferredDate,
+      specialRequests,
+    } = req.body;
+
+    // Check if application exists
+    const [existingApp] = await pool.execute(
+      "SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
+      [id]
+    );
+
+    if (existingApp.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    const application = existingApp[0];
+
+    // Validate required fields
+    if (groomName !== undefined && !groomName) {
+      return res.status(400).json({
+        success: false,
+        message: "Groom name is required",
+      });
+    }
+
+    if (brideName !== undefined && !brideName) {
+      return res.status(400).json({
+        success: false,
+        message: "Bride name is required",
+      });
+    }
+
+    // Check application number uniqueness if changed
+    if (applicationNumber && applicationNumber !== application.application_number) {
+      const [existingNumber] = await pool.execute(
+        "SELECT id FROM applications WHERE application_number = ? AND id != ?",
+        [applicationNumber, id]
+      );
+      if (existingNumber.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: "Application number already exists",
+        });
+      }
+    }
+
+    // Normalize dates
+    const normalizedGroomDob = groomDateOfBirth ? normalizeDate(groomDateOfBirth) : null;
+    const normalizedBrideDob = brideDateOfBirth ? normalizeDate(brideDateOfBirth) : null;
+    const normalizedGroomRepDob = groomRepDateOfBirth ? normalizeDate(groomRepDateOfBirth) : null;
+    const normalizedBrideRepDob = brideRepDateOfBirth ? normalizeDate(brideRepDateOfBirth) : null;
+    const normalizedWitness1Dob = witness1DateOfBirth ? normalizeDate(witness1DateOfBirth) : null;
+    const normalizedWitness2Dob = witness2DateOfBirth ? normalizeDate(witness2DateOfBirth) : null;
+    const normalizedSolemnisedDate = solemnisedDate ? normalizeDate(solemnisedDate) : null;
+    const normalizedPreferredDate = preferredDate ? normalizeDate(preferredDate) : null;
+    const normalizedAppointmentDate = appointmentDate ? normalizeDate(appointmentDate) : null;
+
+    // Handle file uploads - only update if new files are provided
+    const fileFields = {
+      groomId: "groom_id_path",
+      brideId: "bride_id_path",
+      witness1Id: "witness1_id_path",
+      witness2Id: "witness2_id_path",
+      mahrDeclaration: "mahr_declaration_path",
+      civilDivorceDoc: "civil_divorce_doc_path",
+      islamicDivorceDoc: "islamic_divorce_doc_path",
+      groomConversionCert: "groom_conversion_cert_path",
+      brideConversionCert: "bride_conversion_cert_path",
+      statutoryDeclaration: "statutory_declaration_path",
+    };
+
+    // Build update query dynamically
+    const updateFields = [];
+    const updateValues = [];
+
+    // Application number
+    if (applicationNumber !== undefined) {
+      updateFields.push("application_number = ?");
+      updateValues.push(applicationNumber);
+    }
+
+    // Groom fields
+    if (groomName !== undefined) {
+      updateFields.push("groom_full_name = ?");
+      updateValues.push(groomName);
+    }
+    if (groomFatherName !== undefined) {
+      updateFields.push("groom_father_name = ?");
+      updateValues.push(groomFatherName || null);
+    }
+    if (normalizedGroomDob !== undefined) {
+      updateFields.push("groom_date_of_birth = ?");
+      updateValues.push(normalizedGroomDob);
+    }
+    if (groomPlaceOfBirth !== undefined) {
+      updateFields.push("groom_place_of_birth = ?");
+      updateValues.push(groomPlaceOfBirth || null);
+    }
+    if (groomAddress !== undefined) {
+      updateFields.push("groom_address = ?");
+      updateValues.push(groomAddress);
+    }
+    if (groomIdNumber !== undefined) {
+      updateFields.push("groom_id_number = ?");
+      updateValues.push(groomIdNumber);
+    }
+    if (groomConfirm !== undefined) {
+      updateFields.push("groom_confirm = ?");
+      updateValues.push(groomConfirm);
+    }
+    if (groomPersonally !== undefined) {
+      updateFields.push("groom_personally = ?");
+      updateValues.push(groomPersonally);
+    }
+    if (groomRepresentative !== undefined) {
+      updateFields.push("groom_representative = ?");
+      updateValues.push(groomRepresentative);
+    }
+
+    // Groom Representative
+    if (groomRepName !== undefined) {
+      updateFields.push("groom_rep_name = ?");
+      updateValues.push(groomRepName || null);
+    }
+    if (groomRepFatherName !== undefined) {
+      updateFields.push("groom_rep_father_name = ?");
+      updateValues.push(groomRepFatherName || null);
+    }
+    if (normalizedGroomRepDob !== undefined) {
+      updateFields.push("groom_rep_date_of_birth = ?");
+      updateValues.push(normalizedGroomRepDob);
+    }
+    if (groomRepPlaceOfBirth !== undefined) {
+      updateFields.push("groom_rep_place_of_birth = ?");
+      updateValues.push(groomRepPlaceOfBirth || null);
+    }
+    if (groomRepAddress !== undefined) {
+      updateFields.push("groom_rep_address = ?");
+      updateValues.push(groomRepAddress || null);
+    }
+
+    // Bride fields
+    if (brideName !== undefined) {
+      updateFields.push("bride_full_name = ?");
+      updateValues.push(brideName);
+    }
+    if (brideFatherName !== undefined) {
+      updateFields.push("bride_father_name = ?");
+      updateValues.push(brideFatherName || null);
+    }
+    if (normalizedBrideDob !== undefined) {
+      updateFields.push("bride_date_of_birth = ?");
+      updateValues.push(normalizedBrideDob);
+    }
+    if (bridePlaceOfBirth !== undefined) {
+      updateFields.push("bride_place_of_birth = ?");
+      updateValues.push(bridePlaceOfBirth || null);
+    }
+    if (brideAddress !== undefined) {
+      updateFields.push("bride_address = ?");
+      updateValues.push(brideAddress);
+    }
+    if (brideIdNumber !== undefined) {
+      updateFields.push("bride_id_number = ?");
+      updateValues.push(brideIdNumber);
+    }
+    if (brideConfirm !== undefined) {
+      updateFields.push("bride_confirm = ?");
+      updateValues.push(brideConfirm);
+    }
+    if (bridePersonally !== undefined) {
+      updateFields.push("bride_personally = ?");
+      updateValues.push(bridePersonally);
+    }
+    if (brideRepresentative !== undefined) {
+      updateFields.push("bride_representative = ?");
+      updateValues.push(brideRepresentative);
+    }
+
+    // Bride Representative
+    if (brideRepName !== undefined) {
+      updateFields.push("bride_rep_name = ?");
+      updateValues.push(brideRepName || null);
+    }
+    if (brideRepFatherName !== undefined) {
+      updateFields.push("bride_rep_father_name = ?");
+      updateValues.push(brideRepFatherName || null);
+    }
+    if (normalizedBrideRepDob !== undefined) {
+      updateFields.push("bride_rep_date_of_birth = ?");
+      updateValues.push(normalizedBrideRepDob);
+    }
+    if (brideRepPlaceOfBirth !== undefined) {
+      updateFields.push("bride_rep_place_of_birth = ?");
+      updateValues.push(brideRepPlaceOfBirth || null);
+    }
+    if (brideRepAddress !== undefined) {
+      updateFields.push("bride_rep_address = ?");
+      updateValues.push(brideRepAddress || null);
+    }
+
+    // Mahr
+    if (mahrAmount !== undefined) {
+      updateFields.push("mahr_amount = ?");
+      updateValues.push(mahrAmount || null);
+    }
+    if (mahrType !== undefined) {
+      updateFields.push("mahr_type = ?");
+      updateValues.push(mahrType || null);
+    }
+
+    // Solemnisation
+    if (normalizedSolemnisedDate !== undefined) {
+      updateFields.push("solemnised_date = ?");
+      updateValues.push(normalizedSolemnisedDate);
+    }
+    if (solemnisedPlace !== undefined) {
+      updateFields.push("solemnised_place = ?");
+      updateValues.push(solemnisedPlace || null);
+    }
+    if (solemnisedAddress !== undefined) {
+      updateFields.push("solemnised_address = ?");
+      updateValues.push(solemnisedAddress || null);
+    }
+
+    // Contact & Status
+    // Note: email is stored in users table, not applications table
+    // We'll update it separately after updating the application
+    if (contactNumber !== undefined) {
+      // This might map to a contact field, adjust as needed
+    }
+    if (status !== undefined) {
+      updateFields.push("status = ?");
+      updateValues.push(status);
+    }
+    if (depositAmount !== undefined) {
+      updateFields.push("deposit_amount = ?");
+      updateValues.push(depositAmount || null);
+    }
+    if (paymentStatus !== undefined) {
+      updateFields.push("payment_status = ?");
+      updateValues.push(paymentStatus);
+    }
+    if (normalizedAppointmentDate !== undefined) {
+      updateFields.push("appointment_date = ?");
+      updateValues.push(normalizedAppointmentDate);
+    }
+    if (appointmentTime !== undefined) {
+      updateFields.push("appointment_time = ?");
+      updateValues.push(appointmentTime || null);
+    }
+    if (appointmentLocation !== undefined) {
+      updateFields.push("appointment_location = ?");
+      updateValues.push(appointmentLocation || null);
+    }
+    if (normalizedPreferredDate !== undefined) {
+      updateFields.push("preferred_date = ?");
+      updateValues.push(normalizedPreferredDate);
+    }
+    if (specialRequests !== undefined) {
+      updateFields.push("special_requests = ?");
+      updateValues.push(specialRequests || null);
+    }
+
+    // Handle file uploads
+    for (const [fieldName, dbColumn] of Object.entries(fileFields)) {
+      if (files[fieldName] && files[fieldName][0]) {
+        updateFields.push(`${dbColumn} = ?`);
+        updateValues.push(`/uploads/documents/${files[fieldName][0].filename}`);
+      }
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields to update",
+      });
+    }
+
+    // Add id to updateValues for WHERE clause
+    updateValues.push(id);
+
+    // Update application
+    const updateQuery = `UPDATE applications SET ${updateFields.join(", ")} WHERE id = ?`;
+    await pool.execute(updateQuery, updateValues);
+
+    // Update email in users table if provided
+    if (email !== undefined && application.user_id) {
+      try {
+        // Check if email is already in use by another user
+        const [existingUser] = await pool.execute(
+          "SELECT id FROM users WHERE email = ? AND id != ?",
+          [email, application.user_id]
+        );
+        if (existingUser.length > 0) {
+          return res.status(409).json({
+            success: false,
+            message: "Email already in use by another user",
+          });
+        }
+        // Update the email in users table
+        await pool.execute(
+          "UPDATE users SET email = ? WHERE id = ?",
+          [email, application.user_id]
+        );
+      } catch (error) {
+        console.error("Error updating user email:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update email",
+          error: error.message,
+        });
+      }
+    }
+
+    // Update witnesses if provided
+    if (witness1Name !== undefined || witness2Name !== undefined) {
+      // Get existing witnesses
+      const [existingWitnesses] = await pool.execute(
+        "SELECT * FROM witnesses WHERE application_id = ? ORDER BY id",
+        [id]
+      );
+
+      // Update or insert witness 1
+      if (witness1Name !== undefined) {
+        if (existingWitnesses[0]) {
+          await pool.execute(
+            `UPDATE witnesses SET 
+              witness_name = ?, witness_father_name = ?, witness_date_of_birth = ?, 
+              witness_place_of_birth = ?, witness_address = ?
+            WHERE id = ?`,
+            [
+              witness1Name || null,
+              witness1FatherName || null,
+              normalizedWitness1Dob,
+              witness1PlaceOfBirth || null,
+              witness1Address || null,
+              existingWitnesses[0].id,
+            ]
+          );
+        } else {
+          await pool.execute(
+            `INSERT INTO witnesses (application_id, witness_name, witness_father_name, witness_date_of_birth, witness_place_of_birth, witness_address, witness_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              id,
+              witness1Name || null,
+              witness1FatherName || null,
+              normalizedWitness1Dob,
+              witness1PlaceOfBirth || null,
+              witness1Address || null,
+              1,
+            ]
+          );
+        }
+      }
+
+      // Update or insert witness 2
+      if (witness2Name !== undefined) {
+        if (existingWitnesses[1]) {
+          await pool.execute(
+            `UPDATE witnesses SET 
+              witness_name = ?, witness_father_name = ?, witness_date_of_birth = ?, 
+              witness_place_of_birth = ?, witness_address = ?
+            WHERE id = ?`,
+            [
+              witness2Name || null,
+              witness2FatherName || null,
+              normalizedWitness2Dob,
+              witness2PlaceOfBirth || null,
+              witness2Address || null,
+              existingWitnesses[1].id,
+            ]
+          );
+        } else {
+          await pool.execute(
+            `INSERT INTO witnesses (application_id, witness_name, witness_father_name, witness_date_of_birth, witness_place_of_birth, witness_address, witness_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              id,
+              witness2Name || null,
+              witness2FatherName || null,
+              normalizedWitness2Dob,
+              witness2PlaceOfBirth || null,
+              witness2Address || null,
+              2,
+            ]
+          );
+        }
+      }
+    }
+
+    // Fetch updated application
+    const [updatedApp] = await pool.execute(
+      "SELECT * FROM applications WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: "Application updated successfully",
+      data: {
+        application: updatedApp[0],
+      },
+    });
+  } catch (error) {
+    console.error("Error updating application:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update application",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   getAllApplications,
@@ -1338,4 +1820,5 @@ module.exports = {
   updateApplicationNumber,
   deleteApplication,
   createManualApplication,
+  updateApplication,
 };

@@ -196,28 +196,28 @@ const submitApplication = async (req, res) => {
         `INSERT INTO applications (
           application_number, user_id,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
-          groom_id_number, groom_address, groom_email, groom_phone,
+          groom_id_number, groom_address,
           groom_confirm, groom_personally, groom_representative,
           groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
           groom_rep_place_of_birth, groom_rep_address,
           bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
-          bride_id_number, bride_address, bride_email, bride_phone,
+          bride_id_number, bride_address,
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
           payment_status, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber, userId,
           groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
-          groomIdNumber || null, groomAddress || null, portalEmail, contactNumber,
+          groomIdNumber || null, groomAddress || null, portalEmail,
           groomConfirm || false, groomPersonally || false, groomRepresentative || false,
           groomRepName || null, groomRepFatherName || null, groomRepDateOfBirth || null,
           groomRepPlaceOfBirth || null, groomRepAddress || null,
           brideName || null, brideFatherName || null, brideDateOfBirth || null, bridePlaceOfBirth || null,
-          brideIdNumber || null, brideAddress || null, portalEmail, contactNumber,
+          brideIdNumber || null, brideAddress || null,
           brideConfirm || false, bridePersonally || false, brideRepresentative || false,
           brideRepName || null, brideRepFatherName || null, brideRepDateOfBirth || null,
           brideRepPlaceOfBirth || null, brideRepAddress || null,
@@ -318,8 +318,6 @@ const submitApplication = async (req, res) => {
     // Handle MySQL Duplicate Entry Error
     if (error.code === 'ER_DUP_ENTRY') {
       let message = 'Duplicate entry found.';
-      if (error.message.includes('groom_email')) message = 'This Groom Email is already registered.';
-      if (error.message.includes('bride_email')) message = 'This Bride Email is already registered.';
       if (error.message.includes('application_number')) message = 'Application number collision, please try again.';
       if (error.message.includes('portal_email')) message = 'An account with this email already exists.';
 

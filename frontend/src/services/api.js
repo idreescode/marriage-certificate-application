@@ -138,6 +138,17 @@ export const generateCertificate = (id, notify = true) => {
 };
 export const updateApplicationNumber = (id, applicationNumber) => 
   api.put(`/admin/applications/${id}/application-number`, { applicationNumber });
+export const updateApplication = (id, data) => {
+  // Check if data is FormData (for file uploads)
+  if (data instanceof FormData) {
+    return api.put(`/admin/applications/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+  return api.put(`/admin/applications/${id}`, data);
+};
 export const deleteApplication = (id) => api.delete(`/admin/applications/${id}`);
 export const createManualApplication = (data) => {
   // Check if data is FormData (for file uploads)

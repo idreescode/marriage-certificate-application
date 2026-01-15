@@ -24,15 +24,12 @@ CREATE TABLE applications (
   groom_full_name VARCHAR(255) NOT NULL,
   groom_date_of_birth DATE NOT NULL,
   groom_address TEXT NOT NULL,
-  groom_phone VARCHAR(20) NOT NULL,
-  groom_email VARCHAR(255) NOT NULL,
   groom_id_number VARCHAR(100) NOT NULL,
   
   -- Bride Information
   bride_full_name VARCHAR(255) NOT NULL,
   bride_date_of_birth DATE NOT NULL,
   bride_address TEXT NOT NULL,
-  bride_phone VARCHAR(20) NOT NULL,
   bride_email VARCHAR(255) NOT NULL,
   bride_id_number VARCHAR(100) NOT NULL,
   
@@ -79,8 +76,6 @@ CREATE TABLE witnesses (
   id INT PRIMARY KEY AUTO_INCREMENT,
   application_id INT NOT NULL,
   witness_name VARCHAR(255) NOT NULL,
-  witness_phone VARCHAR(20) NOT NULL,
-  witness_email VARCHAR(255),
   witness_order TINYINT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   

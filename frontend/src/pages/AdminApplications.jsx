@@ -28,6 +28,7 @@ import {
   Plus,
   Check,
   X,
+  Pencil,
 } from "lucide-react";
 
 import { useSearchParams } from "react-router-dom";
@@ -493,19 +494,9 @@ export default function AdminApplications() {
                   </td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{app.groom_full_name}</div>
-                    <div
-                      style={{ fontSize: "0.8rem", color: "var(--slate-500)" }}
-                    >
-                      {app.groom_phone}
-                    </div>
                   </td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{app.bride_full_name}</div>
-                    <div
-                      style={{ fontSize: "0.8rem", color: "var(--slate-500)" }}
-                    >
-                      {app.bride_phone}
-                    </div>
                   </td>
                   <td>
                     <StatusBadge status={app.status} />
@@ -527,6 +518,24 @@ export default function AdminApplications() {
                         title="View Details"
                       >
                         <Eye size={16} />
+                      </Link>
+
+                      <Link
+                        to={`/admin/applications/${app.id}/edit`}
+                        className="btn btn-sm btn-secondary"
+                        title="Edit Application"
+                        style={{
+                          color: 'var(--brand-600)',
+                          borderColor: 'var(--brand-600)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--brand-50)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <Pencil size={16} />
                       </Link>
 
                       <button

@@ -13,7 +13,8 @@ const {
   generateCertificate,
   updateApplicationNumber,
   deleteApplication,
-  createManualApplication
+  createManualApplication,
+  updateApplication
 } = require('../controllers/adminController');
 const { uploadDocuments } = require('../middleware/upload');
 
@@ -50,6 +51,23 @@ router.post('/applications/:id/generate-certificate', generateCertificate);
 
 // PUT /api/admin/applications/:id/application-number - Update application number
 router.put('/applications/:id/application-number', updateApplicationNumber);
+
+// PUT /api/admin/applications/:id - Update application
+router.put('/applications/:id', 
+  uploadDocuments.fields([
+    { name: 'groomId', maxCount: 1 },
+    { name: 'brideId', maxCount: 1 },
+    { name: 'witness1Id', maxCount: 1 },
+    { name: 'witness2Id', maxCount: 1 },
+    { name: 'mahrDeclaration', maxCount: 1 },
+    { name: 'civilDivorceDoc', maxCount: 1 },
+    { name: 'islamicDivorceDoc', maxCount: 1 },
+    { name: 'groomConversionCert', maxCount: 1 },
+    { name: 'brideConversionCert', maxCount: 1 },
+    { name: 'statutoryDeclaration', maxCount: 1 }
+  ]),
+  updateApplication
+);
 
 // DELETE /api/admin/applications/:id - Delete application
 router.delete('/applications/:id', deleteApplication);

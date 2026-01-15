@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { createManualApplication } from "../services/api";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createManualApplication, getApplicationById, updateApplication, getFileUrl } from "../services/api";
 import toast from "react-hot-toast";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  ExternalLink,
 } from "lucide-react";
 import Loader from "../components/Loader";
 
@@ -155,7 +156,10 @@ const FormField = ({
 
 export default function AdminManualApplication() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const isEditMode = !!id;
+  const [loading, setLoading] = useState(isEditMode);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [formData, setFormData] = useState({
     // Application Number
     applicationNumber: "",
@@ -176,8 +180,6 @@ export default function AdminManualApplication() {
     groomDateOfBirth: "",
     groomPlaceOfBirth: "",
     groomAddress: "",
-    groomPhone: "",
-    groomEmail: "",
     groomIdNumber: "",
     groomConfirm: false,
     groomPersonally: false,
@@ -194,8 +196,6 @@ export default function AdminManualApplication() {
     brideDateOfBirth: "",
     bridePlaceOfBirth: "",
     brideAddress: "",
-    bridePhone: "",
-    brideEmail: "",
     brideIdNumber: "",
     brideConfirm: false,
     bridePersonally: false,
@@ -212,7 +212,6 @@ export default function AdminManualApplication() {
     witness1DateOfBirth: "",
     witness1PlaceOfBirth: "",
     witness1Address: "",
-    witness1Phone: "",
     witness2Name: "",
     witness2FatherName: "",
     witness2DateOfBirth: "",
@@ -248,6 +247,234 @@ export default function AdminManualApplication() {
   const [bridePreviouslyMarried, setBridePreviouslyMarried] = useState(false);
   const [brideDivorceType, setBrideDivorceType] = useState(null);
   const [brideAhleKitab, setBrideAhleKitab] = useState(false);
+  
+  // Store existing document paths for editing
+  const [existingDocuments, setExistingDocuments] = useState({
+    groomIdPath: null,
+    brideIdPath: null,
+    witness1IdPath: null,
+    witness2IdPath: null,
+    mahrDeclarationPath: null,
+    civilDivorceDocPath: null,
+    islamicDivorceDocPath: null,
+    groomConversionCertPath: null,
+    brideConversionCertPath: null,
+    statutoryDeclarationPath: null,
+  });
+
+  // Load application data for editing
+  useEffect(() => {
+    if (isEditMode && id) {
+      const loadApplication = async () => {
+        try {
+          setInitialLoading(true);
+          const response = await getApplicationById(id);
+          if (response.data.success) {
+            const app = response.data.data.application;
+            const witnesses = response.data.data.witnesses || [];
+            
+            // Debug logging
+            console.log("Application data:", app);
+            console.log("Witnesses data:", witnesses);
+            console.log("Groom rep name:", app.groom_rep_name);
+            console.log("Bride rep name:", app.bride_rep_name);
+            console.log("Date fields:", {
+              groom_date_of_birth: app.groom_date_of_birth,
+              bride_date_of_birth: app.bride_date_of_birth,
+              groom_rep_date_of_birth: app.groom_rep_date_of_birth,
+              bride_rep_date_of_birth: app.bride_rep_date_of_birth,
+            });
+            
+            // Sort witnesses by witness_order if available, otherwise by id
+            const sortedWitnesses = [...witnesses].sort((a, b) => {
+              if (a.witness_order !== null && b.witness_order !== null) {
+                return a.witness_order - b.witness_order;
+              }
+              if (a.witness_order !== null) return -1;
+              if (b.witness_order !== null) return 1;
+              return (a.id || 0) - (b.id || 0);
+            });
+            
+            // Format dates for input fields (YYYY-MM-DD)
+            // Handle dates directly to avoid timezone conversion issues
+            const formatDate = (date) => {
+              if (!date) return "";
+              try {
+                // If it's already in YYYY-MM-DD format, return it directly
+                if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                  return date;
+                }
+                // If it's a Date object or other format, parse it
+                const d = new Date(date);
+                if (isNaN(d.getTime())) return "";
+                // Use local date components to avoid timezone shifts
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              } catch (e) {
+                console.error("Error formatting date:", date, e);
+                return "";
+              }
+            };
+
+            // Format time for input fields (HH:MM)
+            const formatTime = (time) => {
+              if (!time) return "";
+              // If it's already in HH:MM format, return as is
+              if (typeof time === 'string' && time.match(/^\d{2}:\d{2}$/)) {
+                return time;
+              }
+              // If it's a Date object or timestamp, extract time
+              try {
+                const d = new Date(`2000-01-01T${time}`);
+                if (isNaN(d.getTime())) return "";
+                return d.toTimeString().slice(0, 5);
+              } catch (e) {
+                return "";
+              }
+            };
+
+            // Convert number to string, handling null/undefined
+            const formatNumber = (num) => {
+              if (num === null || num === undefined) return "";
+              return String(num);
+            };
+
+            // Normalize phone number - handle arrays and convert to string
+            const formatPhoneNumber = (phone) => {
+              if (!phone) return "";
+              // If it's an array, join it into a string
+              if (Array.isArray(phone)) {
+                return phone.join("");
+              }
+              // If it's already a string, return it
+              return String(phone);
+            };
+
+            // Store existing document paths
+            setExistingDocuments({
+              groomIdPath: app.groom_id_path || null,
+              brideIdPath: app.bride_id_path || null,
+              witness1IdPath: app.witness1_id_path || null,
+              witness2IdPath: app.witness2_id_path || null,
+              mahrDeclarationPath: app.mahr_declaration_path || null,
+              civilDivorceDocPath: app.civil_divorce_doc_path || null,
+              islamicDivorceDocPath: app.islamic_divorce_doc_path || null,
+              groomConversionCertPath: app.groom_conversion_cert_path || null,
+              brideConversionCertPath: app.bride_conversion_cert_path || null,
+              statutoryDeclarationPath: app.statutory_declaration_path || null,
+            });
+
+            setFormData({
+              applicationNumber: app.application_number || "",
+              groomIdFile: null,
+              brideIdFile: null,
+              witness1IdFile: null,
+              witness2IdFile: null,
+              mahrDeclarationFile: null,
+              civilDivorceDocFile: null,
+              islamicDivorceDocFile: null,
+              groomConversionCertFile: null,
+              brideConversionCertFile: null,
+              statutoryDeclarationFile: null,
+              groomName: app.groom_full_name || "",
+              groomFatherName: app.groom_father_name || "",
+              groomDateOfBirth: formatDate(app.groom_date_of_birth),
+              groomPlaceOfBirth: app.groom_place_of_birth || "",
+              groomAddress: app.groom_address || "",
+              groomIdNumber: app.groom_id_number || "",
+              groomConfirm: Boolean(app.groom_confirm),
+              groomPersonally: Boolean(app.groom_personally),
+              groomRepresentative: Boolean(app.groom_representative),
+              groomRepName: app.groom_rep_name || "",
+              groomRepFatherName: app.groom_rep_father_name || "",
+              groomRepDateOfBirth: formatDate(app.groom_rep_date_of_birth),
+              groomRepPlaceOfBirth: app.groom_rep_place_of_birth || "",
+              groomRepAddress: app.groom_rep_address || "",
+              brideName: app.bride_full_name || "",
+              brideFatherName: app.bride_father_name || "",
+              brideDateOfBirth: formatDate(app.bride_date_of_birth),
+              bridePlaceOfBirth: app.bride_place_of_birth || "",
+              brideAddress: app.bride_address || "",
+              bridePhone: formatPhoneNumber(app.bride_phone || ""),
+              brideIdNumber: app.bride_id_number || "",
+              brideConfirm: Boolean(app.bride_confirm),
+              bridePersonally: Boolean(app.bride_personally),
+              brideRepresentative: Boolean(app.bride_representative),
+              brideRepName: app.bride_rep_name || "",
+              brideRepFatherName: app.bride_rep_father_name || "",
+              brideRepDateOfBirth: formatDate(app.bride_rep_date_of_birth),
+              brideRepPlaceOfBirth: app.bride_rep_place_of_birth || "",
+              brideRepAddress: app.bride_rep_address || "",
+              witness1Name: sortedWitnesses[0]?.witness_name || sortedWitnesses[0]?.full_name || "",
+              witness1FatherName: sortedWitnesses[0]?.witness_father_name || sortedWitnesses[0]?.father_name || "",
+              witness1DateOfBirth: formatDate(sortedWitnesses[0]?.witness_date_of_birth || sortedWitnesses[0]?.date_of_birth),
+              witness1PlaceOfBirth: sortedWitnesses[0]?.witness_place_of_birth || sortedWitnesses[0]?.place_of_birth || "",
+              witness1Address: sortedWitnesses[0]?.witness_address || sortedWitnesses[0]?.address || "",
+              witness2Name: sortedWitnesses[1]?.witness_name || sortedWitnesses[1]?.full_name || "",
+              witness2FatherName: sortedWitnesses[1]?.witness_father_name || sortedWitnesses[1]?.father_name || "",
+              witness2DateOfBirth: formatDate(sortedWitnesses[1]?.witness_date_of_birth || sortedWitnesses[1]?.date_of_birth),
+              witness2PlaceOfBirth: sortedWitnesses[1]?.witness_place_of_birth || sortedWitnesses[1]?.place_of_birth || "",
+              witness2Address: sortedWitnesses[1]?.witness_address || sortedWitnesses[1]?.address || "",
+              mahrAmount: app.mahr_amount || "",
+              mahrDeferred: app.mahr_type === "deferred",
+              mahrPrompt: app.mahr_type === "prompt",
+              solemnisedDate: formatDate(app.solemnised_date),
+              solemnisedPlace: app.solemnised_place || "",
+              solemnisedAddress: app.solemnised_address || "",
+              email: app.portal_email || "",
+              contactNumber: formatPhoneNumber(app.groom_phone || app.bride_phone || ""),
+              status: app.status || "completed",
+              depositAmount: formatNumber(app.deposit_amount),
+              paymentStatus: app.payment_status || "verified",
+              appointmentDate: formatDate(app.appointment_date),
+              appointmentTime: formatTime(app.appointment_time),
+              appointmentLocation: app.appointment_location || "",
+              preferredDate: formatDate(app.preferred_date),
+              specialRequests: app.special_requests || "",
+            });
+
+            // Debug: Log formatted dates
+            console.log("Formatted dates in formData:", {
+              groomDateOfBirth: formatDate(app.groom_date_of_birth),
+              brideDateOfBirth: formatDate(app.bride_date_of_birth),
+              groomRepDateOfBirth: formatDate(app.groom_rep_date_of_birth),
+              brideRepDateOfBirth: formatDate(app.bride_rep_date_of_birth),
+            });
+
+            // Set additional flags
+            if (app.groom_conversion_cert_path || app.bride_conversion_cert_path) {
+              setHasConversionCertificate(true);
+              if (app.groom_conversion_cert_path) setGroomConverted(true);
+              if (app.bride_conversion_cert_path) setBrideConverted(true);
+            }
+            if (app.statutory_declaration_path) setBrideAhleKitab(true);
+            if (app.civil_divorce_doc_path || app.islamic_divorce_doc_path) {
+              setBridePreviouslyMarried(true);
+              if (app.civil_divorce_doc_path && app.islamic_divorce_doc_path) {
+                setBrideDivorceType("both");
+              } else if (app.civil_divorce_doc_path) {
+                setBrideDivorceType("civil");
+              } else if (app.islamic_divorce_doc_path) {
+                setBrideDivorceType("islamic");
+              }
+            }
+          }
+        } catch (error) {
+          toast.error("Failed to load application");
+          navigate("/admin/applications");
+        } finally {
+          setInitialLoading(false);
+          setLoading(false); // Enable the update button after data is loaded
+        }
+      };
+      loadApplication();
+    } else {
+      // Not in edit mode, ensure button is enabled
+      setLoading(false);
+    }
+  }, [id, isEditMode, navigate]);
 
   const handleChange = useCallback((e) => {
     const { name, value, type, checked, files } = e.target;
@@ -356,30 +583,30 @@ export default function AdminManualApplication() {
 
     // Add computed fields
     submitFormData.append("mahrType", mahrType);
-    submitFormData.append("groomEmail", formData.groomEmail || formData.email);
-    submitFormData.append("brideEmail", formData.brideEmail || formData.email);
-    submitFormData.append(
-      "groomPhone",
-      formData.groomPhone || formData.contactNumber
-    );
-    submitFormData.append(
-      "bridePhone",
-      formData.bridePhone || formData.contactNumber
-    );
 
     try {
-      const response = await createManualApplication(submitFormData);
-      if (response.data.success) {
-        toast.success("Application created successfully!");
-        // Navigate to applications list page after successful creation
-        setTimeout(() => {
-          navigate("/admin/applications");
-        }, 1000);
+      let response;
+      if (isEditMode) {
+        response = await updateApplication(id, submitFormData);
+        if (response.data.success) {
+          toast.success("Application updated successfully!");
+          setTimeout(() => {
+            navigate(`/admin/applications/${id}`);
+          }, 1000);
+        }
+      } else {
+        response = await createManualApplication(submitFormData);
+        if (response.data.success) {
+          toast.success("Application created successfully!");
+          setTimeout(() => {
+            navigate("/admin/applications");
+          }, 1000);
+        }
       }
     } catch (error) {
-      console.error("Error creating application:", error);
+      console.error(`Error ${isEditMode ? "updating" : "creating"} application:`, error);
       toast.error(
-        error.response?.data?.message || "Failed to create application"
+        error.response?.data?.message || `Failed to ${isEditMode ? "update" : "create"} application`
       );
     } finally {
       setLoading(false);
@@ -389,6 +616,22 @@ export default function AdminManualApplication() {
   // UploadCard Component (same as applicant page)
   const UploadCard = ({ title, subtitle, name, required = false }) => {
     const file = formData[name];
+    // Map form field names to existing document path keys
+    const documentPathMap = {
+      groomIdFile: "groomIdPath",
+      brideIdFile: "brideIdPath",
+      witness1IdFile: "witness1IdPath",
+      witness2IdFile: "witness2IdPath",
+      mahrDeclarationFile: "mahrDeclarationPath",
+      civilDivorceDocFile: "civilDivorceDocPath",
+      islamicDivorceDocFile: "islamicDivorceDocPath",
+      groomConversionCertFile: "groomConversionCertPath",
+      brideConversionCertFile: "brideConversionCertPath",
+      statutoryDeclarationFile: "statutoryDeclarationPath",
+    };
+    const existingPath = existingDocuments[documentPathMap[name]] || null;
+    const hasExistingDocument = existingPath && !file;
+    
     return (
       <div
         style={{
@@ -505,6 +748,170 @@ export default function AdminManualApplication() {
                 <Trash2 size={16} />
               </button>
             </div>
+          ) : hasExistingDocument ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {/* Existing Document Display */}
+              <div
+                style={{
+                  backgroundColor: "var(--slate-50)",
+                  border: "1px solid var(--slate-200)",
+                  borderRadius: "0.5rem",
+                  padding: "0.75rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    overflow: "hidden",
+                    flex: 1,
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: "var(--success-50)",
+                      width: "2rem",
+                      height: "2rem",
+                      borderRadius: "0.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <FileText size={16} style={{ color: "var(--success-600)" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span
+                      style={{
+                        fontFamily: "Montserrat, sans-serif",
+                        fontSize: "0.9rem",
+                        fontWeight: 500,
+                        color: "var(--slate-700)",
+                        display: "block",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Existing document uploaded
+                    </span>
+                    <a
+                      href={getFileUrl(existingPath)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontFamily: "Montserrat, sans-serif",
+                        fontSize: "0.75rem",
+                        color: "var(--brand-600)",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.25rem",
+                        marginTop: "0.25rem",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.textDecoration = "underline";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.textDecoration = "none";
+                      }}
+                    >
+                      View document <ExternalLink size={12} />
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Upload New File Option */}
+              <div
+                style={{
+                  borderTop: "1px solid var(--slate-200)",
+                  paddingTop: "1rem",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "Montserrat, sans-serif",
+                    fontSize: "0.75rem",
+                    color: "var(--slate-600)",
+                    marginBottom: "0.5rem",
+                    marginTop: 0,
+                    fontWeight: 500,
+                  }}
+                >
+                  Upload new file to replace:
+                </p>
+                <label
+                  style={{
+                    borderColor: "var(--slate-300)",
+                    backgroundColor: "var(--slate-50)",
+                    borderWidth: "2px",
+                    borderStyle: "dashed",
+                    borderRadius: "0.5rem",
+                    padding: "1rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--brand-400)";
+                    e.currentTarget.style.backgroundColor = "var(--brand-50)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--slate-300)";
+                    e.currentTarget.style.backgroundColor = "var(--slate-50)";
+                  }}
+                >
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileChange(e, name)}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    style={{ display: "none" }}
+                  />
+                  <div
+                    style={{
+                      backgroundColor: "var(--slate-100)",
+                      width: "2rem",
+                      height: "2rem",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <UploadCloud size={18} color="var(--slate-500)" />
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: "Montserrat, sans-serif",
+                      color: "var(--brand-600)",
+                      fontSize: "0.85rem",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Click to upload replacement
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "Montserrat, sans-serif",
+                      fontSize: "0.7rem",
+                      color: "var(--slate-400)",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    PDF or Image
+                  </span>
+                </label>
+              </div>
+            </div>
           ) : (
             <label
               style={{
@@ -573,7 +980,7 @@ export default function AdminManualApplication() {
             </label>
           )}
         </div>
-        {file && (
+        {(file || hasExistingDocument) && (
           <div
             style={{
               fontFamily: "Montserrat, sans-serif",
@@ -587,14 +994,14 @@ export default function AdminManualApplication() {
             }}
           >
             <CheckCircle2 size={14} />
-            <span>Ready to upload</span>
+            <span>{file ? "Ready to upload" : "Document exists"}</span>
           </div>
         )}
       </div>
     );
   };
 
-  if (loading) return <Loader fullscreen />;
+  if (initialLoading) return <Loader fullscreen />;
 
   return (
     <div
@@ -696,7 +1103,7 @@ export default function AdminManualApplication() {
         </div>
 
         <h1 style={{ fontSize: "2rem", margin: 0, color: "white" }}>
-          Add Manual Application
+          {isEditMode ? "Edit Application" : "Add Manual Application"}
         </h1>
         <p
           style={{
@@ -705,7 +1112,9 @@ export default function AdminManualApplication() {
             marginTop: "0.25rem",
           }}
         >
-          Enter all information for completed nikkah records
+          {isEditMode 
+            ? "Update application information" 
+            : "Enter all information for completed nikkah records"}
         </p>
       </div>
 
@@ -2001,7 +2410,9 @@ export default function AdminManualApplication() {
             }}
           >
             <Save size={16} />
-            {loading ? "Creating..." : "Create Application"}
+            {loading 
+              ? (isEditMode ? "Updating..." : "Creating...") 
+              : (isEditMode ? "Update Application" : "Create Application")}
           </button>
         </div>
       </form>

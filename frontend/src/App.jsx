@@ -71,6 +71,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="applications" element={<AdminApplications />} />
           <Route path="applications/manual" element={<AdminManualApplication />} />
+          <Route path="applications/:id/edit" element={<AdminManualApplication />} />
           <Route path="applications/:id" element={<AdminApplicationDetails />} />
           {/* Fallback for now */}
           <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />

@@ -20,6 +20,8 @@ const migrations = [
   require('./017_add_documents_verified'),
   require('./018_add_is_deleted_to_applications'),
   require('./019_make_witness_phone_nullable'),
+  require('./020_remove_phone_columns'),
+  require('./021_remove_email_columns'),
 ];
 
 // Run migrations
