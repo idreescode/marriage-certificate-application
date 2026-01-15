@@ -62,84 +62,137 @@ const logEmail = async (applicationId, emailType, recipient, subject, status = '
 
 // 1. Application Confirmation Email
 const sendApplicationConfirmation = async (applicationData) => {
-  console.log('📧 sendApplicationConfirmation called with data:', {
+  console.log("📧 sendApplicationConfirmation called with data:", {
     id: applicationData?.id,
     application_number: applicationData?.application_number,
     portal_email: applicationData?.portal_email,
-    has_portalPassword: !!applicationData?.portalPassword
+    has_portalPassword: !!applicationData?.portalPassword,
   });
 
-  const { application_number, groom_full_name, bride_full_name, portal_email, portalPassword, id } = applicationData;
+  const {
+    application_number,
+    groom_full_name,
+    bride_full_name,
+    portal_email,
+    portalPassword,
+    id,
+  } = applicationData;
 
   // Validate required fields
   if (!portal_email) {
-    const error = new Error('portal_email is required for sending application confirmation email');
-    console.error('❌ Email validation error:', error.message);
+    const error = new Error(
+      "portal_email is required for sending application confirmation email"
+    );
+    console.error("❌ Email validation error:", error.message);
     throw error;
   }
 
   if (!application_number) {
-    const error = new Error('application_number is required for sending application confirmation email');
-    console.error('❌ Email validation error:', error.message);
+    const error = new Error(
+      "application_number is required for sending application confirmation email"
+    );
+    console.error("❌ Email validation error:", error.message);
     throw error;
   }
 
   if (!process.env.EMAIL_USER) {
-    const error = new Error('EMAIL_USER environment variable is not set');
-    console.error('❌ Email configuration error:', error.message);
+    const error = new Error("EMAIL_USER environment variable is not set");
+    console.error("❌ Email configuration error:", error.message);
     throw error;
   }
 
-  console.log('📧 Preparing email template...');
+  console.log("📧 Preparing email template...");
   const isManualApplication = applicationData.isManualApplication || false;
-  
-  // For all applications (both regular and manual), show as "Completed"
-  // Prepare template data with conditional content
-  const templateData = {
-    application_number,
-    groom_full_name: groom_full_name || 'N/A',
-    bride_full_name: bride_full_name || 'N/A',
-    portal_email,
-    portalPassword: portalPassword || '',
-    frontend_url: process.env.FRONTEND_URL || '',
-    email_user: process.env.EMAIL_USER,
-    application_status: 'Completed', // Always show as Completed
-    status_bg_color: '#d1fae5', // Green background
-    status_text_color: '#065f46', // Dark green text
-    main_message: 'Your nikah certificate application has been successfully received and is now complete.',
-    password_display: portalPassword ? portalPassword : 'Use your existing password',
-    show_password_row: portalPassword ? 'true' : 'false',
-    next_steps_section: '<h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Application Complete</h3><p style="font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">Your nikah certificate application has been processed and is now complete. You can log into your portal to view your certificate and application details.</p>'
-  };
-  
-  const html = renderTemplate('application-confirmation.html', templateData);
+
+  // Different email content based on application type
+  let templateData;
+
+  if (isManualApplication) {
+    // Admin manually created - Application is already complete
+    templateData = {
+      application_number,
+      groom_full_name: groom_full_name || "N/A",
+      bride_full_name: bride_full_name || "N/A",
+      portal_email,
+      portalPassword: portalPassword || "",
+      frontend_url: process.env.FRONTEND_URL || "",
+      email_user: process.env.EMAIL_USER,
+      application_status: "Completed",
+      status_bg_color: "#d1fae5", // Green background
+      status_text_color: "#065f46", // Dark green text
+      main_message:
+        "Your nikah certificate application has been successfully received and is now complete.",
+      password_display: portalPassword
+        ? portalPassword
+        : "Use your existing password",
+      show_password_row: portalPassword ? "true" : "false",
+      next_steps_section:
+        '<h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Application Complete</h3><p style="font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">Your nikah certificate application has been processed and is now complete. You can log into your portal to view your certificate and application details.</p>',
+    };
+  } else {
+    // User submitted - Application is under review
+    templateData = {
+      application_number,
+      groom_full_name: groom_full_name || "N/A",
+      bride_full_name: bride_full_name || "N/A",
+      portal_email,
+      portalPassword: portalPassword || "",
+      frontend_url: process.env.FRONTEND_URL || "",
+      email_user: process.env.EMAIL_USER,
+      application_status: "Under Review",
+      status_bg_color: "#fff7ed", // Orange/amber background
+      status_text_color: "#c2410c", // Dark orange text
+      main_message:
+        "Your nikah certificate application has been successfully received. Our team will review your application and verify your documents.",
+      password_display: portalPassword
+        ? portalPassword
+        : "Use your existing password",
+      show_password_row: portalPassword ? "true" : "false",
+      next_steps_section:
+        '<h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Next Steps</h3><p style="font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">Please upload all required documents through your portal. Once your documents are verified, you will be notified to proceed with payment. After payment verification, your nikah date will be scheduled.</p>',
+    };
+  }
+
+  const html = renderTemplate("application-confirmation.html", templateData);
 
   const mailOptions = {
     from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
     subject: `Application Received - #${application_number}`,
-    html
+    html,
   };
 
-  console.log('📧 Sending email to:', portal_email);
+  console.log("📧 Sending email to:", portal_email);
   try {
     const result = await transporter.sendMail(mailOptions);
-    console.log('📧 Email sent successfully, result:', result.messageId);
+    console.log("📧 Email sent successfully, result:", result.messageId);
     if (id) {
-      await logEmail(id, 'application_confirmation', portal_email, mailOptions.subject, 'sent');
+      await logEmail(
+        id,
+        "application_confirmation",
+        portal_email,
+        mailOptions.subject,
+        "sent"
+      );
     }
-    console.log('✅ Application confirmation email sent to:', portal_email);
+    console.log("✅ Application confirmation email sent to:", portal_email);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('❌ Error sending email:', error);
-    console.error('❌ Error details:', {
+    console.error("❌ Error sending email:", error);
+    console.error("❌ Error details:", {
       message: error.message,
       code: error.code,
       command: error.command,
-      response: error.response
+      response: error.response,
     });
     if (id) {
-      await logEmail(id, 'application_confirmation', portal_email, mailOptions.subject, 'failed');
+      await logEmail(
+        id,
+        "application_confirmation",
+        portal_email,
+        mailOptions.subject,
+        "failed"
+      );
     }
     // Re-throw the error so the caller knows it failed
     throw error;
