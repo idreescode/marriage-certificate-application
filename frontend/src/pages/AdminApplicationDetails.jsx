@@ -69,15 +69,6 @@ export default function AdminApplicationDetails() {
 
       // If certificate doesn't exist, generate it first
       if (!certificateUrl) {
-        // Check if appointment is scheduled
-        if (!application.appointment_date) {
-          const errorMsg =
-            "Appointment must be scheduled before generating certificate";
-          console.error("❌", errorMsg);
-          toast.error(errorMsg, { duration: 5000 });
-          return;
-        }
-
         console.log("🔄 Generating certificate...");
         const toastId = toast.loading("Generating certificate...");
 
@@ -132,17 +123,16 @@ export default function AdminApplicationDetails() {
         const fullUrl = getFileUrl(certificateUrl);
         console.log("🔗 Opening certificate URL:", fullUrl);
 
-        const newWindow = window.open(fullUrl, "_blank");
-
-        if (!newWindow) {
-          console.error("❌ Popup blocked. Please allow popups for this site.");
-          toast.error(
-            "Popup blocked. Please allow popups to view certificate.",
-            { duration: 5000 }
-          );
-        } else {
-          console.log("✅ Certificate opened in new tab");
-        }
+        // Use anchor element click to avoid popup blocker
+        const link = document.createElement("a");
+        link.href = fullUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log("✅ Certificate opened in new tab");
       } else {
         console.error("❌ No certificate URL available");
         toast.error("Certificate URL not found");

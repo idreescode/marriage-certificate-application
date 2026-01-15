@@ -428,14 +428,6 @@ const generateCertificate = async (req, res) => {
 
     const application = appRows[0];
 
-    // Check if appointment was completed
-    if (!application.appointment_date) {
-      return res.status(400).json({
-        success: false,
-        message: 'Appointment must be scheduled before generating certificate'
-      });
-    }
-
     // Get witnesses
     const [witnesses] = await pool.execute(
       'SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order',
