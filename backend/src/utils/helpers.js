@@ -137,9 +137,9 @@ const formatDate = (date) => {
 
 // Format currency
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-PK', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
-    currency: 'PKR'
+    currency: 'GBP'
   }).format(amount);
 };
 

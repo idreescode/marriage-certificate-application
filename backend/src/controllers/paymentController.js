@@ -49,7 +49,7 @@ const createPaymentIntent = async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: "pkr", // Changed to PKR as per dashboard display, or 'usd' if Stripe requires
+            currency: "gbp", // Using GBP (British Pounds) as per requirements
             product_data: {
               name: "Marriage Certificate Deposit",
               description: `Application Ref: ${applicationId}`,

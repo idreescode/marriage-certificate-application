@@ -842,7 +842,7 @@ export default function AdminApplicationDetails() {
                   label="Deposit Amount"
                   value={
                     application.deposit_amount
-                      ? `PKR ${application.deposit_amount}`
+                      ? `£${application.deposit_amount}`
                       : "Not Set"
                   }
                   subValue={

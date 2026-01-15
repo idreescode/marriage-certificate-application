@@ -184,6 +184,7 @@ const verifyDocuments = async (req, res) => {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
+    const DEFAULT_DEPOSIT_AMOUNT = 200;
 
     // Get application to check if documents exist (exclude deleted)
     const [appRows] = await pool.execute(
@@ -208,19 +209,38 @@ const verifyDocuments = async (req, res) => {
       });
     }
 
-    // Update application - mark documents as verified
+    // Update application - mark documents as verified AND automatically set deposit amount to 200
     await pool.execute(
       `UPDATE applications 
        SET documents_verified = TRUE, 
            documents_verified_by = ?, 
-           documents_verified_at = NOW()
+           documents_verified_at = NOW(),
+           deposit_amount = ?,
+           deposit_amount_set_by = ?,
+           deposit_amount_set_at = NOW(),
+           payment_status = 'amount_set',
+           status = 'payment_pending'
        WHERE id = ?`,
-      [adminId, id]
+      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, id]
     );
+
+    // Get application data with user email for sending deposit amount email
+    const [rows] = await pool.execute(
+      `SELECT a.*, u.email as portal_email 
+       FROM applications a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.id = ?`,
+      [id]
+    );
+
+    // Send email to applicant with deposit amount
+    if (rows.length > 0) {
+      await sendDepositAmountEmail(rows[0]);
+    }
 
     res.json({
       success: true,
-      message: 'Documents verified successfully'
+      message: 'Documents verified successfully and deposit amount set to £200'
     });
 
   } catch (error) {

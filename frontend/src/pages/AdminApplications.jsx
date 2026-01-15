@@ -5,7 +5,6 @@ import Modal from "../components/Modal";
 import {
   getAllApplications,
   verifyDocuments as verifyDocumentsAPI,
-  setDepositAmount as setDepositAPI,
   verifyPayment as verifyPaymentAPI,
   scheduleAppointment as scheduleAPI,
   generateCertificate as generateCertAPI,
@@ -16,7 +15,6 @@ import {
   Search,
   Filter,
   Clock,
-  Banknote,
   Calendar,
   Eye,
   FileText,
@@ -39,12 +37,11 @@ export default function AdminApplications() {
   );
 
   // Modal States
-  const [activeModal, setActiveModal] = useState(null); // 'documents', 'deposit', 'verify', 'schedule', 'view', 'delete'
+  const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'schedule', 'view', 'delete'
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [deleteAppData, setDeleteAppData] = useState(null); // { id, applicationNumber }
 
   // Form States
-  const [depositAmount, setDepositAmount] = useState("");
   const [appointmentData, setAppointmentData] = useState({
     date: "",
     time: "",
@@ -72,12 +69,6 @@ export default function AdminApplications() {
     setActiveModal("documents");
   };
 
-  const openSetDeposit = (id) => {
-    setSelectedAppId(id);
-    setDepositAmount("");
-    setActiveModal("deposit");
-  };
-
   const openVerifyPayment = (id) => {
     setSelectedAppId(id);
     setActiveModal("verify");
@@ -100,7 +91,7 @@ export default function AdminApplications() {
     const toastId = toast.loading("Verifying documents...");
     try {
       await verifyDocumentsAPI(selectedAppId);
-      toast.success("Documents verified successfully!", { id: toastId });
+      toast.success("Documents verified successfully! Deposit amount set to £200.", { id: toastId });
       closeModal();
       fetchApplications();
     } catch (error) {
@@ -108,23 +99,6 @@ export default function AdminApplications() {
         error.response?.data?.message || "Failed to verify documents",
         { id: toastId }
       );
-    }
-  };
-
-  const handleSetDeposit = async (e) => {
-    e.preventDefault();
-    if (!depositAmount) return;
-
-    const toastId = toast.loading("Setting deposit...");
-    try {
-      await setDepositAPI(selectedAppId, {
-        depositAmount: parseFloat(depositAmount),
-      });
-      toast.success("Deposit amount set successfully!", { id: toastId });
-      closeModal();
-      fetchApplications();
-    } catch (error) {
-      toast.error("Failed to set deposit amount", { id: toastId });
     }
   };
 
@@ -430,26 +404,6 @@ export default function AdminApplications() {
                             </button>
                           ) : null}
 
-                          {/* Show Set Deposit button only if documents are verified */}
-                          {app.documents_verified ? (
-                            <button
-                              onClick={() => openSetDeposit(app.id)}
-                              className="btn btn-sm btn-primary"
-                              style={{ 
-                                whiteSpace: "nowrap",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "0.4rem",
-                                minWidth: "130px",
-                                padding: "0.5rem 1rem"
-                              }}
-                            >
-                              <Banknote size={14} />
-                              Set Deposit
-                            </button>
-                          ) : null}
-
                           {/* Show badge if no documents uploaded yet */}
                           {!app.groom_id_path && !app.bride_id_path ? (
                             <span
@@ -583,7 +537,7 @@ export default function AdminApplications() {
             marginTop: '0.5rem',
             margin: 0 
           }}>
-            This will allow you to proceed with setting the deposit amount.
+            This will automatically set the deposit amount to £200 and notify the applicant to proceed with payment.
           </p>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
@@ -602,46 +556,6 @@ export default function AdminApplications() {
             Verify Documents
           </button>
         </div>
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === "deposit"}
-        onClose={closeModal}
-        title="Set Deposit Amount"
-      >
-        <form onSubmit={handleSetDeposit}>
-          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
-              Amount (PKR)
-            </label>
-            <input
-              type="number"
-              className="form-input"
-              value={depositAmount}
-              onChange={(e) => setDepositAmount(e.target.value)}
-              placeholder="e.g. 5000"
-              required
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
-            <button
-              type="button"
-              onClick={closeModal}
-              className="btn btn-secondary"
-              style={{ minWidth: '100px' }}
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              className="btn btn-primary"
-              style={{ minWidth: '120px' }}
-            >
-              Set Amount
-            </button>
-          </div>
-        </form>
       </Modal>
 
       <Modal
