@@ -1,24 +1,31 @@
-const { pool } = require('../config/database');
-const bcrypt = require('bcryptjs');
-const { generateApplicationNumber, generatePassword, normalizeDate } = require('../utils/helpers');
-const { sendApplicationConfirmation, sendAdminNewApplicationEmail } = require('../services/emailService');
-const { createNotification } = require('./notificationController');
-const { body, validationResult } = require('express-validator');
+const { pool } = require("../config/database");
+const bcrypt = require("bcryptjs");
+const {
+  generateApplicationNumber,
+  generatePassword,
+  normalizeDate,
+} = require("../utils/helpers");
+const {
+  sendApplicationConfirmation,
+  sendAdminNewApplicationEmail,
+} = require("../services/emailService");
+const { createNotification } = require("./notificationController");
+const { body, validationResult } = require("express-validator");
 
 // Submit New Application
 const submitApplication = async (req, res) => {
   try {
     // DEBUG: See what frontend is actually sending
-    console.log('===== COMPLETE REQUEST BODY =====');
+    console.log("===== COMPLETE REQUEST BODY =====");
     console.log(JSON.stringify(req.body, null, 2));
-    console.log('=================================');
+    console.log("=================================");
 
     // Convert array format to object format
     // Frontend sends: { data: [{ name: "groomName", value: "..." }, ...] }
     // We need: { groomName: "...", ... }
     let formData = {};
     if (req.body.data && Array.isArray(req.body.data)) {
-      req.body.data.forEach(item => {
+      req.body.data.forEach((item) => {
         formData[item.name] = item.value || null;
       });
     } else {
@@ -26,9 +33,9 @@ const submitApplication = async (req, res) => {
       formData = req.body;
     }
 
-    console.log('===== CONVERTED FORM DATA =====');
+    console.log("===== CONVERTED FORM DATA =====");
     console.log(JSON.stringify(formData, null, 2));
-    console.log('=================================');
+    console.log("=================================");
 
     // Extract data from converted formData object
     // Groom
@@ -98,7 +105,7 @@ const submitApplication = async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Email address is required'
+        message: "Email address is required",
       });
     }
 
@@ -107,7 +114,7 @@ const submitApplication = async (req, res) => {
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid email address'
+        message: "Please provide a valid email address",
       });
     }
 
@@ -115,34 +122,34 @@ const submitApplication = async (req, res) => {
     if (!contactNumber) {
       return res.status(400).json({
         success: false,
-        message: 'Contact number is required'
+        message: "Contact number is required",
       });
     }
 
     // DEBUG: Log date transformations from WordPress
-    console.log('===== DATE TRANSFORMATIONS (WordPress → MySQL) =====');
-    console.log('Original dates from WordPress:', {
+    console.log("===== DATE TRANSFORMATIONS (WordPress → MySQL) =====");
+    console.log("Original dates from WordPress:", {
       groomDateOfBirth: formData.groomDateOfBirth,
       groomRepDateOfBirth: formData.groomRepDateOfBirth,
       brideDateOfBirth: formData.brideDateOfBirth,
       brideRepDateOfBirth: formData.brideRepDateOfBirth,
       witness1DateOfBirth: formData.witness1DateOfBirth,
       witness2DateOfBirth: formData.witness2DateOfBirth,
-      solemnisedDate: formData.solemnisedDate
+      solemnisedDate: formData.solemnisedDate,
     });
-    console.log('Normalized dates (MySQL format YYYY-MM-DD):', {
+    console.log("Normalized dates (MySQL format YYYY-MM-DD):", {
       groomDateOfBirth,
       groomRepDateOfBirth,
       brideDateOfBirth,
       brideRepDateOfBirth,
       witness1DateOfBirth,
       witness2DateOfBirth,
-      solemnisedDate
+      solemnisedDate,
     });
-    console.log('====================================================');
+    console.log("====================================================");
 
     // DEBUG: Log received data
-    console.log('Received form data:', {
+    console.log("Received form data:", {
       groomName,
       brideName,
       witness1Name,
@@ -150,7 +157,7 @@ const submitApplication = async (req, res) => {
       mahrAmount,
       solemnisedDate,
       email,
-      contactNumber
+      contactNumber,
     });
 
     // Generate unique application number
@@ -168,7 +175,7 @@ const submitApplication = async (req, res) => {
     try {
       // Check if email already exists
       const [existingUser] = await connection.execute(
-        'SELECT id FROM users WHERE email = ?',
+        "SELECT id FROM users WHERE email = ?",
         [portalEmail]
       );
 
@@ -177,21 +184,22 @@ const submitApplication = async (req, res) => {
         connection.release();
         return res.status(409).json({
           success: false,
-          message: 'An account with this email already exists. Please use a different email address.'
+          message:
+            "An account with this email already exists. Please use a different email address.",
         });
       }
 
       // 1. Create User
-      console.log('Creating user with email:', portalEmail);
+      console.log("Creating user with email:", portalEmail);
       const [userResult] = await connection.execute(
         'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
-        [portalEmail, hashedPassword, groomName || 'Applicant']
+        [portalEmail, hashedPassword, groomName || "Applicant"]
       );
       const userId = userResult.insertId;
-      console.log('User created with ID:', userId);
+      console.log("User created with ID:", userId);
 
       // 2. Insert Application (linked to user_id)
-      console.log('Attempting to insert application for user_id:', userId);
+      console.log("Attempting to insert application for user_id:", userId);
       const [result] = await connection.execute(
         `INSERT INTO applications (
           application_number, user_id,
@@ -210,50 +218,93 @@ const submitApplication = async (req, res) => {
           payment_status, status
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          applicationNumber, userId,
-          groomName || null, groomFatherName || null, groomDateOfBirth || null, groomPlaceOfBirth || null,
-          groomIdNumber || null, groomAddress || null,
-          groomConfirm || false, groomPersonally || false, groomRepresentative || false,
-          groomRepName || null, groomRepFatherName || null, groomRepDateOfBirth || null,
-          groomRepPlaceOfBirth || null, groomRepAddress || null,
-          brideName || null, brideFatherName || null, brideDateOfBirth || null, bridePlaceOfBirth || null,
-          brideIdNumber || null, brideAddress || null,
-          brideConfirm || false, bridePersonally || false, brideRepresentative || false,
-          brideRepName || null, brideRepFatherName || null, brideRepDateOfBirth || null,
-          brideRepPlaceOfBirth || null, brideRepAddress || null,
-          mahrAmount || null, mahrType || null,
-          solemnisedDate || null, solemnisedPlace || null, solemnisedAddress || null,
-          'pending_admin_review',  // payment_status default for user-submitted applications
-          'admin_review'  // status value
+          applicationNumber,
+          userId,
+          groomName || null,
+          groomFatherName || null,
+          groomDateOfBirth || null,
+          groomPlaceOfBirth || null,
+          groomIdNumber || null,
+          groomAddress || null,
+          groomConfirm || false,
+          groomPersonally || false,
+          groomRepresentative || false,
+          groomRepName || null,
+          groomRepFatherName || null,
+          groomRepDateOfBirth || null,
+          groomRepPlaceOfBirth || null,
+          groomRepAddress || null,
+          brideName || null,
+          brideFatherName || null,
+          brideDateOfBirth || null,
+          bridePlaceOfBirth || null,
+          brideIdNumber || null,
+          brideAddress || null,
+          brideConfirm || false,
+          bridePersonally || false,
+          brideRepresentative || false,
+          brideRepName || null,
+          brideRepFatherName || null,
+          brideRepDateOfBirth || null,
+          brideRepPlaceOfBirth || null,
+          brideRepAddress || null,
+          mahrAmount || null,
+          mahrType || null,
+          solemnisedDate || null,
+          solemnisedPlace || null,
+          solemnisedAddress || null,
+          "pending_admin_review", // payment_status default for user-submitted applications
+          "admin_review", // status value
         ]
       );
 
       const applicationId = result.insertId;
-      console.log('Application created with ID:', applicationId);
+      console.log("Application created with ID:", applicationId);
 
       // Insert witnesses with extended fields
       const witnessesData = [
-        { name: witness1Name, fatherName: witness1FatherName, dob: witness1DateOfBirth, pob: witness1PlaceOfBirth, address: witness1Address },
-        { name: witness2Name, fatherName: witness2FatherName, dob: witness2DateOfBirth, pob: witness2PlaceOfBirth, address: witness2Address }
+        {
+          name: witness1Name,
+          fatherName: witness1FatherName,
+          dob: witness1DateOfBirth,
+          pob: witness1PlaceOfBirth,
+          address: witness1Address,
+        },
+        {
+          name: witness2Name,
+          fatherName: witness2FatherName,
+          dob: witness2DateOfBirth,
+          pob: witness2PlaceOfBirth,
+          address: witness2Address,
+        },
       ];
 
       for (let i = 0; i < witnessesData.length; i++) {
         const w = witnessesData[i];
-        if (w.name) { // Only insert if witness name is provided
+        if (w.name) {
+          // Only insert if witness name is provided
           await connection.execute(
             `INSERT INTO witnesses (
               application_id, witness_name, witness_father_name, 
               witness_date_of_birth, witness_place_of_birth, witness_address, 
               witness_order
             ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [applicationId, w.name, w.fatherName, w.dob, w.pob, w.address, i + 1]
+            [
+              applicationId,
+              w.name,
+              w.fatherName,
+              w.dob,
+              w.pob,
+              w.address,
+              i + 1,
+            ]
           );
         }
       }
 
       // COMMIT TRANSACTION
       await connection.commit();
-      console.log('Transaction Committed');
+      console.log("Transaction Committed");
 
       // Send confirmation email with credentials
       const applicationData = {
@@ -263,80 +314,78 @@ const submitApplication = async (req, res) => {
         bride_full_name: brideName,
         portal_email: portalEmail,
         portalPassword: portalPassword,
-        isManualApplication: false // Regular user submission
+        isManualApplication: false, // Regular user submission
       };
-      
+
       // Send emails in parallel (non-blocking)
       Promise.all([
         sendApplicationConfirmation(applicationData),
-        sendAdminNewApplicationEmail(applicationData)
-      ]).catch(err => console.error('Background Email Error:', err));
+        sendAdminNewApplicationEmail(applicationData),
+      ]).catch((err) => console.error("Background Email Error:", err));
 
       // Create In-App Notification
       try {
         await createNotification({
           applicationId,
-          role: 'admin',
-          type: 'new_application',
-          title: 'New Application Received',
-          message: `New marriage application #${applicationNumber} from ${groomName} & ${brideName}`
+          role: "admin",
+          type: "new_application",
+          title: "New Application Received",
+          message: `New marriage application #${applicationNumber} from ${groomName} & ${brideName}`,
         });
       } catch (notifErr) {
-        console.error('Notification Error:', notifErr);
+        console.error("Notification Error:", notifErr);
       }
 
       // DEVELOPMENT LOG - Credentials sent via email
-      console.log('\n' + '='.repeat(60));
-      console.log('✅ APPLICATION SUBMITTED SUCCESSFULLY');
-      console.log('='.repeat(60));
-      console.log('📧 Confirmation email sent to:', portalEmail);
-      console.log('🔗 Application Number:', applicationNumber);
-      console.log('🔐 Password sent via email');
-      console.log('='.repeat(60) + '\n');
+      console.log("\n" + "=".repeat(60));
+      console.log("✅ APPLICATION SUBMITTED SUCCESSFULLY");
+      console.log("=".repeat(60));
+      console.log("📧 Confirmation email sent to:", portalEmail);
+      console.log("🔗 Application Number:", applicationNumber);
+      console.log("🔐 Password sent via email");
+      console.log("=".repeat(60) + "\n");
 
       res.status(201).json({
         success: true,
-        message: 'Application submitted successfully',
+        message: "Application submitted successfully",
         data: {
           applicationNumber,
-          applicationId
-        }
+          applicationId,
+        },
       });
-
     } catch (transactionError) {
       await connection.rollback();
-      console.error('Transaction Rolled Back due to:', transactionError);
+      console.error("Transaction Rolled Back due to:", transactionError);
       throw transactionError;
     } finally {
       connection.release();
     }
-
   } catch (error) {
-    console.error('Error submitting application:', error);
-    console.error('Stack:', error.stack);
+    console.error("Error submitting application:", error);
+    console.error("Stack:", error.stack);
 
     // Handle MySQL Duplicate Entry Error
-    if (error.code === 'ER_DUP_ENTRY') {
-      let message = 'Duplicate entry found.';
-      if (error.message.includes('application_number')) message = 'Application number collision, please try again.';
-      if (error.message.includes('portal_email')) message = 'An account with this email already exists.';
+    if (error.code === "ER_DUP_ENTRY") {
+      let message = "Duplicate entry found.";
+      if (error.message.includes("application_number"))
+        message = "Application number collision, please try again.";
+      if (error.message.includes("portal_email"))
+        message = "An account with this email already exists.";
 
       return res.status(409).json({
         success: false,
-        message: message
+        message: message,
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to submit application',
-      error: error.message
+      message: "Failed to submit application",
+      error: error.message,
     });
   }
 };
 
-
-
 module.exports = {
-  submitApplication
+  submitApplication,
 };
