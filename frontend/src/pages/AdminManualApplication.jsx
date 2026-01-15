@@ -1184,7 +1184,7 @@ export default function AdminManualApplication() {
             disabled={loading}
             style={{
               padding: '0.75rem 1.5rem',
-              background: '#1e40af',
+              background: 'var(--brand-600)',
               border: 'none',
               borderRadius: '6px',
               cursor: loading ? 'not-allowed' : 'pointer',
@@ -1194,7 +1194,18 @@ export default function AdminManualApplication() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              opacity: loading ? 0.6 : 1
+              opacity: loading ? 0.6 : 1,
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = 'var(--brand-700)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = 'var(--brand-600)';
+              }
             }}
           >
             <Save size={16} />
