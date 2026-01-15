@@ -209,38 +209,42 @@ export default function DocumentUpload() {
                     borderRadius: '50%',
                     transform: 'translate(30%, -30%)'
                 }}></div>
+                {/* Back Button - Top Left Corner */}
+                <button
+                    onClick={() => navigate('/applicant/dashboard')}
+                    style={{ 
+                        position: 'absolute',
+                        top: '1rem',
+                        left: '1.5rem',
+                        zIndex: 10,
+                        background: 'rgba(255, 255, 255, 0.15)', 
+                        padding: '0.4rem 0.75rem',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.4rem', 
+                        border: '1px solid rgba(255, 255, 255, 0.3)', 
+                        color: 'white', 
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                        e.currentTarget.style.transform = 'translateX(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                >
+                    <ArrowLeft size={14} /> Back
+                </button>
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <button
-                        onClick={() => navigate('/applicant/dashboard')}
-                        className="btn btn-link"
-                        style={{ 
-                            background: 'transparent', 
-                            padding: '0.5rem 1rem',
-                            marginBottom: '1rem', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '0.5rem', 
-                            border: '1px solid rgba(255, 255, 255, 0.3)', 
-                            color: 'white', 
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            borderRadius: 'var(--radius-md)',
-                            fontSize: '0.9rem',
-                            fontWeight: 500
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                            e.currentTarget.style.transform = 'translateX(-4px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            e.currentTarget.style.transform = 'translateX(0)';
-                        }}
-                    >
-                        <ArrowLeft size={16} /> Back to Dashboard
-                    </button>
                     <h1 style={{ fontSize: '2.1rem', margin: 0, color: 'white', fontWeight: 700, letterSpacing: '-0.02em' }}>Document Submission</h1>
                     <p style={{ color: 'rgba(255,255,255,0.9)', margin: 0, marginTop: '0.5rem', fontSize: '1rem' }}>Please provide clear, legible copies of all required documents to proceed with your Nikah application.</p>
                 </div>

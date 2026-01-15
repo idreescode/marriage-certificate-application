@@ -17,11 +17,11 @@ const getFrontendUrl = () => {
     return process.env.FRONTEND_URL;
   }
   // Otherwise, determine based on NODE_ENV
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:5173';
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:5173";
   }
   // Default to production URL
-  return 'https://nikahapp.jamiyat.org';
+  return "https://nikahapp.jamiyat.org";
 };
 
 // Create Payment Intent
