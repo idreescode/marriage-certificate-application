@@ -59,7 +59,6 @@ export default function AdminApplications() {
     location: "",
   });
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
 
   useEffect(() => {
     fetchApplications();
@@ -91,7 +90,6 @@ export default function AdminApplications() {
     setSelectedAppId(id);
     setAppointmentData({ date: "", time: "", location: "" });
     setSelectedDate(null);
-    setSelectedTime(null);
     setActiveModal("schedule");
   };
 
@@ -602,7 +600,7 @@ export default function AdminApplications() {
                             className="btn btn-sm btn-primary"
                             style={{ whiteSpace: "nowrap" }}
                           >
-                            Verify
+                            Verify Payment
                           </button>
                         )}
                       {app.status === "payment_verified" && (
@@ -766,7 +764,7 @@ export default function AdminApplications() {
             className="btn btn-primary"
             style={{ minWidth: '100px' }}
           >
-            Verify
+            Verify Payment
           </button>
         </div>
       </Modal>
@@ -866,74 +864,34 @@ export default function AdminApplications() {
             <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
               Time
             </label>
-            <DatePicker
-              selected={selectedTime}
-              onChange={(time) => {
-                setSelectedTime(time);
-                // Format time as HH:MM for backend
-                if (time) {
-                  const hours = String(time.getHours()).padStart(2, '0');
-                  const minutes = String(time.getMinutes()).padStart(2, '0');
-                  const formattedTime = `${hours}:${minutes}`;
-                  setAppointmentData({ ...appointmentData, time: formattedTime });
-                } else {
-                  setAppointmentData({ ...appointmentData, time: "" });
-                }
-              }}
-              showTimeSelect
-              showTimeSelectOnly
-              timeIntervals={15}
-              dateFormat="h:mm aa"
-              placeholderText="Select appointment time"
-              required
+            <input
+              type="time"
               className="form-input"
+              value={appointmentData.time}
+              onChange={(e) =>
+                setAppointmentData({
+                  ...appointmentData,
+                  time: e.target.value,
+                })
+              }
+              required
               style={{ width: '100%' }}
-              wrapperClassName="time-picker-wrapper"
             />
             <style>{`
-              .time-picker-wrapper {
-                width: 100%;
+              input[type="time"] {
+                accent-color: var(--brand-600);
               }
-              .time-picker-wrapper .react-datepicker-wrapper {
-                width: 100%;
-              }
-              .time-picker-wrapper .react-datepicker__input-container input {
-                width: 100%;
-                height: 38px;
-                padding: 8px 12px;
-                border: 1px solid #cbd5e1;
-                border-radius: 6px;
-                font-size: 0.875rem;
-                font-family: inherit;
-                color: #334155;
-                background: white;
-                outline: none;
-                transition: all 0.2s;
-              }
-              .time-picker-wrapper .react-datepicker__input-container input:focus {
+              input[type="time"]:focus {
                 border-color: var(--brand-500);
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                box-shadow: 0 0 0 3px rgba(202, 108, 64, 0.1);
+                outline: none;
               }
-              .react-datepicker__time-container {
-                border-left: 1px solid #e2e8f0;
+              input[type="time"]::-webkit-calendar-picker-indicator {
+                filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+                cursor: pointer;
               }
-              .react-datepicker__time-container .react-datepicker__time {
-                background: white;
-              }
-              .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
-                width: 100%;
-                border-radius: 0 0 8px 8px;
-              }
-              .react-datepicker__time-list-item--selected {
-                background-color: var(--brand-600) !important;
-                color: white !important;
-                font-weight: 600;
-              }
-              .react-datepicker__time-list-item:hover {
-                background-color: var(--brand-100);
-              }
-              .react-datepicker__time-list-item--disabled {
-                color: #cbd5e1;
+              input[type="time"]::-webkit-calendar-picker-indicator:hover {
+                filter: invert(18%) sepia(50%) saturate(2878%) hue-rotate(346deg) brightness(90%) contrast(97%);
               }
             `}</style>
           </div>
