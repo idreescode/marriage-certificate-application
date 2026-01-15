@@ -12,16 +12,19 @@ const { createNotification } = require("./notificationController");
 
 // Helper function to get frontend URL based on environment
 const getFrontendUrl = () => {
+  let url;
   // If FRONTEND_URL is explicitly set, use it
   if (process.env.FRONTEND_URL) {
-    return process.env.FRONTEND_URL;
+    url = process.env.FRONTEND_URL;
+  } else if (process.env.NODE_ENV === "development") {
+    // Otherwise, determine based on NODE_ENV
+    url = "http://localhost:5173";
+  } else {
+    // Default to production URL
+    url = "https://nikahapp.jamiyat.org";
   }
-  // Otherwise, determine based on NODE_ENV
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:5173";
-  }
-  // Default to production URL
-  return "https://nikahapp.jamiyat.org";
+  // Remove trailing slash to prevent double slashes in URL construction
+  return url.replace(/\/+$/, "");
 };
 
 // Create Payment Intent
