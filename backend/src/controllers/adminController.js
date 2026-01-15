@@ -432,6 +432,9 @@ const generateCertificate = async (req, res) => {
   
   try {
     const { id } = req.params;
+    // Check if email notification should be sent (default: true)
+    // If notify=false is passed, skip sending email (e.g., when admin just wants to print)
+    const shouldNotify = req.query.notify !== 'false';
 
     // Get application data (exclude deleted)
     const [appRows] = await pool.execute(
@@ -467,22 +470,26 @@ const generateCertificate = async (req, res) => {
       [certificateUrl, id]
     );
 
-    // Send email to applicant
-    const [updatedRows] = await pool.execute(
-      `SELECT a.*, u.email as portal_email 
-       FROM applications a 
-       JOIN users u ON a.user_id = u.id 
-       WHERE a.id = ?`,
-      [id]
-    );
+    // Send email to applicant only if notify is true (default behavior)
+    if (shouldNotify) {
+      const [updatedRows] = await pool.execute(
+        `SELECT a.*, u.email as portal_email 
+         FROM applications a 
+         JOIN users u ON a.user_id = u.id 
+         WHERE a.id = ?`,
+        [id]
+      );
 
-    if (updatedRows.length > 0) {
-      await sendCertificateReadyEmail(updatedRows[0]);
+      if (updatedRows.length > 0) {
+        await sendCertificateReadyEmail(updatedRows[0]);
+      }
     }
 
     res.json({
       success: true,
-      message: 'Certificate generated successfully',
+      message: shouldNotify 
+        ? 'Certificate generated successfully' 
+        : 'Certificate generated successfully (no notification sent)',
       data: { certificateUrl }
     });
 

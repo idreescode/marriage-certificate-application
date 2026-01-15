@@ -73,7 +73,8 @@ export default function AdminApplicationDetails() {
         const toastId = toast.loading("Generating certificate...");
 
         try {
-          const response = await generateCertificate(id);
+          // When printing, don't send email notification to applicant
+          const response = await generateCertificate(id, false);
           console.log("✅ Certificate generation response:", response.data);
 
           if (response.data.success) {
