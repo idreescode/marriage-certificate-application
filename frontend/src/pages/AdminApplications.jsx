@@ -104,7 +104,10 @@ export default function AdminApplications() {
     const toastId = toast.loading("Verifying documents...");
     try {
       await verifyDocumentsAPI(selectedAppId);
-      toast.success("Documents verified successfully! Deposit amount set to £200.", { id: toastId });
+      toast.success(
+        "Documents verified successfully! Deposit amount set to £200.",
+        { id: toastId }
+      );
       closeModal();
       fetchApplications();
     } catch (error) {
@@ -129,7 +132,7 @@ export default function AdminApplications() {
 
   const openDeleteModal = (appId, applicationNumber) => {
     setDeleteAppData({ id: appId, applicationNumber });
-    setActiveModal('delete');
+    setActiveModal("delete");
   };
 
   const handleDeleteApplication = async () => {
@@ -200,7 +203,9 @@ export default function AdminApplications() {
     const toastId = toast.loading("Updating application number...");
     try {
       await updateApplicationNumber(appId, editingValue.trim());
-      toast.success("Application number updated successfully!", { id: toastId });
+      toast.success("Application number updated successfully!", {
+        id: toastId,
+      });
       setEditingAppId(null);
       setEditingValue("");
       fetchApplications();
@@ -474,7 +479,9 @@ export default function AdminApplications() {
                       </div>
                     ) : (
                       <span
-                        onClick={() => startEditing(app.id, app.application_number)}
+                        onClick={() =>
+                          startEditing(app.id, app.application_number)
+                        }
                         style={{
                           display: "inline-block",
                           cursor: "pointer",
@@ -483,7 +490,8 @@ export default function AdminApplications() {
                           transition: "all 0.2s ease",
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+                          e.currentTarget.style.backgroundColor =
+                            "rgba(59, 130, 246, 0.1)";
                           e.currentTarget.style.color = "var(--brand-600)";
                         }}
                         onMouseLeave={(e) => {
@@ -529,32 +537,35 @@ export default function AdminApplications() {
                         className="btn btn-sm btn-secondary"
                         title="Edit Application"
                         style={{
-                          color: 'var(--brand-600)',
-                          borderColor: 'var(--brand-600)'
+                          color: "var(--brand-600)",
+                          borderColor: "var(--brand-600)",
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'var(--brand-50)';
+                          e.currentTarget.style.backgroundColor =
+                            "var(--brand-50)";
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.backgroundColor = "transparent";
                         }}
                       >
                         <Pencil size={16} />
                       </Link>
 
                       <button
-                        onClick={() => openDeleteModal(app.id, app.application_number)}
+                        onClick={() =>
+                          openDeleteModal(app.id, app.application_number)
+                        }
                         className="btn btn-sm btn-secondary"
                         title="Delete Application"
                         style={{
-                          color: '#ef4444',
-                          borderColor: '#ef4444'
+                          color: "#ef4444",
+                          borderColor: "#ef4444",
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#fee2e2';
+                          e.currentTarget.style.backgroundColor = "#fee2e2";
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.backgroundColor = "transparent";
                         }}
                       >
                         <Trash2 size={16} />
@@ -607,7 +618,7 @@ export default function AdminApplications() {
                         <button
                           onClick={() => openSchedule(app.id)}
                           className="btn btn-sm"
-                          style={{ 
+                          style={{
                             whiteSpace: "nowrap",
                             backgroundColor: "var(--brand-500)",
                             color: "white",
@@ -617,7 +628,7 @@ export default function AdminApplications() {
                             justifyContent: "center",
                             gap: "0.4rem",
                             minWidth: "130px",
-                            padding: "0.5rem 1rem"
+                            padding: "0.5rem 1rem",
                           }}
                         >
                           <Calendar size={14} />
@@ -637,7 +648,7 @@ export default function AdminApplications() {
                             alignItems: "center",
                             justifyContent: "center",
                             minWidth: "130px",
-                            padding: "0.5rem 1rem"
+                            padding: "0.5rem 1rem",
                           }}
                         >
                           Complete
@@ -692,36 +703,48 @@ export default function AdminApplications() {
         onClose={closeModal}
         title="Verify Documents"
       >
-        <div style={{ marginBottom: '1.5rem' }}>
-          <p style={{ 
-            color: 'var(--slate-700)', 
-            fontSize: '0.95rem', 
-            lineHeight: '1.6',
-            margin: 0 
-          }}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <p
+            style={{
+              color: "var(--slate-700)",
+              fontSize: "0.95rem",
+              lineHeight: "1.6",
+              margin: 0,
+            }}
+          >
             Have you reviewed and verified all the uploaded documents?
           </p>
-          <p style={{ 
-            color: 'var(--slate-500)', 
-            fontSize: '0.875rem', 
-            marginTop: '0.5rem',
-            margin: 0 
-          }}>
-            This will automatically set the deposit amount to £200 and notify the applicant to proceed with payment.
+          <p
+            style={{
+              color: "var(--slate-500)",
+              fontSize: "0.875rem",
+              marginTop: "0.5rem",
+              margin: 0,
+            }}
+          >
+            This will automatically set the deposit amount to £200 and notify
+            the applicant to proceed with payment.
           </p>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
-          <button 
-            onClick={closeModal} 
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.75rem",
+            marginTop: "1.75rem",
+          }}
+        >
+          <button
+            onClick={closeModal}
             className="btn btn-secondary"
-            style={{ minWidth: '100px' }}
+            style={{ minWidth: "100px" }}
           >
             Cancel
           </button>
-          <button 
-            onClick={handleVerifyDocuments} 
+          <button
+            onClick={handleVerifyDocuments}
             className="btn btn-primary"
-            style={{ minWidth: '140px' }}
+            style={{ minWidth: "140px" }}
           >
             Verify Documents
           </button>
@@ -733,36 +756,48 @@ export default function AdminApplications() {
         onClose={closeModal}
         title="Verify Payment"
       >
-        <div style={{ marginBottom: '1.5rem' }}>
-          <p style={{ 
-            color: 'var(--slate-700)', 
-            fontSize: '0.95rem', 
-            lineHeight: '1.6',
-            margin: 0 
-          }}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <p
+            style={{
+              color: "var(--slate-700)",
+              fontSize: "0.95rem",
+              lineHeight: "1.6",
+              margin: 0,
+            }}
+          >
             Are you sure you want to verify the payment receipt?
           </p>
-          <p style={{ 
-            color: 'var(--slate-500)', 
-            fontSize: '0.875rem', 
-            marginTop: '0.5rem',
-            margin: 0 
-          }}>
-            This action will mark the payment as verified and allow scheduling the appointment.
+          <p
+            style={{
+              color: "var(--slate-500)",
+              fontSize: "0.875rem",
+              marginTop: "0.5rem",
+              margin: 0,
+            }}
+          >
+            This action will mark the payment as verified and allow scheduling
+            the appointment.
           </p>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
-          <button 
-            onClick={closeModal} 
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.75rem",
+            marginTop: "1.75rem",
+          }}
+        >
+          <button
+            onClick={closeModal}
             className="btn btn-secondary"
-            style={{ minWidth: '100px' }}
+            style={{ minWidth: "100px" }}
           >
             Cancel
           </button>
-          <button 
-            onClick={handleVerifyPayment} 
+          <button
+            onClick={handleVerifyPayment}
             className="btn btn-primary"
-            style={{ minWidth: '100px' }}
+            style={{ minWidth: "100px" }}
           >
             Verify Payment
           </button>
@@ -775,8 +810,16 @@ export default function AdminApplications() {
         title="Schedule Appointment"
       >
         <form onSubmit={handleScheduleAppointment}>
-          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+          <div className="form-group" style={{ marginBottom: "1.25rem" }}>
+            <label
+              className="form-label"
+              style={{
+                marginBottom: "0.5rem",
+                display: "block",
+                fontWeight: 500,
+                color: "var(--slate-700)",
+              }}
+            >
               Date
             </label>
             <DatePicker
@@ -784,7 +827,9 @@ export default function AdminApplications() {
               onChange={(date) => {
                 setSelectedDate(date);
                 // Format date as YYYY-MM-DD for backend
-                const formattedDate = date ? date.toISOString().split('T')[0] : "";
+                const formattedDate = date
+                  ? date.toISOString().split("T")[0]
+                  : "";
                 setAppointmentData({ ...appointmentData, date: formattedDate });
               }}
               dateFormat="dd/MM/yyyy"
@@ -792,7 +837,7 @@ export default function AdminApplications() {
               placeholderText="Select appointment date"
               required
               className="form-input"
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               wrapperClassName="date-picker-wrapper"
             />
             <style>{`
@@ -860,8 +905,16 @@ export default function AdminApplications() {
               }
             `}</style>
           </div>
-          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+          <div className="form-group" style={{ marginBottom: "1.25rem" }}>
+            <label
+              className="form-label"
+              style={{
+                marginBottom: "0.5rem",
+                display: "block",
+                fontWeight: 500,
+                color: "var(--slate-700)",
+              }}
+            >
               Time
             </label>
             <input
@@ -875,7 +928,7 @@ export default function AdminApplications() {
                 })
               }
               required
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
             />
             <style>{`
               input[type="time"] {
@@ -895,8 +948,16 @@ export default function AdminApplications() {
               }
             `}</style>
           </div>
-          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block', fontWeight: 500, color: 'var(--slate-700)' }}>
+          <div className="form-group" style={{ marginBottom: "1.25rem" }}>
+            <label
+              className="form-label"
+              style={{
+                marginBottom: "0.5rem",
+                display: "block",
+                fontWeight: 500,
+                color: "var(--slate-700)",
+              }}
+            >
               Location
             </label>
             <input
@@ -911,20 +972,27 @@ export default function AdminApplications() {
               }
               placeholder="e.g. Main Hall"
               required
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
             />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "0.75rem",
+              marginTop: "1.5rem",
+            }}
+          >
             <button
               type="button"
               onClick={closeModal}
               className="btn btn-secondary"
-              style={{ minWidth: '100px' }}
+              style={{ minWidth: "100px" }}
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn"
               style={{
                 backgroundColor: "var(--brand-500)",
@@ -933,8 +1001,8 @@ export default function AdminApplications() {
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                minWidth: '130px',
-                justifyContent: 'center'
+                minWidth: "130px",
+                justifyContent: "center",
               }}
             >
               <Calendar size={16} />
@@ -950,64 +1018,90 @@ export default function AdminApplications() {
         onClose={closeModal}
         title="Delete Application"
       >
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '1rem',
-            padding: '1rem',
-            background: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '8px',
-            marginBottom: '1.25rem'
-          }}>
-            <AlertTriangle size={24} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "1rem",
+              padding: "1rem",
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "8px",
+              marginBottom: "1.25rem",
+            }}
+          >
+            <AlertTriangle
+              size={24}
+              color="#dc2626"
+              style={{ flexShrink: 0, marginTop: "2px" }}
+            />
             <div style={{ flex: 1 }}>
-              <p style={{ 
-                color: '#991b1b', 
-                fontSize: '1rem', 
-                fontWeight: 600,
-                margin: 0,
-                marginBottom: '0.5rem'
-              }}>
-                Are you sure you want to delete application #{deleteAppData?.applicationNumber}?
+              <p
+                style={{
+                  color: "#991b1b",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  margin: 0,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Are you sure you want to delete application #
+                {deleteAppData?.applicationNumber}?
               </p>
-              <p style={{ 
-                color: '#7f1d1d', 
-                fontSize: '0.875rem', 
-                lineHeight: '1.6',
-                margin: 0 
-              }}>
-                This will deactivate the application and prevent the applicant from logging in.
+              <p
+                style={{
+                  color: "#7f1d1d",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.6",
+                  margin: 0,
+                }}
+              >
+                This will deactivate the application and prevent the applicant
+                from logging in.
               </p>
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem' }}>
-          <button 
-            onClick={closeModal} 
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.75rem",
+            marginTop: "1.75rem",
+          }}
+        >
+          <button
+            onClick={closeModal}
             className="btn btn-secondary"
-            style={{ minWidth: '100px' }}
+            style={{ minWidth: "100px" }}
           >
             Cancel
           </button>
-          <button 
-            onClick={handleDeleteApplication} 
+          <button
+            onClick={handleDeleteApplication}
             className="btn"
-            style={{ 
-              minWidth: '120px',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              border: 'none'
+            style={{
+              minWidth: "120px",
+              backgroundColor: "#ef4444",
+              color: "white",
+              border: "none",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#dc2626';
+              e.currentTarget.style.backgroundColor = "#dc2626";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#ef4444';
+              e.currentTarget.style.backgroundColor = "#ef4444";
             }}
           >
-            <Trash2 size={16} style={{ marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'middle' }} />
+            <Trash2
+              size={16}
+              style={{
+                marginRight: "0.5rem",
+                display: "inline-block",
+                verticalAlign: "middle",
+              }}
+            />
             Delete
           </button>
         </div>
