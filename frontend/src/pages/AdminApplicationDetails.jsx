@@ -83,24 +83,130 @@ export default function AdminApplicationDetails() {
             ...prev,
             certificate_url: certificateUrl,
           }));
+          // Open the certificate PDF in a new tab immediately (before toast to avoid popup blockers)
+          const fullUrl = getFileUrl(certificateUrl);
+          console.log("🔗 Opening certificate URL:", fullUrl);
+          console.log("📋 Certificate URL from response:", certificateUrl);
+
+          // Verify URL is valid
+          if (!fullUrl || fullUrl === '') {
+            console.error("❌ Invalid URL generated:", fullUrl);
+            toast.error("Failed to generate certificate URL", { id: toastId });
+            return;
+          }
+
+          // Open PDF immediately - fetch as blob to ensure it's accessible
+          // This method works even if direct file access has issues
+          const openCertificate = async () => {
+            try {
+              // Try to fetch the PDF as a blob
+              const response = await fetch(fullUrl, {
+                method: 'GET',
+                credentials: 'include', // Include cookies for auth if needed
+              });
+              
+              if (response.ok) {
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // Open blob URL in new tab
+                const newWindow = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+                
+                if (newWindow) {
+                  // Clean up blob URL after a delay
+                  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                  console.log("✅ Certificate opened via blob URL");
+                  toast.success("Certificate generated and opened!", {
+                    id: toastId,
+                  });
+                  return true;
+                } else {
+                  // Fallback: create download link
+                  const link = document.createElement("a");
+                  link.href = blobUrl;
+                  link.target = "_blank";
+                  link.download = `certificate-${id}.pdf`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                  console.log("✅ Certificate downloaded via blob");
+                  toast.success("Certificate generated! Check your downloads.", {
+                    id: toastId,
+                  });
+                  return true;
+                }
+              } else {
+                throw new Error(`HTTP ${response.status}`);
+              }
+            } catch (fetchError) {
+              console.warn("⚠️ Blob fetch failed, trying direct URL:", fetchError);
+              
+              // Fallback: try direct URL methods
+              // Method 1: window.open
+              try {
+                const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
+                if (newWindow) {
+                  console.log("✅ Certificate opened via direct window.open");
+                  toast.success("Certificate generated and opened!", {
+                    id: toastId,
+                  });
+                  return true;
+                }
+              } catch (e) {
+                console.warn("⚠️ window.open failed:", e);
+              }
+              
+              // Method 2: Anchor click
+              try {
+                const link = document.createElement("a");
+                link.href = fullUrl;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.style.display = "none";
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                  if (document.body.contains(link)) {
+                    document.body.removeChild(link);
+                  }
+                }, 1000);
+                console.log("✅ Certificate opened via anchor click");
+                toast.success("Certificate generated and opened!", {
+                  id: toastId,
+                });
+                return true;
+              } catch (e) {
+                console.error("❌ All methods failed:", e);
+              }
+              
+              // Final fallback: show clickable message
+              toast.success(
+                `Certificate generated! Click here to open.`,
+                {
+                  id: toastId,
+                  duration: 10000,
+                  onClick: () => {
+                    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+                  },
+                  style: {
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  },
+                }
+              );
+              return false;
+            }
+          };
+          
+          // Wait a brief moment for file to be written, then open
+          setTimeout(() => {
+            openCertificate();
+          }, 500);
+          
           toast.success("Certificate generated successfully!", {
             id: toastId,
           });
-
-          // Open the certificate PDF in a new tab
-          const fullUrl = getFileUrl(certificateUrl);
-          console.log("🔗 Opening certificate URL:", fullUrl);
-
-          // Use anchor element click to avoid popup blocker
-          const link = document.createElement("a");
-          link.href = fullUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          console.log("✅ Certificate opened in new tab");
         } else {
           console.error(
             "❌ Certificate generation failed:",
