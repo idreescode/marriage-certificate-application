@@ -262,7 +262,8 @@ const submitApplication = async (req, res) => {
         groom_full_name: groomName,
         bride_full_name: brideName,
         portal_email: portalEmail,
-        portalPassword: portalPassword
+        portalPassword: portalPassword,
+        isManualApplication: false // Regular user submission
       };
       
       // Send emails in parallel (non-blocking)

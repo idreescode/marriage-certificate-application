@@ -38,7 +38,7 @@
               <p style="font-size: 16px; color: #1f2937; margin: 0 0 20px 0; line-height: 1.6;">Assalamu Alaikum,</p>
               
               <p style="font-size: 15px; color: #4b5563; margin: 0 0 30px 0; line-height: 1.6;">
-                Your nikah certificate application has been successfully received and is now under review.
+                {{main_message}}
               </p>
               
               <!-- Application Details Box -->
@@ -62,7 +62,7 @@
                       <tr>
                         <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Status:</td>
                         <td style="padding: 8px 0;">
-                          <span style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Under Review</span>
+                          <span style="display: inline-block; background-color: {{status_bg_color}}; color: {{status_text_color}}; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{application_status}}</span>
                         </td>
                       </tr>
                     </table>
@@ -82,7 +82,7 @@
                       </tr>
                       <tr>
                         <td style="padding: 8px 0; color: #1e40af; font-size: 14px;">Password:</td>
-                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; font-family: 'Courier New', monospace;">{{portalPassword}}</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; font-family: 'Courier New', monospace;">{{password_display}}</td>
                       </tr>
                     </table>
                     <p style="margin: 15px 0 0 0; font-size: 13px; color: #1e40af;">Please save these credentials securely to access your application portal.</p>
@@ -90,26 +90,8 @@
                 </tr>
               </table>
               
-              <!-- Next Steps -->
-              <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Next Steps</h3>
-              <table role="presentation" style="width: 100%;">
-                <tr>
-                  <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px; width: 30px;">1.</td>
-                  <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">Jamiyat staff will contact you by email or telephone to discuss the availability of the date and time of nikah.</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px;">2.</td>
-                  <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">A deposit by bank transfer will be required to confirm the date and time.</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px;">3.</td>
-                  <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">You will receive an email notification when the payment amount is set.</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; vertical-align: top; color: #6b7280; font-size: 14px;">4.</td>
-                  <td style="padding: 8px 0; color: #4b5563; font-size: 14px; line-height: 1.6;">Log into your portal to track your application status at any time.</td>
-                </tr>
-              </table>
+              <!-- Next Steps / Application Complete -->
+              {{next_steps_section}}
               
               <!-- CTA Button -->
               <table role="presentation" style="width: 100%; margin: 35px 0;">

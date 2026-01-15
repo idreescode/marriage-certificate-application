@@ -1170,31 +1170,76 @@ const createManualApplication = async (req, res) => {
         }
 
         // Send confirmation email if email is provided
-        if (portalEmail) {
+        console.log("📧 ========== EMAIL SENDING PROCESS START ==========");
+        console.log("📧 Email sending check - portalEmail:", portalEmail, "isNewUser:", isNewUser, "applicationId:", applicationId);
+        
+        if (portalEmail && portalEmail.trim()) {
           try {
+            console.log("📧 Email is provided, fetching application data...");
             // Fetch application data for email
             const [appData] = await pool.execute(
-              `SELECT id, application_number, groom_full_name, bride_full_name, portal_email 
+              `SELECT id, application_number, groom_full_name, bride_full_name 
                FROM applications WHERE id = ?`,
               [applicationId]
             );
+            
+            console.log("📧 Application data fetched:", appData.length > 0 ? "Found" : "Not found");
+            if (appData.length > 0) {
+              console.log("📧 Application data:", {
+                id: appData[0].id,
+                application_number: appData[0].application_number,
+                groom_full_name: appData[0].groom_full_name,
+                bride_full_name: appData[0].bride_full_name
+              });
+            }
 
             if (appData.length > 0) {
-              await sendApplicationConfirmation({
-                ...appData[0],
-                portal_email: portalEmail,
+              const emailData = {
+                id: appData[0].id,
+                application_number: appData[0].application_number,
+                groom_full_name: appData[0].groom_full_name,
+                bride_full_name: appData[0].bride_full_name,
+                portal_email: portalEmail.trim(),
                 portalPassword: isNewUser ? portalPassword : '', // Empty string for existing users (they use their existing password)
+                isManualApplication: true, // Flag to indicate this is a manual application
+              };
+              
+              console.log("📧 Calling sendApplicationConfirmation with data:", {
+                id: emailData.id,
+                application_number: emailData.application_number,
+                portal_email: emailData.portal_email,
+                has_portalPassword: !!emailData.portalPassword
               });
-              console.log(
-                "✅ Application confirmation email sent to:",
-                portalEmail
-              );
+              
+              const emailResult = await sendApplicationConfirmation(emailData);
+              console.log("✅ Application confirmation email sent successfully:", emailResult);
+              console.log("✅ Email sent to:", portalEmail);
+            } else {
+              console.error("❌ Application data not found for email sending, applicationId:", applicationId);
             }
           } catch (emailError) {
             // Don't fail the request if email fails, just log it
+            console.error("❌ ========== EMAIL SENDING FAILED ==========");
             console.error("❌ Error sending confirmation email:", emailError);
+            console.error("❌ Error name:", emailError.name);
+            console.error("❌ Error message:", emailError.message);
+            console.error("❌ Error code:", emailError.code);
+            console.error("❌ Error stack:", emailError.stack);
+            console.error("❌ Email error details:", {
+              message: emailError.message,
+              code: emailError.code,
+              command: emailError.command,
+              response: emailError.response,
+              portalEmail: portalEmail,
+              applicationId: applicationId
+            });
+            console.error("❌ ==========================================");
           }
+        } else {
+          console.log("⚠️ No email provided or email is empty, skipping email notification");
+          console.log("⚠️ portalEmail value:", portalEmail);
         }
+        console.log("📧 ========== EMAIL SENDING PROCESS END ==========");
 
         return res.status(201).json(responseData);
       } catch (commitError) {
