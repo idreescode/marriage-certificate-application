@@ -16,33 +16,111 @@ const generatePassword = (length = 10) => {
   return password;
 };
 
-// Convert date from MM-DD-YYYY to YYYY-MM-DD format (MySQL format)
-const convertDateToMySQL = (dateString) => {
-  if (!dateString) return null;
-  
-  // If already in YYYY-MM-DD format, return as is
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    return dateString;
+// Normalize date from WordPress format (DD-MM-YYYY) to MySQL format (YYYY-MM-DD)
+// WordPress sends dates in DD-MM-YYYY format (e.g., "15-01-2024")
+const normalizeDate = (dateString) => {
+  // Return null for falsy values
+  if (!dateString || typeof dateString !== 'string') {
+    return null;
   }
+
+  // Trim whitespace
+  const trimmed = dateString.trim();
   
-  // Try to parse MM-DD-YYYY format
-  const mmddyyyyMatch = dateString.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-  if (mmddyyyyMatch) {
-    const [, month, day, year] = mmddyyyyMatch;
+  // Return null for empty strings
+  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined') {
+    return null;
+  }
+
+  // Already in MySQL format (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    // Validate it's a real date
+    const date = new Date(trimmed + 'T00:00:00');
+    if (!isNaN(date.getTime()) && date.toISOString().startsWith(trimmed)) {
+      return trimmed;
+    }
+  }
+
+  // WordPress format: DD-MM-YYYY (e.g., "15-01-2024") - PRIMARY FORMAT
+  if (/^\d{2}-\d{2}-\d{4}$/.test(trimmed)) {
+    const parts = trimmed.split('-');
+    const day = parts[0];
+    const month = parts[1];
+    const year = parts[2];
+    
+    // Validate date
+    const date = new Date(`${year}-${month}-${day}T00:00:00`);
+    if (!isNaN(date.getTime()) && 
+        date.getDate() === parseInt(day) && 
+        date.getMonth() === parseInt(month) - 1 && 
+        date.getFullYear() === parseInt(year)) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  // Format: DD/MM/YYYY (e.g., "15/01/2024")
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    const parts = trimmed.split('/');
+    const day = parts[0];
+    const month = parts[1];
+    const year = parts[2];
+    
+    const date = new Date(`${year}-${month}-${day}T00:00:00`);
+    if (!isNaN(date.getTime()) && 
+        date.getDate() === parseInt(day) && 
+        date.getMonth() === parseInt(month) - 1 && 
+        date.getFullYear() === parseInt(year)) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  // Format: MM/DD/YYYY (US format, e.g., "01/15/2024")
+  // Only try this if first part <= 12 (could be month)
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    const parts = trimmed.split('/');
+    const first = parseInt(parts[0]);
+    const second = parseInt(parts[1]);
+    
+    // If first part <= 12 and second > 12, it's likely MM/DD/YYYY
+    if (first <= 12 && second > 12) {
+      const month = parts[0];
+      const day = parts[1];
+      const year = parts[2];
+      
+      const date = new Date(`${year}-${month}-${day}T00:00:00`);
+      if (!isNaN(date.getTime()) && 
+          date.getDate() === parseInt(day) && 
+          date.getMonth() === parseInt(month) - 1 && 
+          date.getFullYear() === parseInt(year)) {
+        return `${year}-${month}-${day}`;
+      }
+    }
+  }
+
+  // Format: YYYY/MM/DD
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(trimmed)) {
+    const parts = trimmed.split('/');
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+    
+    const date = new Date(`${year}-${month}-${day}T00:00:00`);
+    if (!isNaN(date.getTime()) && date.toISOString().startsWith(`${year}-${month}-${day}`)) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  // Try parsing as ISO date string (handles timezone info)
+  const isoDate = new Date(trimmed);
+  if (!isNaN(isoDate.getTime())) {
+    const year = isoDate.getFullYear();
+    const month = String(isoDate.getMonth() + 1).padStart(2, '0');
+    const day = String(isoDate.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-  
-  // Try to parse other common formats
-  const date = new Date(dateString);
-  if (!isNaN(date.getTime())) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-  
-  // If parsing fails, return null
-  console.warn(`Warning: Could not parse date: ${dateString}`);
+
+  // Invalid date format
+  console.warn(`⚠️  Invalid date format received: "${trimmed}". Returning null.`);
   return null;
 };
 
@@ -82,7 +160,7 @@ const getStatusColor = (status) => {
 module.exports = {
   generateApplicationNumber,
   generatePassword,
-  convertDateToMySQL,
+  normalizeDate,
   formatDate,
   formatCurrency,
   getStatusColor

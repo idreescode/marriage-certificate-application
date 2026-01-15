@@ -97,17 +97,35 @@ jobs:
           
           echo "📌 Target branch: \$BRANCH_NAME"
           
-          # Fetch latest changes
+          # Show current state before pull
+          echo "📊 Current state before pull:"
+          echo "   Current commit: \$(git log -1 --oneline 2>/dev/null || echo 'No commits yet')"
+          echo "   Current branch: \$(git branch --show-current 2>/dev/null || echo 'No branch')"
+          
+          # Fetch latest changes with force to ensure we get everything
+          echo "🔄 Fetching latest changes from origin..."
           git fetch origin --force --prune
           git fetch origin \$BRANCH_NAME --force
           
+          # Stash any local changes (shouldn't be any, but just in case)
+          git stash 2>/dev/null || true
+          
           # Checkout and reset to latest
+          echo "🔄 Checking out and resetting to latest code..."
           git checkout -f \$BRANCH_NAME 2>/dev/null || git checkout -b \$BRANCH_NAME origin/\$BRANCH_NAME
           git reset --hard origin/\$BRANCH_NAME
           
-          # Note: We don't run git clean -fd to preserve .env and other untracked files
-          echo "✅ Latest code pulled. New commit:"
-          git log -1 --oneline
+          # Clean untracked files (but preserve .env and uploads)
+          echo "🧹 Cleaning untracked files (preserving .env and uploads)..."
+          git clean -fd -e ".env*" -e "uploads" -e "*.backup.*" 2>/dev/null || true
+          
+          # Verify we have the latest code
+          echo "✅ Latest code pulled. Latest commit details:"
+          echo "📝 Commit: \$(git log -1 --oneline)"
+          echo "👤 Author: \$(git log -1 --format='%an <%ae>')"
+          echo "📅 Date: \$(git log -1 --format='%ad' --date=format:'%Y-%m-%d %H:%M:%S')"
+          echo "💬 Message: \$(git log -1 --format='%s')"
+          echo "📊 Files changed: \$(git diff --stat HEAD~1 HEAD 2>/dev/null | tail -1 || echo 'N/A')"
           
           # Move backend files from subdirectory to root if needed
           if [ -d "backend" ] && [ ! -f "package.json" ]; then
@@ -135,6 +153,48 @@ jobs:
             echo "📁 Creating uploads directory..."
             mkdir -p uploads/receipts uploads/certificates
             chmod -R 755 uploads
+          fi
+          
+          # Install Puppeteer system dependencies (required for PDF generation)
+          echo "🔧 Installing Puppeteer system dependencies..."
+          if command -v apt-get &> /dev/null; then
+            sudo apt-get update -qq || true
+            # Try installing packages, allowing automatic selection of t64 variants on Ubuntu 24.04+
+            sudo apt-get install -y -qq \
+              libatk-bridge2.0-0 \
+              libatk1.0-0 \
+              libcups2 \
+              libdrm2 \
+              libgtk-3-0 \
+              libgbm1 \
+              libasound2t64 \
+              libxcomposite1 \
+              libxdamage1 \
+              libxfixes3 \
+              libxrandr2 \
+              libxss1 \
+              libxkbcommon0 \
+              libpango-1.0-0 \
+              libcairo2 \
+              libatspi2.0-0 \
+              libxshmfence1 \
+              libnss3 \
+              libx11-xcb1 \
+              libxcb-dri3-0 \
+              libdrm-common \
+              libxcb1 \
+              libx11-6 \
+              libxext6 \
+              ca-certificates \
+              fonts-liberation \
+              libappindicator3-1 \
+              libu2f-udev \
+              xdg-utils \
+              2>&1 | grep -v "Note, selecting" || true
+            echo "✅ System dependencies installed"
+          else
+            echo "⚠️  apt-get not found, skipping system dependency installation"
+            echo "⚠️  You may need to install Puppeteer dependencies manually"
           fi
           
           # Install/update dependencies
@@ -167,35 +227,89 @@ jobs:
           
           # Restart/Start PM2 process
           echo "🔄 Starting/Restarting backend with PM2..."
+          
           # Stop and delete existing process to ensure clean restart
+          echo "🛑 Stopping existing PM2 process..."
+          pm2 stop nikah-backend 2>/dev/null || true
           pm2 delete nikah-backend 2>/dev/null || true
+          
           # Clear PM2 cache and logs
           pm2 flush 2>/dev/null || true
-          # Wait a moment for process to fully stop
-          sleep 1
-          # Start the server with updated code from current directory
-          cd /var/www/backend
-          pm2 start server.js --name nikah-backend --update-env
-          # Wait for process to start
+          
+          # Wait longer for process to fully stop and release resources
+          echo "⏳ Waiting for process to fully stop..."
           sleep 3
-          # Force reload to ensure latest code is loaded (this clears require cache)
-          pm2 reload nikah-backend --update-env || pm2 restart nikah-backend --update-env
-          # Wait for reload to complete
-          sleep 2
+          
+          # Verify process is actually stopped
+          if pm2 list | grep -q "nikah-backend"; then
+            echo "⚠️  Process still exists, forcing kill..."
+            pm2 kill 2>/dev/null || true
+            sleep 2
+          fi
+          
+          # Ensure we're in the correct directory with latest code
+          cd /var/www/backend
+          echo "📂 Current directory: \$(pwd)"
+          echo "📝 Verifying latest code is present..."
+          echo "   Latest commit: \$(git log -1 --oneline)"
+          echo "   server.js modified: \$(stat -c %y server.js 2>/dev/null || stat -f %Sm server.js 2>/dev/null || echo 'unknown')"
+          
+          # Start the server with updated code from current directory
+          echo "🚀 Starting backend with PM2..."
+          pm2 start server.js --name nikah-backend --update-env
+          
+          # Wait for process to start and initialize
+          sleep 5
+          
+          # Verify the process is running
+          if ! pm2 list | grep -q "nikah-backend.*online"; then
+            echo "❌ Process failed to start, attempting restart..."
+            pm2 restart nikah-backend --update-env
+            sleep 3
+          fi
+          
+          # Force a hard restart to ensure latest code is loaded (clears require cache)
+          echo "🔄 Performing hard restart to load latest code..."
+          pm2 restart nikah-backend --update-env
+          
+          # Wait for restart to complete
+          sleep 3
+          
           # Save PM2 process list
           pm2 save
+          
           # Setup PM2 to start on system boot
           pm2 startup 2>/dev/null || true
           
           echo "✅ Backend deployment completed!"
-          echo "📊 Current deployed commit:"
-          git log -1 --oneline
+          echo ""
+          echo "📊 Current deployed commit details:"
+          echo "📝 Commit: \$(git log -1 --oneline)"
+          echo "👤 Author: \$(git log -1 --format='%an <%ae>')"
+          echo "📅 Date: \$(git log -1 --format='%ad' --date=format:'%Y-%m-%d %H:%M:%S')"
+          echo "💬 Message: \$(git log -1 --format='%s')"
+          echo ""
           echo "📊 PM2 Status:"
           pm2 status
-          echo "📋 PM2 Logs (last 20 lines):"
-          pm2 logs nikah-backend --lines 20 --nostream || true
-          echo "📁 Verifying key files are updated:"
+          echo ""
+          echo "📋 PM2 Logs (last 30 lines):"
+          pm2 logs nikah-backend --lines 30 --nostream || true
+          echo ""
+          echo "📁 Verifying key files are updated (checking modification times):"
+          echo "   server.js: \$(stat -c %y server.js 2>/dev/null || stat -f %Sm server.js 2>/dev/null || echo 'not found')"
           ls -lh server.js src/controllers/applicationController.js src/utils/helpers.js 2>/dev/null || echo "⚠️  Some files not found"
+          echo ""
+          echo "🔍 Verifying PM2 is running latest code:"
+          PM2_PID=\$(pm2 jlist | grep -o '"pid":[0-9]*' | head -1 | cut -d: -f2)
+          if [ -n "\$PM2_PID" ]; then
+            PM2_START_TIME=\$(ps -o lstart= -p \$PM2_PID 2>/dev/null || echo "unknown")
+            echo "   PM2 Process ID: \$PM2_PID"
+            echo "   PM2 Started: \$PM2_START_TIME"
+            echo "   Server.js modified: \$(stat -c %y server.js 2>/dev/null || stat -f %Sm server.js 2>/dev/null || echo 'unknown')"
+            echo "   ✅ If PM2 start time is after server.js modification, latest code is running"
+          else
+            echo "   ⚠️  Could not determine PM2 process details"
+          fi
           EOF
           
           # Ensure /var/www directory exists
