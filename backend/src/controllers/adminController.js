@@ -1,7 +1,11 @@
 const { pool } = require("../config/database");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { generatePassword, generateApplicationNumber, normalizeDate } = require("../utils/helpers");
+const {
+  generatePassword,
+  generateApplicationNumber,
+  normalizeDate,
+} = require("../utils/helpers");
 const {
   sendDepositAmountEmail,
   sendPaymentVerifiedEmail,
@@ -510,7 +514,7 @@ const updateApplicationNumber = async (req, res) => {
     if (!applicationNumber || !applicationNumber.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Application number is required'
+        message: "Application number is required",
       });
     }
 
@@ -520,7 +524,7 @@ const updateApplicationNumber = async (req, res) => {
     if (trimmedNumber.length > 50) {
       return res.status(400).json({
         success: false,
-        message: 'Application number must be 50 characters or less'
+        message: "Application number must be 50 characters or less",
       });
     }
 
@@ -533,7 +537,7 @@ const updateApplicationNumber = async (req, res) => {
     if (appRows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Application not found"
+        message: "Application not found",
       });
     }
 
@@ -546,7 +550,8 @@ const updateApplicationNumber = async (req, res) => {
     if (existingApp.length > 0) {
       return res.status(409).json({
         success: false,
-        message: 'This application number already exists. Please use a different number.'
+        message:
+          "This application number already exists. Please use a different number.",
       });
     }
 
@@ -560,24 +565,25 @@ const updateApplicationNumber = async (req, res) => {
       success: true,
       message: "Application number updated successfully",
       data: {
-        applicationNumber: trimmedNumber
-      }
+        applicationNumber: trimmedNumber,
+      },
     });
   } catch (error) {
     console.error("Error updating application number:", error);
-    
+
     // Handle MySQL Duplicate Entry Error
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: 'This application number already exists. Please use a different number.'
+        message:
+          "This application number already exists. Please use a different number.",
       });
     }
 
     res.status(500).json({
       success: false,
       message: "Failed to update application number",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -708,49 +714,49 @@ const createManualApplication = async (req, res) => {
       // Contact & Status
       email,
       contactNumber,
-      status = 'completed', // Default to completed for old data
+      status = "completed", // Default to completed for old data
       depositAmount,
       paymentStatus,
       appointmentDate,
       appointmentTime,
       appointmentLocation,
       preferredDate,
-      specialRequests
+      specialRequests,
     } = req.body;
 
     // Validate required fields
     if (!groomName || !brideName) {
       return res.status(400).json({
         success: false,
-        message: 'Groom and Bride names are required'
+        message: "Groom and Bride names are required",
       });
     }
 
     if (!groomDateOfBirth) {
       return res.status(400).json({
         success: false,
-        message: 'Groom date of birth is required'
+        message: "Groom date of birth is required",
       });
     }
 
     if (!groomPlaceOfBirth) {
       return res.status(400).json({
         success: false,
-        message: 'Groom place of birth is required'
+        message: "Groom place of birth is required",
       });
     }
 
     if (!brideDateOfBirth) {
       return res.status(400).json({
         success: false,
-        message: 'Bride date of birth is required'
+        message: "Bride date of birth is required",
       });
     }
 
     if (!bridePlaceOfBirth) {
       return res.status(400).json({
         success: false,
-        message: 'Bride place of birth is required'
+        message: "Bride place of birth is required",
       });
     }
 
@@ -760,7 +766,7 @@ const createManualApplication = async (req, res) => {
       if (!emailRegex.test(email)) {
         return res.status(400).json({
           success: false,
-          message: 'Please provide a valid email address'
+          message: "Please provide a valid email address",
         });
       }
     }
@@ -769,17 +775,18 @@ const createManualApplication = async (req, res) => {
     const portalEmail = email && email.trim() ? email.toLowerCase() : null;
     let portalPassword = null;
     let hashedPassword = null;
-    
+
     if (portalEmail) {
       portalPassword = generatePassword();
       hashedPassword = await bcrypt.hash(portalPassword, 10);
     }
 
     // Use provided application number or generate one
-    let applicationNumber = providedApplicationNumber && providedApplicationNumber.trim() 
-      ? providedApplicationNumber.trim() 
-      : generateApplicationNumber();
-    
+    let applicationNumber =
+      providedApplicationNumber && providedApplicationNumber.trim()
+        ? providedApplicationNumber.trim()
+        : generateApplicationNumber();
+
     // GET CONNECTION FOR TRANSACTION
     const connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -787,10 +794,10 @@ const createManualApplication = async (req, res) => {
     try {
       // Check if application number already exists (within transaction)
       const [existingApp] = await connection.execute(
-        'SELECT id FROM applications WHERE application_number = ?',
+        "SELECT id FROM applications WHERE application_number = ?",
         [applicationNumber]
       );
-      
+
       if (existingApp.length > 0) {
         // If user provided the number, return error
         if (providedApplicationNumber && providedApplicationNumber.trim()) {
@@ -798,7 +805,8 @@ const createManualApplication = async (req, res) => {
           connection.release();
           return res.status(409).json({
             success: false,
-            message: 'This application number already exists. Please use a different number.'
+            message:
+              "This application number already exists. Please use a different number.",
           });
         }
         // If auto-generated, try generating a new one (max 5 attempts)
@@ -807,7 +815,7 @@ const createManualApplication = async (req, res) => {
         while (!foundUnique && attempts < 5) {
           applicationNumber = generateApplicationNumber();
           const [checkApp] = await connection.execute(
-            'SELECT id FROM applications WHERE application_number = ?',
+            "SELECT id FROM applications WHERE application_number = ?",
             [applicationNumber]
           );
           if (checkApp.length === 0) {
@@ -821,37 +829,38 @@ const createManualApplication = async (req, res) => {
           connection.release();
           return res.status(500).json({
             success: false,
-            message: 'Unable to generate unique application number. Please try again.'
+            message:
+              "Unable to generate unique application number. Please try again.",
           });
         }
       }
       let userId = null;
       let isNewUser = false;
-      
+
       // Only create/lookup user if email is provided
       if (portalEmail) {
         // Check if email already exists
         const [existingUser] = await connection.execute(
-          'SELECT id FROM users WHERE email = ?',
+          "SELECT id FROM users WHERE email = ?",
           [portalEmail]
         );
 
         if (existingUser.length > 0) {
           userId = existingUser[0].id;
-          console.log('Using existing user with ID:', userId);
+          console.log("Using existing user with ID:", userId);
         } else {
           // Create User
-          console.log('Creating user with email:', portalEmail);
+          console.log("Creating user with email:", portalEmail);
           const [userResult] = await connection.execute(
             'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
-            [portalEmail, hashedPassword, groomName || 'Applicant']
+            [portalEmail, hashedPassword, groomName || "Applicant"]
           );
           userId = userResult.insertId;
           isNewUser = true;
-          console.log('User created with ID:', userId);
+          console.log("User created with ID:", userId);
         }
       } else {
-        console.log('No email provided, skipping user creation');
+        console.log("No email provided, skipping user creation");
       }
 
       // Normalize dates
@@ -867,36 +876,38 @@ const createManualApplication = async (req, res) => {
 
       // Handle file uploads - prepare document paths
       const fileFields = {
-        groomId: 'groom_id_path',
-        brideId: 'bride_id_path',
-        witness1Id: 'witness1_id_path',
-        witness2Id: 'witness2_id_path',
-        mahrDeclaration: 'mahr_declaration_path',
-        civilDivorceDoc: 'civil_divorce_doc_path',
-        islamicDivorceDoc: 'islamic_divorce_doc_path',
-        groomConversionCert: 'groom_conversion_cert_path',
-        brideConversionCert: 'bride_conversion_cert_path',
-        statutoryDeclaration: 'statutory_declaration_path'
+        groomId: "groom_id_path",
+        brideId: "bride_id_path",
+        witness1Id: "witness1_id_path",
+        witness2Id: "witness2_id_path",
+        mahrDeclaration: "mahr_declaration_path",
+        civilDivorceDoc: "civil_divorce_doc_path",
+        islamicDivorceDoc: "islamic_divorce_doc_path",
+        groomConversionCert: "groom_conversion_cert_path",
+        brideConversionCert: "bride_conversion_cert_path",
+        statutoryDeclaration: "statutory_declaration_path",
       };
 
       const documentPaths = {};
       for (const [fieldName, dbColumn] of Object.entries(fileFields)) {
         if (files[fieldName] && files[fieldName][0]) {
-          documentPaths[dbColumn] = `/uploads/documents/${files[fieldName][0].filename}`;
+          documentPaths[
+            dbColumn
+          ] = `/uploads/documents/${files[fieldName][0].filename}`;
         }
       }
 
       // Insert Application with retry logic for collision
-      console.log('Attempting to insert application for user_id:', userId);
+      console.log("Attempting to insert application for user_id:", userId);
       let insertResult;
       let insertAttempts = 0;
       let finalApplicationNumber = applicationNumber;
       let insertSuccess = false;
-      
+
       while (!insertSuccess && insertAttempts < 3) {
         try {
           [insertResult] = await connection.execute(
-        `INSERT INTO applications (
+            `INSERT INTO applications (
           application_number, user_id,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
           groom_id_number, groom_address, groom_email, groom_phone,
@@ -918,48 +929,83 @@ const createManualApplication = async (req, res) => {
           mahr_declaration_path, civil_divorce_doc_path, islamic_divorce_doc_path,
           groom_conversion_cert_path, bride_conversion_cert_path, statutory_declaration_path
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          finalApplicationNumber, userId,
-          groomName || null, groomFatherName || null, normalizedGroomDob, groomPlaceOfBirth || null,
-          groomIdNumber || null, groomAddress || null, groomEmail || portalEmail || null, groomPhone || contactNumber || null,
-          groomConfirm || false, groomPersonally || false, groomRepresentative || false,
-          groomRepName || null, groomRepFatherName || null, normalizedGroomRepDob,
-          groomRepPlaceOfBirth || null, groomRepAddress || null,
-          brideName || null, brideFatherName || null, normalizedBrideDob, bridePlaceOfBirth || null,
-          brideIdNumber || null, brideAddress || null, brideEmail || portalEmail || null, bridePhone || contactNumber || null,
-          brideConfirm || false, bridePersonally || false, brideRepresentative || false,
-          brideRepName || null, brideRepFatherName || null, normalizedBrideRepDob,
-          brideRepPlaceOfBirth || null, brideRepAddress || null,
-          mahrAmount || null, mahrType || null,
-          normalizedSolemnisedDate, solemnisedPlace || null, solemnisedAddress || null,
-          normalizedPreferredDate, specialRequests || null,
-          depositAmount || 200, adminId, paymentStatus || 'amount_set',
-          normalizedAppointmentDate, appointmentTime || null, appointmentLocation || null,
-          status || 'completed',
-          documentPaths.groom_id_path || null,
-          documentPaths.bride_id_path || null,
-          documentPaths.witness1_id_path || null,
-          documentPaths.witness2_id_path || null,
-          documentPaths.mahr_declaration_path || null,
-          documentPaths.civil_divorce_doc_path || null,
-          documentPaths.islamic_divorce_doc_path || null,
-          documentPaths.groom_conversion_cert_path || null,
-          documentPaths.bride_conversion_cert_path || null,
-          documentPaths.statutory_declaration_path || null
-        ]
+            [
+              finalApplicationNumber,
+              userId,
+              groomName || null,
+              groomFatherName || null,
+              normalizedGroomDob,
+              groomPlaceOfBirth || null,
+              groomIdNumber || null,
+              groomAddress || null,
+              groomEmail || portalEmail || null,
+              groomPhone || contactNumber || null,
+              groomConfirm || false,
+              groomPersonally || false,
+              groomRepresentative || false,
+              groomRepName || null,
+              groomRepFatherName || null,
+              normalizedGroomRepDob,
+              groomRepPlaceOfBirth || null,
+              groomRepAddress || null,
+              brideName || null,
+              brideFatherName || null,
+              normalizedBrideDob,
+              bridePlaceOfBirth || null,
+              brideIdNumber || null,
+              brideAddress || null,
+              brideEmail || portalEmail || null,
+              bridePhone || contactNumber || null,
+              brideConfirm || false,
+              bridePersonally || false,
+              brideRepresentative || false,
+              brideRepName || null,
+              brideRepFatherName || null,
+              normalizedBrideRepDob,
+              brideRepPlaceOfBirth || null,
+              brideRepAddress || null,
+              mahrAmount || null,
+              mahrType || null,
+              normalizedSolemnisedDate,
+              solemnisedPlace || null,
+              solemnisedAddress || null,
+              normalizedPreferredDate,
+              specialRequests || null,
+              depositAmount || 200,
+              adminId,
+              paymentStatus || "amount_set",
+              normalizedAppointmentDate,
+              appointmentTime || null,
+              appointmentLocation || null,
+              status || "completed",
+              documentPaths.groom_id_path || null,
+              documentPaths.bride_id_path || null,
+              documentPaths.witness1_id_path || null,
+              documentPaths.witness2_id_path || null,
+              documentPaths.mahr_declaration_path || null,
+              documentPaths.civil_divorce_doc_path || null,
+              documentPaths.islamic_divorce_doc_path || null,
+              documentPaths.groom_conversion_cert_path || null,
+              documentPaths.bride_conversion_cert_path || null,
+              documentPaths.statutory_declaration_path || null,
+            ]
           );
           insertSuccess = true;
           break; // Success, exit loop
         } catch (insertError) {
           // Handle duplicate entry error
-          if (insertError.code === 'ER_DUP_ENTRY' && insertError.message.includes('application_number')) {
+          if (
+            insertError.code === "ER_DUP_ENTRY" &&
+            insertError.message.includes("application_number")
+          ) {
             // If user provided the number, return error
             if (providedApplicationNumber && providedApplicationNumber.trim()) {
               await connection.rollback();
               connection.release();
               return res.status(409).json({
                 success: false,
-                message: 'This application number already exists. Please use a different number.'
+                message:
+                  "This application number already exists. Please use a different number.",
               });
             }
             // If auto-generated, try a new number
@@ -974,7 +1020,8 @@ const createManualApplication = async (req, res) => {
               connection.release();
               return res.status(500).json({
                 success: false,
-                message: 'Unable to generate unique application number after multiple attempts. Please try again.'
+                message:
+                  "Unable to generate unique application number after multiple attempts. Please try again.",
               });
             }
           } else {
@@ -989,34 +1036,35 @@ const createManualApplication = async (req, res) => {
         connection.release();
         return res.status(500).json({
           success: false,
-          message: 'Failed to insert application. Please try again.'
+          message: "Failed to insert application. Please try again.",
         });
       }
 
       const applicationId = insertResult.insertId;
-      console.log('Application created with ID:', applicationId);
+      console.log("Application created with ID:", applicationId);
 
       // Insert witnesses with extended fields
       const witnessesData = [
-        { 
-          name: witness1Name, 
-          fatherName: witness1FatherName, 
-          dob: normalizedWitness1Dob, 
-          pob: witness1PlaceOfBirth, 
-          address: witness1Address
+        {
+          name: witness1Name,
+          fatherName: witness1FatherName,
+          dob: normalizedWitness1Dob,
+          pob: witness1PlaceOfBirth,
+          address: witness1Address,
         },
-        { 
-          name: witness2Name, 
-          fatherName: witness2FatherName, 
-          dob: normalizedWitness2Dob, 
-          pob: witness2PlaceOfBirth, 
-          address: witness2Address
-        }
+        {
+          name: witness2Name,
+          fatherName: witness2FatherName,
+          dob: normalizedWitness2Dob,
+          pob: witness2PlaceOfBirth,
+          address: witness2Address,
+        },
       ];
 
       for (let i = 0; i < witnessesData.length; i++) {
         const w = witnessesData[i];
-        if (w.name) { // Only insert if witness name is provided
+        if (w.name) {
+          // Only insert if witness name is provided
           try {
             await connection.execute(
               `INSERT INTO witnesses (
@@ -1024,16 +1072,26 @@ const createManualApplication = async (req, res) => {
                 witness_date_of_birth, witness_place_of_birth, witness_address, 
                 witness_order
               ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-              [applicationId, w.name, w.fatherName, w.dob, w.pob, w.address, i + 1]
+              [
+                applicationId,
+                w.name,
+                w.fatherName,
+                w.dob,
+                w.pob,
+                w.address,
+                i + 1,
+              ]
             );
           } catch (witnessError) {
             // If witness insertion fails, rollback and return error
             await connection.rollback();
             connection.release();
-            console.error('Error inserting witness:', witnessError);
+            console.error("Error inserting witness:", witnessError);
             return res.status(500).json({
               success: false,
-              message: `Failed to insert witness ${i + 1}: ${witnessError.message}`
+              message: `Failed to insert witness ${i + 1}: ${
+                witnessError.message
+              }`,
             });
           }
         }
@@ -1042,23 +1100,23 @@ const createManualApplication = async (req, res) => {
       // COMMIT TRANSACTION - Only commit if everything succeeded
       try {
         await connection.commit();
-        console.log('Transaction Committed');
-        
+        console.log("Transaction Committed");
+
         // Send success response AFTER successful commit
         const responseData = {
           success: true,
-          message: 'Application created successfully',
+          message: "Application created successfully",
           data: {
             applicationNumber: finalApplicationNumber,
             applicationId,
             portalEmail: portalEmail || null,
-            portalPassword: isNewUser ? portalPassword : undefined
-          }
+            portalPassword: isNewUser ? portalPassword : undefined,
+          },
         };
-        
+
         // Release connection before sending response
         connection.release();
-        
+
         // Update deposit_amount_set_at timestamp (using separate query)
         await pool.execute(
           `UPDATE applications 
@@ -1066,26 +1124,31 @@ const createManualApplication = async (req, res) => {
            WHERE id = ? AND deposit_amount_set_at IS NULL`,
           [applicationId]
         );
-        
+
         // For manual applications: Generate certificate automatically
         try {
-          const { generateCertificatePDF } = require("../services/certificateService");
-          
+          const {
+            generateCertificatePDF,
+          } = require("../services/certificateService");
+
           // Fetch application data with witnesses for certificate generation
           const [appData] = await pool.execute(
             `SELECT * FROM applications WHERE id = ?`,
             [applicationId]
           );
-          
+
           if (appData.length > 0) {
             const [witnessesData] = await pool.execute(
               "SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order",
               [applicationId]
             );
-            
+
             // Generate certificate
-            const certificateUrl = await generateCertificatePDF(appData[0], witnessesData);
-            
+            const certificateUrl = await generateCertificatePDF(
+              appData[0],
+              witnessesData
+            );
+
             // Update application with certificate URL
             await pool.execute(
               `UPDATE applications 
@@ -1095,16 +1158,19 @@ const createManualApplication = async (req, res) => {
                WHERE id = ?`,
               [certificateUrl, applicationId]
             );
-            
-            console.log('✅ Certificate generated for manual application:', applicationId);
+
+            console.log(
+              "✅ Certificate generated for manual application:",
+              applicationId
+            );
           }
         } catch (certError) {
           // Don't fail the request if certificate generation fails, just log it
-          console.error('❌ Error generating certificate:', certError);
+          console.error("❌ Error generating certificate:", certError);
         }
-        
-        // Send confirmation email if email is provided and new user was created
-        if (portalEmail && isNewUser && portalPassword) {
+
+        // Send confirmation email if email is provided
+        if (portalEmail) {
           try {
             // Fetch application data for email
             const [appData] = await pool.execute(
@@ -1112,78 +1178,86 @@ const createManualApplication = async (req, res) => {
                FROM applications WHERE id = ?`,
               [applicationId]
             );
-            
+
             if (appData.length > 0) {
               await sendApplicationConfirmation({
                 ...appData[0],
                 portal_email: portalEmail,
-                portalPassword: portalPassword
+                portalPassword: isNewUser ? portalPassword : '', // Empty string for existing users (they use their existing password)
               });
-              console.log('✅ Application confirmation email sent to:', portalEmail);
+              console.log(
+                "✅ Application confirmation email sent to:",
+                portalEmail
+              );
             }
           } catch (emailError) {
             // Don't fail the request if email fails, just log it
-            console.error('❌ Error sending confirmation email:', emailError);
+            console.error("❌ Error sending confirmation email:", emailError);
           }
         }
-        
+
         return res.status(201).json(responseData);
       } catch (commitError) {
         // If commit fails, rollback
         try {
           await connection.rollback();
-          console.error('Transaction Rolled Back due to commit error:', commitError);
+          console.error(
+            "Transaction Rolled Back due to commit error:",
+            commitError
+          );
         } catch (rollbackError) {
-          console.error('Error during rollback:', rollbackError);
+          console.error("Error during rollback:", rollbackError);
         }
         connection.release();
         throw commitError;
       }
-
     } catch (transactionError) {
       // Rollback transaction if any error occurred
       try {
         // Check if connection is still active before rollback
         if (connection && !connection._fatalError) {
           await connection.rollback();
-          console.error('Transaction Rolled Back due to:', transactionError);
+          console.error("Transaction Rolled Back due to:", transactionError);
         }
       } catch (rollbackError) {
-        console.error('Error during rollback:', rollbackError);
+        console.error("Error during rollback:", rollbackError);
       }
       // Release connection
       if (connection) {
         try {
           connection.release();
         } catch (releaseError) {
-          console.error('Error releasing connection:', releaseError);
+          console.error("Error releasing connection:", releaseError);
         }
       }
       throw transactionError;
     }
-
   } catch (error) {
-    console.error('Error creating manual application:', error);
-    console.error('Stack:', error.stack);
+    console.error("Error creating manual application:", error);
+    console.error("Stack:", error.stack);
 
     // Handle MySQL Duplicate Entry Error
-    if (error.code === 'ER_DUP_ENTRY') {
-      let message = 'Duplicate entry found.';
-      if (error.message.includes('groom_email')) message = 'This Groom Email is already registered.';
-      if (error.message.includes('bride_email')) message = 'This Bride Email is already registered.';
-      if (error.message.includes('application_number')) message = 'Application number collision, please try again.';
-      if (error.message.includes('portal_email')) message = 'An account with this email already exists.';
+    if (error.code === "ER_DUP_ENTRY") {
+      let message = "Duplicate entry found.";
+      if (error.message.includes("groom_email"))
+        message = "This Groom Email is already registered.";
+      if (error.message.includes("bride_email"))
+        message = "This Bride Email is already registered.";
+      if (error.message.includes("application_number"))
+        message = "Application number collision, please try again.";
+      if (error.message.includes("portal_email"))
+        message = "An account with this email already exists.";
 
       return res.status(409).json({
         success: false,
-        message: message
+        message: message,
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to create application',
-      error: error.message
+      message: "Failed to create application",
+      error: error.message,
     });
   }
 };

@@ -282,7 +282,7 @@ export default function AdminApplications() {
           }}
         >
           <Plus size={18} />
-          Add Manual Application
+          Add New Application
         </Link>
       </div>
 
