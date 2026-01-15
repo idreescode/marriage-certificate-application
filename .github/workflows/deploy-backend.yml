@@ -31,6 +31,8 @@ jobs:
           EMAIL_PORT=${{ secrets.EMAIL_PORT }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISH_KEY=${{ secrets.STRIPE_PUBLISH_KEY }}
           FRONTEND_URL=${{ secrets.FRONTEND_URL || 'https://nikahapp.jamiyat.org' }}
           API_TOKEN=${{ secrets.API_TOKEN }}
           EOF

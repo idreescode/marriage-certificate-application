@@ -65,78 +65,69 @@ export default function AdminApplicationDetails() {
     console.log("📄 Certificate URL:", application.certificate_url);
 
     try {
-      let certificateUrl = application.certificate_url;
+      // Always generate a fresh certificate when printing
+      console.log("🔄 Generating certificate...");
+      const toastId = toast.loading("Generating certificate...");
 
-      // If certificate doesn't exist, generate it first
-      if (!certificateUrl) {
-        console.log("🔄 Generating certificate...");
-        const toastId = toast.loading("Generating certificate...");
+      try {
+        // When printing, don't send email notification to applicant
+        const response = await generateCertificate(id, false);
+        console.log("✅ Certificate generation response:", response.data);
 
-        try {
-          // When printing, don't send email notification to applicant
-          const response = await generateCertificate(id, false);
-          console.log("✅ Certificate generation response:", response.data);
+        if (response.data.success) {
+          const certificateUrl = response.data.data.certificateUrl;
+          console.log("📄 Generated certificate URL:", certificateUrl);
 
-          if (response.data.success) {
-            certificateUrl = response.data.data.certificateUrl;
-            console.log("📄 Generated certificate URL:", certificateUrl);
-
-            // Update application state with new certificate URL
-            setApplication((prev) => ({
-              ...prev,
-              certificate_url: certificateUrl,
-            }));
-            toast.success("Certificate generated successfully!", {
-              id: toastId,
-            });
-          } else {
-            console.error(
-              "❌ Certificate generation failed:",
-              response.data.message
-            );
-            toast.error(
-              response.data.message || "Failed to generate certificate",
-              { id: toastId }
-            );
-            return;
-          }
-        } catch (error) {
-          console.error("❌ Certificate generation error:", error);
-          console.error("Error response:", error.response?.data);
-          console.error("Error status:", error.response?.status);
-          console.error("Error message:", error.message);
-
-          const errorMessage =
-            error.response?.data?.message ||
-            error.message ||
-            "Failed to generate certificate";
-
-          toast.error(errorMessage, {
+          // Update application state with new certificate URL
+          setApplication((prev) => ({
+            ...prev,
+            certificate_url: certificateUrl,
+          }));
+          toast.success("Certificate generated successfully!", {
             id: toastId,
-            duration: 5000,
           });
+
+          // Open the certificate PDF in a new tab
+          const fullUrl = getFileUrl(certificateUrl);
+          console.log("🔗 Opening certificate URL:", fullUrl);
+
+          // Use anchor element click to avoid popup blocker
+          const link = document.createElement("a");
+          link.href = fullUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          console.log("✅ Certificate opened in new tab");
+        } else {
+          console.error(
+            "❌ Certificate generation failed:",
+            response.data.message
+          );
+          toast.error(
+            response.data.message || "Failed to generate certificate",
+            { id: toastId }
+          );
           return;
         }
-      }
+      } catch (error) {
+        console.error("❌ Certificate generation error:", error);
+        console.error("Error response:", error.response?.data);
+        console.error("Error status:", error.response?.status);
+        console.error("Error message:", error.message);
 
-      // Open the certificate PDF in a new tab
-      if (certificateUrl) {
-        const fullUrl = getFileUrl(certificateUrl);
-        console.log("🔗 Opening certificate URL:", fullUrl);
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to generate certificate";
 
-        // Use anchor element click to avoid popup blocker
-        const link = document.createElement("a");
-        link.href = fullUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        console.log("✅ Certificate opened in new tab");
-      } else {
-        console.error("❌ No certificate URL available");
-        toast.error("Certificate URL not found");
+        toast.error(errorMessage, {
+          id: toastId,
+          duration: 5000,
+        });
+        return;
       }
     } catch (error) {
       console.error("❌ Unexpected error in handlePrint:", error);

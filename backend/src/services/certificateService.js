@@ -4,6 +4,11 @@ const path = require('path');
 
 const generateCertificatePDF = async (applicationData, witnesses) => {
   try {
+    // Validate required data
+    if (!applicationData || !applicationData.id) {
+      throw new Error('Invalid application data: missing application ID');
+    }
+
     // Ensure uploads directory exists
     const uploadsDir = path.join(__dirname, '../../uploads/certificates');
     if (!fs.existsSync(uploadsDir)) {
@@ -16,6 +21,9 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
 
     // Load HTML template
     const templatePath = path.join(__dirname, '../templates/certificate/certificate.html');
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(`Certificate template not found at: ${templatePath}`);
+    }
     let html = fs.readFileSync(templatePath, 'utf8');
 
     // Format dates
@@ -129,55 +137,71 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     });
 
     // Launch Puppeteer and generate PDF
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ]
-    });
+    let browser;
+    try {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage'
+        ],
+        timeout: 60000 // 60 second timeout for browser launch
+      });
+    } catch (launchError) {
+      console.error('Failed to launch Puppeteer browser:', launchError);
+      throw new Error(`Failed to launch browser: ${launchError.message}. Make sure Puppeteer dependencies are installed.`);
+    }
 
     const page = await browser.newPage();
     
-    // Set viewport for A3 Landscape size (wider page)
-    await page.setViewport({
-      width: 1587,  // 420mm in pixels at 96 DPI (A3 landscape width)
-      height: 1123, // 297mm in pixels at 96 DPI (A3 landscape height)
-      deviceScaleFactor: 1
-    });
-    
-    // Set content and wait for fonts/styles/images to load
-    await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000
-    });
-    
-    // Wait a bit more for any external resources (like logo)
-    // Using Promise-based delay instead of deprecated waitForTimeout
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Generate PDF in A3 Landscape orientation (wider page)
-    await page.pdf({
-      path: filePath,
-      format: 'A3',
-      landscape: true,  // Landscape orientation
-      printBackground: true,
-      preferCSSPageSize: true,
-      margin: {
-        top: '0mm',
-        right: '0mm',
-        bottom: '0mm',
-        left: '0mm'
-      }
-    });
-
-    await browser.close();
+    try {
+      // Set viewport for A3 Landscape size (wider page)
+      await page.setViewport({
+        width: 1587,  // 420mm in pixels at 96 DPI (A3 landscape width)
+        height: 1123, // 297mm in pixels at 96 DPI (A3 landscape height)
+        deviceScaleFactor: 1
+      });
+      
+      // Set content and wait for fonts/styles/images to load
+      await page.setContent(html, { 
+        waitUntil: 'networkidle0',
+        timeout: 30000
+      });
+      
+      // Wait a bit more for any external resources (like logo)
+      // Using Promise-based delay instead of deprecated waitForTimeout
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Generate PDF in A3 Landscape orientation (wider page)
+      await page.pdf({
+        path: filePath,
+        format: 'A3',
+        landscape: true,  // Landscape orientation
+        printBackground: true,
+        preferCSSPageSize: true,
+        margin: {
+          top: '0mm',
+          right: '0mm',
+          bottom: '0mm',
+          left: '0mm'
+        }
+      });
+    } finally {
+      // Always close browser even if PDF generation fails
+      await browser.close();
+    }
 
     return relativePath;
 
   } catch (error) {
     console.error('Error generating certificate PDF:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      applicationId: applicationData?.id,
+      hasWitnesses: witnesses?.length > 0
+    });
     throw error;
   }
 };

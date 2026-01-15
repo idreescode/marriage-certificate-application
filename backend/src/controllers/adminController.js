@@ -458,6 +458,24 @@ const generateCertificate = async (req, res) => {
 
     const application = appRows[0];
 
+    // Delete old certificate file if it exists
+    if (application.certificate_url) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        // Convert relative path to absolute path
+        const oldCertificatePath = path.join(__dirname, '../../', application.certificate_url);
+        
+        if (fs.existsSync(oldCertificatePath)) {
+          fs.unlinkSync(oldCertificatePath);
+          console.log(`✅ Deleted old certificate: ${oldCertificatePath}`);
+        }
+      } catch (deleteError) {
+        // Log error but don't fail the certificate generation
+        console.error('⚠️ Error deleting old certificate:', deleteError.message);
+      }
+    }
+
     // Get witnesses
     const [witnesses] = await pool.execute(
       "SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order",
@@ -501,10 +519,12 @@ const generateCertificate = async (req, res) => {
     });
   } catch (error) {
     console.error("Error generating certificate:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
       message: "Failed to generate certificate",
       error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 };
@@ -1139,6 +1159,22 @@ const createManualApplication = async (req, res) => {
               "SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order",
               [applicationId]
             );
+
+            // Delete old certificate file if it exists (for manual applications that might be recreated)
+            if (appData[0].certificate_url) {
+              try {
+                const fs = require('fs');
+                const path = require('path');
+                const oldCertificatePath = path.join(__dirname, '../../', appData[0].certificate_url);
+                
+                if (fs.existsSync(oldCertificatePath)) {
+                  fs.unlinkSync(oldCertificatePath);
+                  console.log(`✅ Deleted old certificate: ${oldCertificatePath}`);
+                }
+              } catch (deleteError) {
+                console.error('⚠️ Error deleting old certificate:', deleteError.message);
+              }
+            }
 
             // Generate certificate
             const certificateUrl = await generateCertificatePDF(

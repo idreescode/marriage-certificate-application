@@ -179,7 +179,9 @@ export default function AdminApplications() {
       toast.success("Certificate generated successfully!", { id: toastId });
       fetchApplications();
     } catch (error) {
-      toast.error("Failed to generate certificate", { id: toastId });
+      console.error("Certificate generation error:", error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || "Failed to generate certificate";
+      toast.error(errorMessage, { id: toastId, duration: 5000 });
     }
   };
 
