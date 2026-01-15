@@ -114,7 +114,7 @@ export default function DocumentUpload() {
     };
 
     const UploadCard = ({ title, subtitle, name, required = false, type = 'image/*,.pdf' }) => (
-        <div className="card h-full flex flex-col justify-between" style={{ minHeight: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="card h-full flex flex-col justify-between" style={{ minHeight: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backgroundColor: 'var(--brand-50)' }}>
             <div>
                 <div className="flex justify-between items-start mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                     <div>
@@ -329,7 +329,7 @@ export default function DocumentUpload() {
                     </div>
 
                     {/* Section 4: Additional Requirements (Conditional) */}
-                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm" style={{ backgroundColor: 'white', border: '1px solid var(--slate-200)', borderRadius: '0.75rem', boxShadow: 'var(--shadow-sm)' }}>
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm" style={{ backgroundColor: 'var(--brand-50)', border: '1px solid var(--slate-200)', borderRadius: '0.75rem', boxShadow: 'var(--shadow-sm)' }}>
                         <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center cursor-pointer" onClick={() => setShowConversion(!showConversion)} style={{ padding: '1rem', backgroundColor: 'var(--slate-50)', borderBottom: '1px solid var(--slate-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <Info size={18} className="text-brand-600" style={{ color: 'var(--brand-600)' }} />

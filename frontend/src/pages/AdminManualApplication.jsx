@@ -8,7 +8,7 @@ import Loader from '../components/Loader';
 // Move FormSection outside component
 const FormSection = ({ title, children }) => (
   <div style={{
-    background: 'white',
+    background: 'var(--brand-50)',
     borderRadius: '10px',
     marginBottom: '1.5rem',
     overflow: 'hidden',
@@ -351,7 +351,7 @@ export default function AdminManualApplication() {
     const file = formData[name];
     return (
       <div style={{ 
-        background: 'white', 
+        background: 'var(--brand-50)', 
         borderRadius: '0.5rem', 
         padding: '1.5rem', 
         border: '1px solid var(--slate-200)',
@@ -447,7 +447,7 @@ export default function AdminManualApplication() {
   if (loading) return <Loader fullscreen />;
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', background: '#f8fafc', minHeight: '100vh' }}>
+    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', background: 'var(--brand-50)', minHeight: '100vh' }}>
       {/* Header */}
       <div
         style={{
@@ -1157,7 +1157,7 @@ export default function AdminManualApplication() {
           justifyContent: 'flex-end',
           gap: '1rem',
           padding: '1.5rem',
-          background: 'white',
+          background: 'var(--brand-50)',
           borderRadius: '8px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           border: '1px solid #e2e8f0',
@@ -1168,7 +1168,7 @@ export default function AdminManualApplication() {
             onClick={() => navigate('/admin/applications')}
             style={{
               padding: '0.75rem 1.5rem',
-              background: 'white',
+              background: 'var(--brand-50)',
               border: '1px solid #cbd5e1',
               borderRadius: '6px',
               cursor: 'pointer',
