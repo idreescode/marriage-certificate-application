@@ -41,14 +41,15 @@ export default function AdminApplications() {
   );
 
   // Modal States
-  const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'view', 'delete'
+  const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'view', 'delete', 'approve'
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [deleteAppData, setDeleteAppData] = useState(null); // { id, applicationNumber }
+  const [approveAppData, setApproveAppData] = useState(null); // { id, applicationNumber, groomName, brideName }
 
   // Edit Application Number State
   const [editingAppId, setEditingAppId] = useState(null);
   const [editingValue, setEditingValue] = useState("");
-  
+
   // Loading states for actions
   const [verifyingDocuments, setVerifyingDocuments] = useState(false);
 
@@ -78,18 +79,40 @@ export default function AdminApplications() {
     setActiveModal("verify");
   };
 
+  const openApproveModal = (app) => {
+    setApproveAppData({
+      id: app.id,
+      applicationNumber: app.application_number,
+      groomName: app.groom_full_name,
+      brideName: app.bride_full_name,
+      groomAddress: app.groom_address,
+      brideAddress: app.bride_address,
+      solemnisedDate: app.solemnised_date,
+      solemnisedPlace: app.solemnised_place,
+      solemnisedAddress: app.solemnised_address,
+    });
+    setActiveModal("approve");
+  };
+
   const closeModal = () => {
     setActiveModal(null);
     setSelectedAppId(null);
     setDeleteAppData(null);
+    setApproveAppData(null);
   };
 
   // Action Handlers
-  const handleApproveApplication = async (appId) => {
+  const handleApproveApplication = async () => {
+    if (!approveAppData) return;
+
     const toastId = toast.loading("Approving application...");
     try {
-      await approveApplicationAPI(appId);
-      toast.success("Application approved successfully! User will receive portal credentials.", { id: toastId });
+      await approveApplicationAPI(approveAppData.id);
+      toast.success(
+        "Application approved successfully! User will receive portal credentials.",
+        { id: toastId }
+      );
+      closeModal();
       fetchApplications();
     } catch (error) {
       toast.error(
@@ -101,7 +124,7 @@ export default function AdminApplications() {
 
   const handleVerifyDocuments = async () => {
     if (verifyingDocuments) return; // Prevent multiple clicks
-    
+
     setVerifyingDocuments(true);
     const toastId = toast.loading("Verifying documents...");
     try {
@@ -164,7 +187,11 @@ export default function AdminApplications() {
       fetchApplications();
     } catch (error) {
       console.error("Certificate generation error:", error);
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || "Failed to generate certificate";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to generate certificate";
       toast.error(errorMessage, { id: toastId, duration: 5000 });
     }
   };
@@ -212,7 +239,7 @@ export default function AdminApplications() {
       appointment_scheduled: "badge-info",
       completed: "badge-success",
     };
-    
+
     // Custom display text for statuses
     const statusText = {
       submitted: "SUBMITTED",
@@ -221,7 +248,7 @@ export default function AdminApplications() {
       appointment_scheduled: "APPOINTMENT SCHEDULED",
       completed: "COMPLETED",
     };
-    
+
     // For admin_review status:
     // - If approved_at exists, it means approved → "DOCUMENT PENDING"
     // - Otherwise, it's not approved yet → "UNDER REVIEW"
@@ -232,7 +259,7 @@ export default function AdminApplications() {
         statusText.admin_review = "UNDER REVIEW";
       }
     }
-    
+
     return (
       <span className={`badge ${styles[status] || "badge-info"}`}>
         {statusText[status] || status.replace("_", " ").toUpperCase()}
@@ -583,7 +610,7 @@ export default function AdminApplications() {
                           {/* Show Approve button only if application is not yet approved (approved_at is null) */}
                           {!app.approved_at && (
                             <button
-                              onClick={() => handleApproveApplication(app.id)}
+                              onClick={() => openApproveModal(app)}
                               className="btn btn-sm btn-success"
                               style={{
                                 whiteSpace: "nowrap",
@@ -599,16 +626,16 @@ export default function AdminApplications() {
 
                           {/* Show Verify Documents button if documents are uploaded but not verified (after approval) */}
                           {app.approved_at &&
-                          (app.groom_id_path || app.bride_id_path) &&
-                          !app.documents_verified && (
-                            <button
-                              onClick={() => openVerifyDocuments(app.id)}
-                              className="btn btn-sm btn-primary"
-                              style={{ whiteSpace: "nowrap" }}
-                            >
-                              Verify Documents
-                            </button>
-                          )}
+                            (app.groom_id_path || app.bride_id_path) &&
+                            !app.documents_verified && (
+                              <button
+                                onClick={() => openVerifyDocuments(app.id)}
+                                className="btn btn-sm btn-primary"
+                                style={{ whiteSpace: "nowrap" }}
+                              >
+                                Verify Documents
+                              </button>
+                            )}
                         </>
                       )}
 
@@ -883,6 +910,156 @@ export default function AdminApplications() {
               }}
             />
             Delete
+          </button>
+        </div>
+      </Modal>
+
+      {/* Approve Confirmation Modal */}
+      <Modal
+        isOpen={activeModal === "approve"}
+        onClose={closeModal}
+        title="Approve Application"
+      >
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "1rem",
+              padding: "1rem",
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: "8px",
+              marginBottom: "1.25rem",
+            }}
+          >
+            <Check
+              size={24}
+              color="#16a34a"
+              style={{ flexShrink: 0, marginTop: "2px" }}
+            />
+            <div style={{ flex: 1 }}>
+              <p
+                style={{
+                  color: "#166534",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  margin: 0,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Are you sure you want to approve application #
+                {approveAppData?.applicationNumber}?
+              </p>
+              <p
+                style={{
+                  color: "#15803d",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.6",
+                  margin: 0,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <strong>Groom:</strong> {approveAppData?.groomName}
+                <br />
+                <strong>Bride:</strong> {approveAppData?.brideName}
+              </p>
+              {approveAppData?.solemnisedDate && (
+                <p
+                  style={{
+                    color: "#15803d",
+                    fontSize: "0.875rem",
+                    lineHeight: "1.6",
+                    margin: 0,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <strong>Solemnised Date:</strong>{" "}
+                  {new Date(approveAppData.solemnisedDate).toLocaleDateString()}
+                </p>
+              )}
+              {approveAppData?.solemnisedPlace && (
+                <p
+                  style={{
+                    color: "#15803d",
+                    fontSize: "0.875rem",
+                    lineHeight: "1.6",
+                    margin: 0,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <strong>Solemnised Place:</strong>{" "}
+                  {approveAppData.solemnisedPlace}
+                </p>
+              )}
+              {approveAppData?.solemnisedAddress && (
+                <p
+                  style={{
+                    color: "#15803d",
+                    fontSize: "0.875rem",
+                    lineHeight: "1.6",
+                    margin: 0,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <strong>Solemnised Address:</strong>{" "}
+                  {approveAppData.solemnisedAddress}
+                </p>
+              )}
+              <p
+                style={{
+                  color: "#15803d",
+                  fontSize: "0.875rem",
+                  lineHeight: "1.6",
+                  margin: 0,
+                }}
+              >
+                This will approve the application and send portal access
+                credentials to the applicant via email.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.75rem",
+            marginTop: "1.75rem",
+          }}
+        >
+          <button
+            onClick={closeModal}
+            className="btn btn-secondary"
+            style={{ minWidth: "100px" }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleApproveApplication}
+            className="btn btn-success"
+            style={{
+              minWidth: "120px",
+              backgroundColor: "var(--success)",
+              color: "white",
+              border: "none",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#16a34a";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--success)";
+            }}
+          >
+            <Check
+              size={16}
+              style={{
+                marginRight: "0.5rem",
+                display: "inline-block",
+                verticalAlign: "middle",
+              }}
+            />
+            Approve
           </button>
         </div>
       </Modal>

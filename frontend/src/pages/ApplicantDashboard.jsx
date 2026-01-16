@@ -451,6 +451,154 @@ export default function ApplicantDashboard() {
                      </div>
                   )}
 
+                  {/* Certificate Generation Awaiting Card */}
+                  {app.status === 'payment_verified' && !app.certificate_url && (
+                     <div style={{
+                        background: 'white',
+                        borderRadius: 'var(--radius-lg)',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(16, 185, 129, 0.15)',
+                        border: '1px solid #10b981',
+                        transition: 'box-shadow 0.3s ease'
+                     }}
+                     onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 30px rgba(16, 185, 129, 0.25)'}
+                     onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(16, 185, 129, 0.15)'}
+                     >
+                        <div style={{
+                           background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                           padding: '1rem 1.5rem',
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: '0.5rem'
+                        }}>
+                           <FileCheck size={18} color="white" />
+                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Certificate Generation</h3>
+                        </div>
+                        <div style={{ padding: '1.5rem' }}>
+                           <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', marginBottom: '1rem' }}>
+                              <strong style={{ color: '#059669' }}>Excellent!</strong> Your payment has been verified. Our admin team will now generate your marriage certificate.
+                           </p>
+                           <div style={{
+                              background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                              padding: '1.25rem',
+                              borderRadius: 'var(--radius-md)',
+                              border: '1px solid #a7f3d0',
+                              marginBottom: '1rem'
+                           }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                                 <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                                 }}>
+                                    <FileCheck size={20} color="white" />
+                                 </div>
+                                 <div>
+                                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--slate-800)', letterSpacing: '-0.01em' }}>Next Step: Certificate Generation</h4>
+                                    <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--slate-600)', marginTop: '0.25rem' }}>You'll receive an email once ready</p>
+                                 </div>
+                              </div>
+                              <div style={{
+                                 padding: '1rem',
+                                 background: 'white',
+                                 borderRadius: 'var(--radius-sm)',
+                                 border: '1px solid #6ee7b7',
+                                 marginTop: '0.75rem'
+                              }}>
+                                 <p style={{ fontSize: '0.875rem', color: 'var(--slate-700)', margin: 0, lineHeight: '1.6' }}>
+                                    <strong style={{ color: '#059669' }}>What happens next?</strong><br />
+                                    Our admin team will generate your marriage certificate. Once ready, you'll receive an email notification and can download it from your dashboard.
+                                 </p>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  )}
+
+                  {/* Nikah Scheduled Information Card */}
+                  {app.appointment_date && (
+                     <div style={{
+                        background: 'white',
+                        borderRadius: 'var(--radius-lg)',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(16, 185, 129, 0.15)',
+                        border: '1px solid #10b981',
+                        transition: 'box-shadow 0.3s ease'
+                     }}
+                     onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 30px rgba(16, 185, 129, 0.25)'}
+                     onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(16, 185, 129, 0.15)'}
+                     >
+                        <div style={{
+                           background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                           padding: '1rem 1.5rem',
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: '0.5rem'
+                        }}>
+                           <CheckCircle size={18} color="white" />
+                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Nikah Scheduled</h3>
+                        </div>
+                        <div style={{ padding: '1.5rem' }}>
+                           <div style={{
+                              background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                              padding: '1.5rem',
+                              borderRadius: 'var(--radius-md)',
+                              border: '1px solid #a7f3d0'
+                           }}>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--slate-800)', letterSpacing: '-0.01em' }}>📅 Nikah Appointment Details</h4>
+                              <div style={{
+                                 background: 'white',
+                                 padding: '1.25rem',
+                                 borderRadius: 'var(--radius-md)',
+                                 border: '1px solid #6ee7b7',
+                                 display: 'grid',
+                                 gap: '1rem'
+                              }}>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.75rem', alignItems: 'center' }}>
+                                    <strong style={{ color: 'var(--slate-600)', fontSize: '0.875rem' }}>📅 Date:</strong>
+                                    <span style={{ fontWeight: 600, fontSize: '1rem', color: '#059669' }}>
+                                       {new Date(app.appointment_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </span>
+                                 </div>
+                                 {app.appointment_time && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.75rem', alignItems: 'center' }}>
+                                       <strong style={{ color: 'var(--slate-600)', fontSize: '0.875rem' }}>🕐 Time:</strong>
+                                       <span style={{ fontWeight: 600, fontSize: '1rem', color: '#059669' }}>
+                                          {app.appointment_time.substring(0, 5)}
+                                       </span>
+                                    </div>
+                                 )}
+                                 {app.appointment_location && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.75rem', alignItems: 'start' }}>
+                                       <strong style={{ color: 'var(--slate-600)', fontSize: '0.875rem' }}>📍 Location:</strong>
+                                       <span style={{ fontWeight: 500, fontSize: '0.95rem', color: 'var(--slate-700)', lineHeight: '1.5' }}>
+                                          {app.appointment_location}
+                                       </span>
+                                    </div>
+                                 )}
+                              </div>
+                              <p style={{
+                                 fontSize: '0.875rem',
+                                 color: 'var(--slate-600)',
+                                 margin: 0,
+                                 marginTop: '1rem',
+                                 padding: '0.875rem',
+                                 background: '#fffbeb',
+                                 border: '1px solid #fde68a',
+                                 borderRadius: 'var(--radius-md)'
+                              }}>
+                                 💡 Please arrive on time with all required documents and witnesses. Contact us if you need to reschedule.
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+                  )}
+
                   {/* Urgent Payment Action Card */}
                   {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && !app.payment_receipt_url && (
                      <div style={{
@@ -620,51 +768,102 @@ export default function ApplicantDashboard() {
                      <div style={{ padding: '1.5rem' }}>
                         <div className="timeline" style={{ position: 'relative', paddingLeft: '1.5rem', borderLeft: '3px solid #e2e8f0' }}>
 
+                           {/* Step 1: Application Submitted */}
                            <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                               <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: '#2563eb', border: '3px solid white', boxShadow: '0 0 0 3px #2563eb' }}></div>
                               <h4 style={{ fontSize: '0.95rem', margin: 0, color: '#1e293b', fontWeight: 600 }}>Application Submitted</h4>
                               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>{new Date(app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                            </div>
 
-                           <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
-                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: (app.groom_id_path || app.bride_id_path) ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: (app.groom_id_path || app.bride_id_path) ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: (app.groom_id_path || app.bride_id_path) ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Documents Uploaded</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {(app.groom_id_path || app.bride_id_path) ? 'Submitted Successfully' : 'Pending Upload'}
-                              </p>
-                           </div>
+                           {/* Step 2: Admin Approves */}
+                           {(() => {
+                              const isApproved = app.approved_at != null || ['payment_pending', 'payment_verified', 'appointment_scheduled', 'completed'].includes(app.status);
+                              const isActive = app.status === 'admin_review' || app.status === 'submitted';
+                              return (
+                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isApproved ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isApproved ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isApproved ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Admin Approved</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                       {isApproved ? (app.approved_at ? `Approved ${new Date(app.approved_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Approved') : (isActive ? 'Waiting for admin approval' : 'Pending')}
+                                    </p>
+                                 </div>
+                              );
+                           })()}
 
-                           <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
-                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.documents_verified ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.documents_verified ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.documents_verified ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Documents Verified</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {app.documents_verified ? (app.documents_verified_at ? new Date(app.documents_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Verified') : 'Under Review'}
-                              </p>
-                           </div>
+                           {/* Step 3: Documents Uploaded (by User) */}
+                           {(() => {
+                              const docsUploaded = allDocumentsUploaded;
+                              const isActive = app.approved_at != null && app.status === 'admin_review';
+                              return (
+                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: docsUploaded ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: docsUploaded ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: docsUploaded ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Documents Uploaded</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                       {docsUploaded ? 'All documents submitted' : (isActive ? 'Action required - Upload documents' : 'Waiting for approval')}
+                                    </p>
+                                 </div>
+                              );
+                           })()}
 
-                           <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
-                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.deposit_amount ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.deposit_amount ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.deposit_amount ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Payment Quote Set</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {app.deposit_amount ? `Amount: £${app.deposit_amount}` : 'Awaiting Quote'}
-                              </p>
-                           </div>
+                           {/* Step 4: Documents Verified (by Admin) */}
+                           {(() => {
+                              const isVerified = app.documents_verified === true;
+                              const isActive = allDocumentsUploaded && !app.documents_verified && (app.status === 'admin_review' || app.status === 'payment_pending');
+                              return (
+                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isVerified ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isVerified ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Documents Verified</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                       {isVerified ? (app.documents_verified_at ? `Verified ${new Date(app.documents_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Verified by admin') : (isActive ? 'Waiting for admin verification' : 'Not yet')}
+                                    </p>
+                                 </div>
+                              );
+                           })()}
 
-                           <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
-                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.payment_verified_at ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.payment_verified_at ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.payment_verified_at ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Payment Verification</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {app.payment_verified_at ? new Date(app.payment_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Pending Payment'}
-                              </p>
-                           </div>
+                           {/* Step 5: Payment (by User) */}
+                           {(() => {
+                              const paymentDone = app.payment_receipt_url != null;
+                              const isActive = app.documents_verified && app.deposit_amount != null && app.status === 'payment_pending';
+                              return (
+                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: paymentDone ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: paymentDone ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: paymentDone ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Made</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                       {paymentDone ? `Receipt uploaded` : (isActive ? `Action required - Pay £${app.deposit_amount}` : (app.deposit_amount ? `£${app.deposit_amount} required` : 'Not yet'))}
+                                    </p>
+                                 </div>
+                              );
+                           })()}
 
-                           <div style={{ position: 'relative' }}>
-                              <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: app.appointment_date ? '#2563eb' : '#cbd5e1', border: '3px solid white', boxShadow: app.appointment_date ? '0 0 0 3px #2563eb' : 'none' }}></div>
-                              <h4 style={{ fontSize: '0.95rem', margin: 0, color: app.appointment_date ? '#1e293b' : '#94a3b8', fontWeight: 600 }}>Nikkah Scheduled</h4>
-                              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                 {app.appointment_date ? new Date(app.appointment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Awaiting Confirmation'}
-                              </p>
-                           </div>
+                           {/* Step 6: Payment Verified (by Admin) */}
+                           {(() => {
+                              const isVerified = app.payment_verified_at != null || app.status === 'payment_verified';
+                              const isActive = app.payment_receipt_url && !app.payment_verified_at && app.status === 'payment_pending';
+                              return (
+                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isVerified ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isVerified ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Verified</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                       {isVerified ? (app.payment_verified_at ? `Verified ${new Date(app.payment_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Verified by admin') : (isActive ? 'Waiting for admin verification' : 'Pending')}
+                                    </p>
+                                 </div>
+                              );
+                           })()}
+
+                           {/* Step 7: Certificate Generated (by Admin) */}
+                           {(() => {
+                              const isCompleted = app.status === 'completed' || (app.certificate_url != null);
+                              const isActive = app.status === 'payment_verified' || app.status === 'appointment_scheduled';
+                              return (
+                                 <div style={{ position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isCompleted ? '#10b981' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isCompleted ? '0 0 0 3px #10b981' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isCompleted ? '#059669' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Certificate Generated</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
+                                       {isCompleted ? (app.certificate_generated_at ? `Generated ${new Date(app.certificate_generated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Certificate ready') : (isActive ? 'Waiting for admin to generate' : 'Not yet')}
+                                    </p>
+                                 </div>
+                              );
+                           })()}
 
                         </div>
                      </div>
