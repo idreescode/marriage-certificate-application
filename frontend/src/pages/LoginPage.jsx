@@ -225,6 +225,7 @@ export default function LoginPage() {
                       password: e.target.value,
                     }))
                   }
+                  autoComplete="current-password"
                   required
                 />
               </div>

@@ -17,11 +17,21 @@ export default function ApplicantDashboard() {
 
    useEffect(() => {
       const token = localStorage.getItem('token');
+      const userType = localStorage.getItem('userType');
+      
       if (!token) {
          toast.error('Please login to continue');
          navigate('/applicant/login');
          return;
       }
+
+      // Redirect admin users to admin dashboard
+      if (userType === 'admin') {
+         toast.error('Admin users cannot access applicant dashboard');
+         navigate('/admin/dashboard');
+         return;
+      }
+
       fetchDashboard();
    }, []);
 
@@ -34,11 +44,18 @@ export default function ApplicantDashboard() {
          const errorMessage = error.response?.data?.message || 'Failed to load dashboard data';
          toast.error(errorMessage);
          
-         // Only redirect on auth errors
+         // Handle auth errors - check user role for proper redirect
          if (error.response?.status === 401 || error.response?.status === 403) {
+            const userType = localStorage.getItem('userType');
             localStorage.removeItem('token');
+            localStorage.removeItem('userType');
+            
             setTimeout(() => {
-               navigate('/applicant/login');
+               if (userType === 'admin') {
+                  navigate('/admin/login');
+               } else {
+                  navigate('/applicant/login');
+               }
             }, 2000);
          }
       } finally {
@@ -110,7 +127,24 @@ export default function ApplicantDashboard() {
    };
 
    if (loading) return <Loader fullscreen />;
-   const app = data?.application;
+   
+   // Check if data is available
+   if (!data || !data.application) {
+      return (
+         <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--slate-600)', fontSize: '1.1rem' }}>No application data available.</p>
+            <button 
+               onClick={() => navigate('/applicant/login')}
+               className="btn btn-primary"
+               style={{ marginTop: '1rem' }}
+            >
+               Return to Login
+            </button>
+         </div>
+      );
+   }
+
+   const app = data.application;
 
    const StatusPill = ({ status }) => {
       const styles = {
