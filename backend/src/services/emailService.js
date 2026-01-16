@@ -628,6 +628,54 @@ const sendApplicationApprovedEmail = async (applicationData) => {
   }
 };
 
+// 12. Admin Credentials Email
+const sendAdminCredentialsEmail = async (adminData) => {
+  const {
+    email,
+    full_name,
+    password,
+  } = adminData;
+
+  if (!email) {
+    console.error("email is required for sending admin credentials email");
+    throw new Error("email is required");
+  }
+
+  if (!full_name) {
+    console.error("full_name is required for sending admin credentials email");
+    throw new Error("full_name is required");
+  }
+
+  if (!password) {
+    console.error("password is required for sending admin credentials email");
+    throw new Error("password is required");
+  }
+
+  const html = renderTemplate('admin-credentials.html', {
+    email,
+    full_name,
+    password,
+    frontend_url: process.env.FRONTEND_URL || "",
+    email_user: process.env.EMAIL_USER,
+  });
+
+  const mailOptions = {
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Admin Account Created - Welcome to Jamiyat Admin Portal`,
+    html,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Admin credentials email sent to:', email);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('❌ Error sending admin credentials email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendApplicationConfirmation,
   sendDepositAmountEmail,
@@ -639,5 +687,6 @@ module.exports = {
   sendAdminNewApplicationEmail,
   sendPasswordResetEmail,
   sendApplicationUnderReviewEmail,
-  sendApplicationApprovedEmail
+  sendApplicationApprovedEmail,
+  sendAdminCredentialsEmail
 };

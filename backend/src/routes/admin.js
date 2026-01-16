@@ -15,7 +15,12 @@ const {
   updateApplicationNumber,
   deleteApplication,
   createManualApplication,
-  updateApplication
+  updateApplication,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  createAdmin
 } = require('../controllers/adminController');
 const { uploadDocuments } = require('../middleware/upload');
 
@@ -92,5 +97,21 @@ router.post('/applications/manual',
   ]),
   createManualApplication
 );
+
+// User Management Routes
+// GET /api/admin/users - Get all users
+router.get('/users', getAllUsers);
+
+// GET /api/admin/users/:id - Get user by ID
+router.get('/users/:id', getUserById);
+
+// POST /api/admin/users - Create new admin user
+router.post('/users', createAdmin);
+
+// PUT /api/admin/users/:id - Update user
+router.put('/users/:id', updateUser);
+
+// DELETE /api/admin/users/:id - Delete user
+router.delete('/users/:id', deleteUser);
 
 module.exports = router;

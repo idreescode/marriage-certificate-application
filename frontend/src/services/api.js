@@ -163,6 +163,13 @@ export const createManualApplication = (data) => {
   return api.post('/admin/applications/manual', data);
 };
 
+// User Management APIs
+export const getAllUsers = (params) => api.get('/admin/users', { params });
+export const getUserById = (id) => api.get(`/admin/users/${id}`);
+export const createAdmin = (data) => api.post('/admin/users', data);
+export const updateUser = (id, data) => api.put(`/admin/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/admin/users/${id}`);
+
 // Payment APIs - Online payment disabled, only bank transfer is available
 // export const createCheckoutSession = () => api.post('/payment/create-checkout-session');
 // export const verifySession = (sessionId) => api.post('/payment/verify-session', { sessionId });

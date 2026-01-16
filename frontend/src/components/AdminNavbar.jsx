@@ -120,6 +120,7 @@ export default function AdminNavbar() {
             >
               <NavLink to="/admin/dashboard" label="Dashboard" />
               <NavLink to="/admin/applications" label="Applications" />
+              <NavLink to="/admin/users" label="Users" />
               {/* <NavLink to="/admin/payments" label="Payments" /> */}
               {/* <NavLink to="/admin/settings" label="Settings" /> */}
             </div>

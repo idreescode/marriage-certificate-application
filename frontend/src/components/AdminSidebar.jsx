@@ -1,6 +1,6 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Settings, LogOut, FileText } from 'lucide-react';
 
 export default function AdminSidebar() {
   const location = useLocation();
@@ -28,8 +28,13 @@ export default function AdminSidebar() {
         </Link>
         
         <Link to="/admin/applications" className={`sidebar-link ${isActive('/admin/applications') ? 'active' : ''}`}>
-          <Users size={20} />
+          <FileText size={20} />
           <span>Applications</span>
+        </Link>
+
+        <Link to="/admin/users" className={`sidebar-link ${isActive('/admin/users') ? 'active' : ''}`}>
+          <Users size={20} />
+          <span>Users</span>
         </Link>
 
         <Link to="/admin/payments" className={`sidebar-link ${isActive('/admin/payments') ? 'active' : ''}`}>

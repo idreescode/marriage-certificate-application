@@ -13,6 +13,7 @@ const {
   sendCertificateReadyEmail,
   sendApplicationConfirmation,
   sendApplicationApprovedEmail,
+  sendAdminCredentialsEmail,
 } = require("../services/emailService");
 
 // Admin Login
@@ -1955,6 +1956,376 @@ const updateApplication = async (req, res) => {
   }
 };
 
+// Get All Users
+const getAllUsers = async (req, res) => {
+  try {
+    const { role, search, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = "SELECT id, email, role, full_name, created_at, updated_at FROM users WHERE 1=1";
+    const params = [];
+
+    if (role) {
+      query += " AND role = ?";
+      params.push(role);
+    }
+
+    if (search) {
+      query += " AND (email LIKE ? OR full_name LIKE ?)";
+      const searchTerm = `%${search}%`;
+      params.push(searchTerm, searchTerm);
+    }
+
+    query += ` ORDER BY created_at DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+
+    const [users] = await pool.execute(query, params);
+
+    // Get total count
+    let countQuery = "SELECT COUNT(*) as total FROM users WHERE 1=1";
+    const countParams = [];
+
+    if (role) {
+      countQuery += " AND role = ?";
+      countParams.push(role);
+    }
+
+    if (search) {
+      countQuery += " AND (email LIKE ? OR full_name LIKE ?)";
+      const searchTerm = `%${search}%`;
+      countParams.push(searchTerm, searchTerm);
+    }
+
+    const [countResult] = await pool.execute(countQuery, countParams);
+    const total = countResult[0].total;
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error getting users:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+      error: error.message,
+    });
+  }
+};
+
+// Get User By ID
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [users] = await pool.execute(
+      "SELECT id, email, role, full_name, created_at, updated_at FROM users WHERE id = ?",
+      [id]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        user: users[0],
+      },
+    });
+  } catch (error) {
+    console.error("Error getting user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user",
+      error: error.message,
+    });
+  }
+};
+
+// Update User
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, full_name, role, password } = req.body;
+
+    // Check if user exists
+    const [existingUsers] = await pool.execute(
+      "SELECT * FROM users WHERE id = ?",
+      [id]
+    );
+
+    if (existingUsers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const existingUser = existingUsers[0];
+
+    // Build update query dynamically
+    const updateFields = [];
+    const updateValues = [];
+
+    if (email !== undefined) {
+      // Check if email is already in use by another user
+      const [emailCheck] = await pool.execute(
+        "SELECT id FROM users WHERE email = ? AND id != ?",
+        [email.toLowerCase(), id]
+      );
+      if (emailCheck.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already in use by another user",
+        });
+      }
+      updateFields.push("email = ?");
+      updateValues.push(email.toLowerCase());
+    }
+
+    if (full_name !== undefined) {
+      updateFields.push("full_name = ?");
+      updateValues.push(full_name);
+    }
+
+    if (role !== undefined) {
+      // Validate role
+      if (!['admin', 'applicant'].includes(role)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid role. Must be 'admin' or 'applicant'",
+        });
+      }
+      updateFields.push("role = ?");
+      updateValues.push(role);
+    }
+
+    if (password !== undefined && password.trim() !== '') {
+      // Validate password strength (minimum 6 characters)
+      if (password.trim().length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 6 characters long",
+        });
+      }
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(password.trim(), 10);
+      updateFields.push("password = ?");
+      updateValues.push(hashedPassword);
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields to update",
+      });
+    }
+
+    updateValues.push(id);
+
+    // Update user
+    const updateQuery = `UPDATE users SET ${updateFields.join(", ")} WHERE id = ?`;
+    await pool.execute(updateQuery, updateValues);
+
+    // Fetch updated user
+    const [updatedUsers] = await pool.execute(
+      "SELECT id, email, role, full_name, created_at, updated_at FROM users WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: "User updated successfully",
+      data: {
+        user: updatedUsers[0],
+      },
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update user",
+      error: error.message,
+    });
+  }
+};
+
+// Create Admin User
+const createAdmin = async (req, res) => {
+  try {
+    const { email, full_name, password } = req.body;
+
+    // Validate required fields
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    if (!full_name || !full_name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Full name is required",
+      });
+    }
+
+    if (!password || !password.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    // Validate password strength (minimum 6 characters)
+    if (password.trim().length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if email already exists
+    const [existingUsers] = await pool.execute(
+      "SELECT id FROM users WHERE email = ?",
+      [normalizedEmail]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+
+    // Create admin user
+    const [result] = await pool.execute(
+      "INSERT INTO users (email, password, role, full_name) VALUES (?, ?, 'admin', ?)",
+      [normalizedEmail, hashedPassword, full_name.trim()]
+    );
+
+    const userId = result.insertId;
+
+    // Send email with credentials
+    try {
+      await sendAdminCredentialsEmail({
+        email: normalizedEmail,
+        full_name: full_name.trim(),
+        password: password.trim(), // Send plain password in email
+      });
+    } catch (emailError) {
+      console.error("Error sending admin credentials email:", emailError);
+      // Don't fail the request if email fails, just log it
+      // User is still created successfully
+    }
+
+    // Fetch created user (without password)
+    const [newUsers] = await pool.execute(
+      "SELECT id, email, role, full_name, created_at, updated_at FROM users WHERE id = ?",
+      [userId]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Admin user created successfully. Credentials have been sent via email.",
+      data: {
+        user: newUsers[0],
+      },
+    });
+  } catch (error) {
+    console.error("Error creating admin user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create admin user",
+      error: error.message,
+    });
+  }
+};
+
+// Delete User
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const currentUserId = req.user.id;
+
+    // Prevent self-deletion
+    if (parseInt(id) === parseInt(currentUserId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot delete your own account",
+      });
+    }
+
+    // Check if user exists
+    const [existingUsers] = await pool.execute(
+      "SELECT * FROM users WHERE id = ?",
+      [id]
+    );
+
+    if (existingUsers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const user = existingUsers[0];
+
+    // Check if user has applications
+    const [applications] = await pool.execute(
+      "SELECT COUNT(*) as count FROM applications WHERE user_id = ?",
+      [id]
+    );
+
+    if (applications[0].count > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete user with existing applications. Please delete or reassign applications first.",
+      });
+    }
+
+    // Delete user
+    await pool.execute("DELETE FROM users WHERE id = ?", [id]);
+
+    res.json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete user",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   adminLogin,
   getAllApplications,
@@ -1970,4 +2341,9 @@ module.exports = {
   deleteApplication,
   createManualApplication,
   updateApplication,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  createAdmin,
 };

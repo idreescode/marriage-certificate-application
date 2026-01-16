@@ -14,6 +14,7 @@ import ApplicantLayout from './layouts/ApplicantLayout';
 import AdminApplications from './pages/AdminApplications';
 import AdminApplicationDetails from './pages/AdminApplicationDetails';
 import AdminManualApplication from './pages/AdminManualApplication';
+import AdminUsers from './pages/AdminUsers';
 const basename = '/';
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
           <Route path="applications/manual" element={<AdminManualApplication />} />
           <Route path="applications/:id/edit" element={<AdminManualApplication />} />
           <Route path="applications/:id" element={<AdminApplicationDetails />} />
+          <Route path="users" element={<AdminUsers />} />
           {/* Fallback for now */}
           <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />
           <Route path="settings" element={<div className="p-8 text-center text-slate-500">Settings Module Coming Soon</div>} />

@@ -22,7 +22,7 @@ export default function LoginPage() {
       localStorage.setItem('userType', user.role); // 'admin' or 'applicant'
       localStorage.setItem('userName', user.fullName);
 
-      if (user.role === 'admin' || user.role === 'super_admin') {
+      if (user.role === 'admin') {
         toast.success(`Welcome back, ${user.fullName}`);
         navigate('/admin/dashboard');
       } else {

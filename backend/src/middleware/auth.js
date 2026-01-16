@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
 
 // Middleware to verify admin role
 const verifyAdmin = (req, res, next) => {
-  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super_admin')) {
+  if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ 
       success: false, 
       message: 'Access denied - Admin role required' 
