@@ -14,6 +14,7 @@ const {
   sendApplicationConfirmation,
   sendApplicationApprovedEmail,
   sendAdminCredentialsEmail,
+  sendUserUpdatedEmail,
 } = require("../services/emailService");
 
 // Admin Login
@@ -218,10 +219,11 @@ const approveApplication = async (req, res) => {
     const app = appRows[0];
 
     // Check if application is already approved or beyond
-    if (app.status !== 'admin_review') {
+    if (app.status !== "admin_review") {
       return res.status(400).json({
         success: false,
-        message: "Application is not in review status or has already been processed",
+        message:
+          "Application is not in review status or has already been processed",
       });
     }
 
@@ -230,10 +232,10 @@ const approveApplication = async (req, res) => {
     const hashedPassword = await bcrypt.hash(portalPassword, 10);
 
     // Update user password
-    await pool.execute(
-      "UPDATE users SET password = ? WHERE id = ?",
-      [hashedPassword, app.user_id]
-    );
+    await pool.execute("UPDATE users SET password = ? WHERE id = ?", [
+      hashedPassword,
+      app.user_id,
+    ]);
 
     // Keep status as 'admin_review' - this indicates approved and waiting for documents
     // Status will change to 'payment_pending' only after documents are verified
@@ -330,8 +332,11 @@ const verifyDocuments = async (req, res) => {
 
     // Send email to applicant with deposit amount (non-blocking - don't wait for it)
     if (rows.length > 0) {
-      sendDepositAmountEmail(rows[0]).catch(error => {
-        console.error('Error sending deposit amount email (non-blocking):', error);
+      sendDepositAmountEmail(rows[0]).catch((error) => {
+        console.error(
+          "Error sending deposit amount email (non-blocking):",
+          error
+        );
         // Email failure doesn't affect the verification success
       });
     }
@@ -547,18 +552,25 @@ const generateCertificate = async (req, res) => {
     // Delete old certificate file if it exists
     if (application.certificate_url) {
       try {
-        const fs = require('fs');
-        const path = require('path');
+        const fs = require("fs");
+        const path = require("path");
         // Convert relative path to absolute path
-        const oldCertificatePath = path.join(__dirname, '../../', application.certificate_url);
-        
+        const oldCertificatePath = path.join(
+          __dirname,
+          "../../",
+          application.certificate_url
+        );
+
         if (fs.existsSync(oldCertificatePath)) {
           fs.unlinkSync(oldCertificatePath);
           console.log(`✅ Deleted old certificate: ${oldCertificatePath}`);
         }
       } catch (deleteError) {
         // Log error but don't fail the certificate generation
-        console.error('⚠️ Error deleting old certificate:', deleteError.message);
+        console.error(
+          "⚠️ Error deleting old certificate:",
+          deleteError.message
+        );
       }
     }
 
@@ -610,7 +622,7 @@ const generateCertificate = async (req, res) => {
       success: false,
       message: "Failed to generate certificate",
       error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
@@ -1249,16 +1261,25 @@ const createManualApplication = async (req, res) => {
             // Delete old certificate file if it exists (for manual applications that might be recreated)
             if (appData[0].certificate_url) {
               try {
-                const fs = require('fs');
-                const path = require('path');
-                const oldCertificatePath = path.join(__dirname, '../../', appData[0].certificate_url);
-                
+                const fs = require("fs");
+                const path = require("path");
+                const oldCertificatePath = path.join(
+                  __dirname,
+                  "../../",
+                  appData[0].certificate_url
+                );
+
                 if (fs.existsSync(oldCertificatePath)) {
                   fs.unlinkSync(oldCertificatePath);
-                  console.log(`✅ Deleted old certificate: ${oldCertificatePath}`);
+                  console.log(
+                    `✅ Deleted old certificate: ${oldCertificatePath}`
+                  );
                 }
               } catch (deleteError) {
-                console.error('⚠️ Error deleting old certificate:', deleteError.message);
+                console.error(
+                  "⚠️ Error deleting old certificate:",
+                  deleteError.message
+                );
               }
             }
 
@@ -1962,7 +1983,8 @@ const getAllUsers = async (req, res) => {
     const { role, search, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
-    let query = "SELECT id, email, role, full_name, created_at, updated_at FROM users WHERE 1=1";
+    let query =
+      "SELECT id, email, role, full_name, created_at, updated_at FROM users WHERE 1=1";
     const params = [];
 
     if (role) {
@@ -1976,7 +1998,9 @@ const getAllUsers = async (req, res) => {
       params.push(searchTerm, searchTerm);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+    query += ` ORDER BY created_at DESC LIMIT ${parseInt(
+      limit
+    )} OFFSET ${parseInt(offset)}`;
 
     const [users] = await pool.execute(query, params);
 
@@ -2101,7 +2125,7 @@ const updateUser = async (req, res) => {
 
     if (role !== undefined) {
       // Validate role
-      if (!['admin', 'applicant'].includes(role)) {
+      if (!["admin", "applicant"].includes(role)) {
         return res.status(400).json({
           success: false,
           message: "Invalid role. Must be 'admin' or 'applicant'",
@@ -2111,7 +2135,7 @@ const updateUser = async (req, res) => {
       updateValues.push(role);
     }
 
-    if (password !== undefined && password.trim() !== '') {
+    if (password !== undefined && password.trim() !== "") {
       // Validate password strength (minimum 6 characters)
       if (password.trim().length < 6) {
         return res.status(400).json({
@@ -2135,7 +2159,9 @@ const updateUser = async (req, res) => {
     updateValues.push(id);
 
     // Update user
-    const updateQuery = `UPDATE users SET ${updateFields.join(", ")} WHERE id = ?`;
+    const updateQuery = `UPDATE users SET ${updateFields.join(
+      ", "
+    )} WHERE id = ?`;
     await pool.execute(updateQuery, updateValues);
 
     // Fetch updated user
@@ -2144,11 +2170,90 @@ const updateUser = async (req, res) => {
       [id]
     );
 
+    const updatedUser = updatedUsers[0];
+
+    // Track what changed for email notification
+    const changes = {
+      email_changed:
+        email !== undefined &&
+        email.toLowerCase() !== existingUser.email.toLowerCase(),
+      password_changed: password !== undefined && password.trim() !== "",
+      name_changed:
+        full_name !== undefined && full_name !== existingUser.full_name,
+      role_changed: role !== undefined && role !== existingUser.role,
+    };
+
+    // Send email notification if any changes were made
+    if (
+      changes.email_changed ||
+      changes.password_changed ||
+      changes.name_changed ||
+      changes.role_changed
+    ) {
+      try {
+        // Determine recipient email: if email changed, send to new email; otherwise send to current email
+        const recipientEmail = changes.email_changed
+          ? updatedUser.email
+          : existingUser.email;
+
+        const emailData = {
+          email: recipientEmail,
+          full_name: updatedUser.full_name, // Use updated name for greeting
+          password_changed: changes.password_changed,
+          new_password: changes.password_changed ? password.trim() : null,
+          email_changed: changes.email_changed,
+          new_email: changes.email_changed ? updatedUser.email : null,
+          name_changed: changes.name_changed,
+          new_full_name: changes.name_changed ? updatedUser.full_name : null,
+          role_changed: changes.role_changed,
+          new_role: changes.role_changed ? updatedUser.role : null,
+        };
+
+        await sendUserUpdatedEmail(emailData);
+
+        // If email was changed, also send notification to old email for security
+        if (changes.email_changed) {
+          try {
+            const oldEmailData = {
+              email: existingUser.email,
+              full_name: existingUser.full_name,
+              password_changed: false,
+              new_password: null,
+              email_changed: true,
+              new_email: updatedUser.email,
+              name_changed: false,
+              new_full_name: null,
+              role_changed: false,
+              new_role: null,
+            };
+            await sendUserUpdatedEmail(oldEmailData);
+          } catch (oldEmailError) {
+            console.error(
+              "Error sending notification to old email:",
+              oldEmailError
+            );
+            // Continue even if old email fails
+          }
+        }
+      } catch (emailError) {
+        console.error("Error sending user updated email:", emailError);
+        // Don't fail the request if email fails, just log it
+        // User is still updated successfully
+      }
+    }
+
     res.json({
       success: true,
-      message: "User updated successfully",
+      message:
+        "User updated successfully" +
+        (changes.password_changed ||
+        changes.email_changed ||
+        changes.name_changed ||
+        changes.role_changed
+          ? ". User has been notified via email."
+          : ""),
       data: {
-        user: updatedUsers[0],
+        user: updatedUser,
       },
     });
   } catch (error) {

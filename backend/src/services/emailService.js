@@ -676,6 +676,121 @@ const sendAdminCredentialsEmail = async (adminData) => {
   }
 };
 
+// 13. User Updated Email
+const sendUserUpdatedEmail = async (userData) => {
+  const {
+    email,
+    full_name,
+    password_changed,
+    new_password,
+    email_changed,
+    new_email,
+    name_changed,
+    new_full_name,
+    role_changed,
+    new_role,
+  } = userData;
+
+  if (!email) {
+    console.error("email is required for sending user updated email");
+    throw new Error("email is required");
+  }
+
+  if (!full_name) {
+    console.error("full_name is required for sending user updated email");
+    throw new Error("full_name is required");
+  }
+
+  // Build updated fields HTML
+  let updatedFields = "";
+  if (email_changed && new_email) {
+    updatedFields += `
+      <tr>
+        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Email:</td>
+        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500; word-break: break-all;">${new_email}</td>
+      </tr>
+    `;
+  }
+  if (password_changed && new_password) {
+    updatedFields += `
+      <tr>
+        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">New Password:</td>
+        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; font-family: 'Courier New', monospace;">${new_password}</td>
+      </tr>
+    `;
+  }
+  if (name_changed && new_full_name) {
+    updatedFields += `
+      <tr>
+        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Full Name:</td>
+        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">${new_full_name}</td>
+      </tr>
+    `;
+  }
+  if (role_changed && new_role) {
+    updatedFields += `
+      <tr>
+        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Role:</td>
+        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">${new_role}</td>
+      </tr>
+    `;
+  }
+
+  // Build security notices HTML
+  let securityNotices = "";
+  if (password_changed && new_password) {
+    securityNotices += `
+      <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; margin-bottom: 25px;">
+        <tr>
+          <td style="padding: 20px;">
+            <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
+              <strong>Security Notice:</strong> Your password has been changed. Please save this new password securely. We recommend changing it after your next login for security purposes.
+            </p>
+          </td>
+        </tr>
+      </table>
+    `;
+  }
+  if (email_changed && new_email) {
+    securityNotices += `
+      <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 25px;">
+        <tr>
+          <td style="padding: 20px;">
+            <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
+              <strong>Email Change:</strong> Your login email has been updated. Please use your new email address (${new_email}) to log in to your account.
+            </p>
+          </td>
+        </tr>
+      </table>
+    `;
+  }
+
+  const html = renderTemplate('user-updated.html', {
+    email: email_changed ? new_email : email,
+    full_name: name_changed ? new_full_name : full_name,
+    updated_fields: updatedFields || '<tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">No specific changes listed.</td></tr>',
+    security_notices: securityNotices,
+    frontend_url: process.env.FRONTEND_URL || "",
+    email_user: process.env.EMAIL_USER,
+  });
+
+  const mailOptions = {
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
+    to: email_changed ? new_email : email, // Send to new email if changed, otherwise old email
+    subject: `Account Updated - Jamiyat Admin Portal`,
+    html,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ User updated email sent to:', email_changed ? new_email : email);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('❌ Error sending user updated email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendApplicationConfirmation,
   sendDepositAmountEmail,
@@ -688,5 +803,6 @@ module.exports = {
   sendPasswordResetEmail,
   sendApplicationUnderReviewEmail,
   sendApplicationApprovedEmail,
-  sendAdminCredentialsEmail
+  sendAdminCredentialsEmail,
+  sendUserUpdatedEmail
 };
