@@ -55,7 +55,7 @@ function App() {
         <Route path="/" element={<LoginPage />} />
 
         <Route path="/login" element={<LoginPage />} />
-        {/* <Route path="/applicant/login" element={<ApplicantLogin />} /> */}
+        <Route path="/applicant/login" element={<LoginPage />} />
 
         {/* Applicant Routes with Layout */}
         <Route path="/applicant" element={<ApplicantLayout />}>

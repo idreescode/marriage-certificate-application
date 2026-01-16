@@ -18,6 +18,7 @@ export default function ApplicantDashboard() {
    useEffect(() => {
       const token = localStorage.getItem('token');
       if (!token) {
+         toast.error('Please login to continue');
          navigate('/applicant/login');
          return;
       }
@@ -29,8 +30,17 @@ export default function ApplicantDashboard() {
          const response = await getApplicantDashboard();
          setData(response.data.data);
       } catch (error) {
-         toast.error('Failed to load dashboard data');
-         navigate('/applicant/login');
+         console.error('Error fetching dashboard:', error);
+         const errorMessage = error.response?.data?.message || 'Failed to load dashboard data';
+         toast.error(errorMessage);
+         
+         // Only redirect on auth errors
+         if (error.response?.status === 401 || error.response?.status === 403) {
+            localStorage.removeItem('token');
+            setTimeout(() => {
+               navigate('/applicant/login');
+            }, 2000);
+         }
       } finally {
          setLoading(false);
       }
