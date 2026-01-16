@@ -19,15 +19,15 @@ export default function LoginPage() {
       const { token, user } = response.data.data;
 
       localStorage.setItem('token', token);
-      localStorage.setItem('userType', user.role); // 'admin' or 'applicant'
-      localStorage.setItem('userName', user.fullName);
+      localStorage.setItem("userType", user.role); // 'admin' or 'applicant'
+      localStorage.setItem("userName", user.fullName);
 
-      if (user.role === 'admin') {
+      if (user.role === "admin") {
         toast.success(`Welcome back, ${user.fullName}`);
-        navigate('/admin/dashboard');
+        navigate("/admin/dashboard");
       } else {
-        toast.success('Login successful');
-        navigate('/applicant/dashboard');
+        toast.success("Login successful");
+        navigate("/applicant/dashboard");
       }
     } catch (err) {
       console.error(err);
