@@ -12,6 +12,7 @@ const {
   sendAppointmentEmail,
   sendCertificateReadyEmail,
   sendApplicationConfirmation,
+  sendApplicationApprovedEmail,
 } = require("../services/emailService");
 
 // Admin Login
@@ -191,6 +192,87 @@ const getApplicationById = async (req, res) => {
   }
 };
 
+// Approve Application
+const approveApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user.id;
+
+    // Get application data
+    const [appRows] = await pool.execute(
+      `SELECT a.*, u.email as portal_email 
+       FROM applications a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE a.id = ? AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)`,
+      [id]
+    );
+
+    if (appRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    const app = appRows[0];
+
+    // Check if application is already approved or beyond
+    if (app.status !== 'admin_review') {
+      return res.status(400).json({
+        success: false,
+        message: "Application is not in review status or has already been processed",
+      });
+    }
+
+    // Generate a new password for the user
+    const portalPassword = generatePassword();
+    const hashedPassword = await bcrypt.hash(portalPassword, 10);
+
+    // Update user password
+    await pool.execute(
+      "UPDATE users SET password = ? WHERE id = ?",
+      [hashedPassword, app.user_id]
+    );
+
+    // Keep status as 'admin_review' - this indicates approved and waiting for documents
+    // Status will change to 'payment_pending' only after documents are verified
+    // Set approved_at timestamp to track approval
+    // Explicitly ensure status remains 'admin_review' (in case it was changed elsewhere)
+    await pool.execute(
+      `UPDATE applications 
+       SET approved_at = NOW(),
+           approved_by = ?,
+           status = 'admin_review'
+       WHERE id = ?`,
+      [adminId, id]
+    );
+
+    // Send approval email with password
+    const applicationData = {
+      id: app.id,
+      application_number: app.application_number,
+      groom_full_name: app.groom_full_name,
+      bride_full_name: app.bride_full_name,
+      portal_email: app.portal_email,
+      portalPassword: portalPassword,
+    };
+
+    await sendApplicationApprovedEmail(applicationData);
+
+    res.json({
+      success: true,
+      message: "Application approved successfully",
+    });
+  } catch (error) {
+    console.error("Error approving application:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to approve application",
+      error: error.message,
+    });
+  }
+};
+
 // Verify Documents
 const verifyDocuments = async (req, res) => {
   try {
@@ -245,9 +327,12 @@ const verifyDocuments = async (req, res) => {
       [id]
     );
 
-    // Send email to applicant with deposit amount
+    // Send email to applicant with deposit amount (non-blocking - don't wait for it)
     if (rows.length > 0) {
-      await sendDepositAmountEmail(rows[0]);
+      sendDepositAmountEmail(rows[0]).catch(error => {
+        console.error('Error sending deposit amount email (non-blocking):', error);
+        // Email failure doesn't affect the verification success
+      });
     }
 
     res.json({
@@ -1874,6 +1959,7 @@ module.exports = {
   adminLogin,
   getAllApplications,
   getApplicationById,
+  approveApplication,
   verifyDocuments,
   setDepositAmount,
   verifyPayment,

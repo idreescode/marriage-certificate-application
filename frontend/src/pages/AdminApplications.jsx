@@ -4,6 +4,7 @@ import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import {
   getAllApplications,
+  approveApplication as approveApplicationAPI,
   verifyDocuments as verifyDocumentsAPI,
   verifyPayment as verifyPaymentAPI,
   scheduleAppointment as scheduleAPI,
@@ -59,6 +60,9 @@ export default function AdminApplications() {
     location: "",
   });
   const [selectedDate, setSelectedDate] = useState(null);
+  
+  // Loading states for actions
+  const [verifyingDocuments, setVerifyingDocuments] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -100,7 +104,24 @@ export default function AdminApplications() {
   };
 
   // Action Handlers
+  const handleApproveApplication = async (appId) => {
+    const toastId = toast.loading("Approving application...");
+    try {
+      await approveApplicationAPI(appId);
+      toast.success("Application approved successfully! User will receive portal credentials.", { id: toastId });
+      fetchApplications();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to approve application",
+        { id: toastId }
+      );
+    }
+  };
+
   const handleVerifyDocuments = async () => {
+    if (verifyingDocuments) return; // Prevent multiple clicks
+    
+    setVerifyingDocuments(true);
     const toastId = toast.loading("Verifying documents...");
     try {
       await verifyDocumentsAPI(selectedAppId);
@@ -115,6 +136,8 @@ export default function AdminApplications() {
         error.response?.data?.message || "Failed to verify documents",
         { id: toastId }
       );
+    } finally {
+      setVerifyingDocuments(false);
     }
   };
 
@@ -219,7 +242,7 @@ export default function AdminApplications() {
     }
   };
 
-  const StatusBadge = ({ status }) => {
+  const StatusBadge = ({ status, app }) => {
     const styles = {
       submitted: "badge-info",
       admin_review: "badge-warning",
@@ -228,9 +251,30 @@ export default function AdminApplications() {
       appointment_scheduled: "badge-info",
       completed: "badge-success",
     };
+    
+    // Custom display text for statuses
+    const statusText = {
+      submitted: "SUBMITTED",
+      payment_pending: "PAYMENT PENDING",
+      payment_verified: "PAYMENT VERIFIED",
+      appointment_scheduled: "APPOINTMENT SCHEDULED",
+      completed: "COMPLETED",
+    };
+    
+    // For admin_review status:
+    // - If approved_at exists, it means approved → "DOCUMENT PENDING"
+    // - Otherwise, it's not approved yet → "UNDER REVIEW"
+    if (status === "admin_review") {
+      if (app && app.approved_at) {
+        statusText.admin_review = "DOCUMENT PENDING";
+      } else {
+        statusText.admin_review = "UNDER REVIEW";
+      }
+    }
+    
     return (
       <span className={`badge ${styles[status] || "badge-info"}`}>
-        {status.replace("_", " ").toUpperCase()}
+        {statusText[status] || status.replace("_", " ").toUpperCase()}
       </span>
     );
   };
@@ -513,7 +557,7 @@ export default function AdminApplications() {
                     <div style={{ fontWeight: 500 }}>{app.bride_full_name}</div>
                   </td>
                   <td>
-                    <StatusBadge status={app.status} />
+                    <StatusBadge status={app.status} app={app} />
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
                     {new Date(app.created_at).toLocaleDateString()}
@@ -575,9 +619,27 @@ export default function AdminApplications() {
 
                       {app.status === "admin_review" && (
                         <>
-                          {/* Show Verify Documents button if documents are uploaded but not verified */}
-                          {(app.groom_id_path || app.bride_id_path) &&
-                          !app.documents_verified ? (
+                          {/* Show Approve button only if application is not yet approved (approved_at is null) */}
+                          {!app.approved_at && (
+                            <button
+                              onClick={() => handleApproveApplication(app.id)}
+                              className="btn btn-sm btn-success"
+                              style={{
+                                whiteSpace: "nowrap",
+                                backgroundColor: "var(--success)",
+                                color: "white",
+                                border: "none",
+                              }}
+                            >
+                              <Check size={14} />
+                              Approve
+                            </button>
+                          )}
+
+                          {/* Show Verify Documents button if documents are uploaded but not verified (after approval) */}
+                          {app.approved_at &&
+                          (app.groom_id_path || app.bride_id_path) &&
+                          !app.documents_verified && (
                             <button
                               onClick={() => openVerifyDocuments(app.id)}
                               className="btn btn-sm btn-primary"
@@ -585,24 +647,7 @@ export default function AdminApplications() {
                             >
                               Verify Documents
                             </button>
-                          ) : null}
-
-                          {/* Show badge if no documents uploaded yet */}
-                          {!app.groom_id_path && !app.bride_id_path ? (
-                            <span
-                              className="badge"
-                              style={{
-                                fontSize: "0.75rem",
-                                color: "var(--slate-600)",
-                                backgroundColor: "var(--slate-100)",
-                                padding: "0.35rem 0.75rem",
-                                fontWeight: 500,
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              Awaiting Documents
-                            </span>
-                          ) : null}
+                          )}
                         </>
                       )}
 
@@ -637,7 +682,8 @@ export default function AdminApplications() {
                           Schedule
                         </button>
                       )}
-                      {app.status === "appointment_scheduled" && (
+                      {/* Show Generate Certificate button after payment is verified */}
+                      {app.status === "payment_verified" && (
                         <button
                           onClick={() => handleGenerateCertificate(app.id)}
                           className="btn btn-sm btn-success text-white"
@@ -653,7 +699,7 @@ export default function AdminApplications() {
                             padding: "0.5rem 1rem",
                           }}
                         >
-                          Complete
+                          Generate Certificate
                         </button>
                       )}
                     </div>
@@ -747,8 +793,9 @@ export default function AdminApplications() {
             onClick={handleVerifyDocuments}
             className="btn btn-primary"
             style={{ minWidth: "140px" }}
+            disabled={verifyingDocuments}
           >
-            Verify Documents
+            {verifyingDocuments ? "Verifying..." : "Verify Documents"}
           </button>
         </div>
       </Modal>

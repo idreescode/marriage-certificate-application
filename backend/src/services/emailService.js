@@ -493,6 +493,141 @@ const sendPasswordResetEmail = async (email, resetLink) => {
   }
 };
 
+// 10. Application Under Review Email (to user - no password)
+const sendApplicationUnderReviewEmail = async (applicationData) => {
+  const {
+    application_number,
+    groom_full_name,
+    bride_full_name,
+    portal_email,
+    id,
+  } = applicationData;
+
+  if (!portal_email) {
+    console.error("portal_email is required for sending application under review email");
+    return;
+  }
+
+  if (!application_number) {
+    console.error("application_number is required for sending application under review email");
+    return;
+  }
+
+  const html = renderTemplate('application-under-review.html', {
+    application_number,
+    groom_full_name: groom_full_name || "N/A",
+    bride_full_name: bride_full_name || "N/A",
+    portal_email,
+    frontend_url: process.env.FRONTEND_URL || "",
+    email_user: process.env.EMAIL_USER,
+  });
+
+  const mailOptions = {
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
+    to: portal_email,
+    subject: `Application Under Review - #${application_number}`,
+    html,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    if (id) {
+      await logEmail(
+        id,
+        "application_under_review",
+        portal_email,
+        mailOptions.subject,
+        "sent"
+      );
+    }
+    console.log('✅ Application under review email sent to:', portal_email);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('❌ Error sending application under review email:', error);
+    if (id) {
+      await logEmail(
+        id,
+        "application_under_review",
+        portal_email,
+        mailOptions.subject,
+        "failed"
+      );
+    }
+    throw error;
+  }
+};
+
+// 11. Application Approved Email (to user - with password)
+const sendApplicationApprovedEmail = async (applicationData) => {
+  const {
+    application_number,
+    groom_full_name,
+    bride_full_name,
+    portal_email,
+    portalPassword,
+    id,
+  } = applicationData;
+
+  if (!portal_email) {
+    console.error("portal_email is required for sending application approved email");
+    return;
+  }
+
+  if (!application_number) {
+    console.error("application_number is required for sending application approved email");
+    return;
+  }
+
+  if (!portalPassword) {
+    console.error("portalPassword is required for sending application approved email");
+    return;
+  }
+
+  const html = renderTemplate('application-approved.html', {
+    application_number,
+    groom_full_name: groom_full_name || "N/A",
+    bride_full_name: bride_full_name || "N/A",
+    portal_email,
+    portalPassword,
+    frontend_url: process.env.FRONTEND_URL || "",
+    email_user: process.env.EMAIL_USER,
+  });
+
+  const mailOptions = {
+    from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
+    to: portal_email,
+    subject: `Application Approved - #${application_number}`,
+    html,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    if (id) {
+      await logEmail(
+        id,
+        "application_approved",
+        portal_email,
+        mailOptions.subject,
+        "sent"
+      );
+    }
+    console.log('✅ Application approved email sent to:', portal_email);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('❌ Error sending application approved email:', error);
+    if (id) {
+      await logEmail(
+        id,
+        "application_approved",
+        portal_email,
+        mailOptions.subject,
+        "failed"
+      );
+    }
+    throw error;
+  }
+};
+
 module.exports = {
   sendApplicationConfirmation,
   sendDepositAmountEmail,
@@ -502,5 +637,7 @@ module.exports = {
   sendCertificateReadyEmail,
   sendBankDetailsRequestEmail,
   sendAdminNewApplicationEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendApplicationUnderReviewEmail,
+  sendApplicationApprovedEmail
 };

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          
+          <!-- Header with Logo -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #b05a33 0%, #8f4728 100%); padding: 20px 30px;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <!-- Logo on Left -->
+                  <td align="left" valign="middle" style="width: auto; padding-right: 20px;">
+                    <table role="presentation" style="background-color: #ffffff; border-radius: 8px; padding: 8px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+                      <tr>
+                        <td>
+                          <img src="{{logo_url}}" alt="Jamiyat" style="height: 50px; display: block; max-width: 150px;" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Title on Right -->
+                  <td align="right" valign="middle" style="width: auto;">
+                    <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.5px; text-align: right;">Application Approved</h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="font-size: 16px; color: #1f2937; margin: 0 0 20px 0; line-height: 1.6;">Assalamu Alaikum,</p>
+              
+              <p style="font-size: 15px; color: #4b5563; margin: 0 0 30px 0; line-height: 1.6;">
+                Great news! Your nikah certificate application has been approved. We are available on your preferred date, and you can now proceed with uploading your required documents.
+              </p>
+              
+              <!-- Application Details Box -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 15px 0; color: #b05a33; font-size: 16px; font-weight: 600;">Application Details</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Application Number:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">{{application_number}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Groom:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">{{groom_full_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Bride:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">{{bride_full_name}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Status:</td>
+                        <td style="padding: 8px 0;">
+                          <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Approved</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Portal Access Box -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px; font-weight: 600;">Portal Access Credentials</h3>
+                    <table role="presentation" style="width: 100%;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #1e40af; font-size: 14px; width: 30%;">Email:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500; word-break: break-all;">{{portal_email}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #1e40af; font-size: 14px;">Password:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600; font-family: 'Courier New', monospace;">{{portalPassword}}</td>
+                      </tr>
+                    </table>
+                    <p style="margin: 15px 0 0 0; font-size: 13px; color: #1e40af;">Please save these credentials securely to access your application portal.</p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Next Steps Section -->
+              <h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Next Steps</h3>
+              <p style="font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">
+                Please log into your portal using the credentials above and upload all required documents. Once your documents are verified, you will be notified to proceed with payment.
+              </p>
+              
+              <!-- CTA Button -->
+              <table role="presentation" style="width: 100%; margin: 35px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{frontend_url}}/login" style="display: inline-block; background-color: #b05a33; color: #ffffff; padding: 14px 40px; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(176, 90, 51, 0.3);">Access Your Portal</a>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="font-size: 13px; color: #6b7280; margin: 25px 0 0 0; line-height: 1.6; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                If you have any questions, please contact us at {{email_user}}
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 25px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; font-size: 13px; color: #6b7280;">Jamiyat Tabligh-ul-Islam</p>
+              <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">Nikah Certificate Services</p>
+              <p style="margin: 10px 0 0 0; font-size: 11px; color: #9ca3af;">&copy; 2024 Jamiyat.org. All rights reserved.</p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

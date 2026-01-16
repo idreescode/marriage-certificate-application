@@ -8,6 +8,7 @@ const {
 const {
   sendApplicationConfirmation,
   sendAdminNewApplicationEmail,
+  sendApplicationUnderReviewEmail,
 } = require("../services/emailService");
 const { createNotification } = require("./notificationController");
 const { body, validationResult } = require("express-validator");
@@ -307,7 +308,7 @@ const submitApplication = async (req, res) => {
       await connection.commit();
       console.log("Transaction Committed");
 
-      // Send confirmation email with credentials
+      // Prepare application data for emails
       const applicationData = {
         id: applicationId,
         application_number: applicationNumber,
@@ -319,8 +320,10 @@ const submitApplication = async (req, res) => {
       };
 
       // Send emails in parallel (non-blocking)
+      // 1. Send "under review" email to user (no password)
+      // 2. Send notification email to admin
       Promise.all([
-        sendApplicationConfirmation(applicationData),
+        sendApplicationUnderReviewEmail(applicationData),
         sendAdminNewApplicationEmail(applicationData),
       ]).catch((err) => console.error("Background Email Error:", err));
 

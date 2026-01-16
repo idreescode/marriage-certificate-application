@@ -2,7 +2,7 @@
 // Removes groom_phone, bride_phone from applications table and witness_phone from witnesses table
 
 module.exports = {
-  name: '020_remove_phone_columns',
+  name: "020_remove_phone_columns",
 
   async up(connection) {
     try {
@@ -12,10 +12,15 @@ module.exports = {
           ALTER TABLE applications
           DROP COLUMN groom_phone
         `);
-        console.log('   ✓ groom_phone column dropped from applications');
+        console.log("   ✓ groom_phone column dropped from applications");
       } catch (error) {
-        if (error.code === 'ER_BAD_FIELD_ERROR' || error.message.includes("doesn't exist")) {
-          console.log('   ! groom_phone column does not exist, skipping');
+        if (
+          error.code === "ER_BAD_FIELD_ERROR" ||
+          error.code === "ER_CANT_DROP_FIELD_OR_KEY" ||
+          error.message.includes("doesn't exist") ||
+          error.message.includes("check that column/key exists")
+        ) {
+          console.log("   ! groom_phone column does not exist, skipping");
         } else {
           throw error;
         }
@@ -27,10 +32,15 @@ module.exports = {
           ALTER TABLE applications
           DROP COLUMN bride_phone
         `);
-        console.log('   ✓ bride_phone column dropped from applications');
+        console.log("   ✓ bride_phone column dropped from applications");
       } catch (error) {
-        if (error.code === 'ER_BAD_FIELD_ERROR' || error.message.includes("doesn't exist")) {
-          console.log('   ! bride_phone column does not exist, skipping');
+        if (
+          error.code === "ER_BAD_FIELD_ERROR" ||
+          error.code === "ER_CANT_DROP_FIELD_OR_KEY" ||
+          error.message.includes("doesn't exist") ||
+          error.message.includes("check that column/key exists")
+        ) {
+          console.log("   ! bride_phone column does not exist, skipping");
         } else {
           throw error;
         }
@@ -42,16 +52,21 @@ module.exports = {
           ALTER TABLE witnesses
           DROP COLUMN witness_phone
         `);
-        console.log('   ✓ witness_phone column dropped from witnesses');
+        console.log("   ✓ witness_phone column dropped from witnesses");
       } catch (error) {
-        if (error.code === 'ER_BAD_FIELD_ERROR' || error.message.includes("doesn't exist")) {
-          console.log('   ! witness_phone column does not exist, skipping');
+        if (
+          error.code === "ER_BAD_FIELD_ERROR" ||
+          error.code === "ER_CANT_DROP_FIELD_OR_KEY" ||
+          error.message.includes("doesn't exist") ||
+          error.message.includes("check that column/key exists")
+        ) {
+          console.log("   ! witness_phone column does not exist, skipping");
         } else {
           throw error;
         }
       }
     } catch (error) {
-      console.error('   ✗ Error removing phone columns:', error.message);
+      console.error("   ✗ Error removing phone columns:", error.message);
       throw error;
     }
   },
@@ -63,10 +78,10 @@ module.exports = {
         ALTER TABLE applications
         ADD COLUMN groom_phone VARCHAR(20) NULL
       `);
-      console.log('   ✓ groom_phone column re-added to applications');
+      console.log("   ✓ groom_phone column re-added to applications");
     } catch (error) {
-      if (error.code === 'ER_DUP_FIELDNAME') {
-        console.log('   ! groom_phone column already exists, skipping');
+      if (error.code === "ER_DUP_FIELDNAME") {
+        console.log("   ! groom_phone column already exists, skipping");
       } else {
         throw error;
       }
@@ -77,10 +92,10 @@ module.exports = {
         ALTER TABLE applications
         ADD COLUMN bride_phone VARCHAR(20) NULL
       `);
-      console.log('   ✓ bride_phone column re-added to applications');
+      console.log("   ✓ bride_phone column re-added to applications");
     } catch (error) {
-      if (error.code === 'ER_DUP_FIELDNAME') {
-        console.log('   ! bride_phone column already exists, skipping');
+      if (error.code === "ER_DUP_FIELDNAME") {
+        console.log("   ! bride_phone column already exists, skipping");
       } else {
         throw error;
       }
@@ -91,13 +106,13 @@ module.exports = {
         ALTER TABLE witnesses
         ADD COLUMN witness_phone VARCHAR(20) NULL
       `);
-      console.log('   ✓ witness_phone column re-added to witnesses');
+      console.log("   ✓ witness_phone column re-added to witnesses");
     } catch (error) {
-      if (error.code === 'ER_DUP_FIELDNAME') {
-        console.log('   ! witness_phone column already exists, skipping');
+      if (error.code === "ER_DUP_FIELDNAME") {
+        console.log("   ! witness_phone column already exists, skipping");
       } else {
         throw error;
       }
     }
-  }
+  },
 };

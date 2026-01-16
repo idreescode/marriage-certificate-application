@@ -184,7 +184,6 @@ export default function DocumentUpload() {
 
         {files[name] ? (
           <div
-            className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center group"
             style={{
               backgroundColor: "var(--slate-50)",
               border: "1px solid var(--slate-200)",
@@ -192,22 +191,23 @@ export default function DocumentUpload() {
               padding: "0.75rem",
               display: "flex",
               alignItems: "center",
-              position: "relative",
+              justifyContent: "space-between",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             <div
-              className="flex items-center gap-3 overflow-hidden flex-1"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "0.75rem",
+                flex: "1 1 auto",
+                minWidth: 0,
+                maxWidth: "calc(100% - 3rem)",
                 overflow: "hidden",
-                flex: 1,
-                paddingRight: "0.5rem",
               }}
             >
               <div
-                className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
                 style={{
                   backgroundColor: "var(--brand-50)",
                   width: "2rem",
@@ -216,34 +216,61 @@ export default function DocumentUpload() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
                 <FileText size={16} style={{ color: "var(--brand-600)" }} />
               </div>
               <span
-                className="text-sm font-medium text-slate-700 truncate"
                 style={{
                   fontSize: "0.9rem",
                   fontWeight: 500,
                   color: "var(--slate-700)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  flex: "1 1 auto",
+                  minWidth: 0,
+                  lineHeight: "1.5",
                 }}
+                title={
+                  files[name] && files[name].name
+                    ? files[name].name
+                    : "File uploaded"
+                }
               >
-                {files[name].name}
+                {files[name] && files[name].name
+                  ? files[name].name
+                  : "File uploaded"}
               </span>
             </div>
             <button
               onClick={() => removeFile(name)}
-              className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors flex-shrink-0"
+              type="button"
               style={{
                 padding: "0.375rem",
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                transition: "color 0.2s",
-                marginLeft: "auto",
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--slate-400)",
+                flexShrink: 0,
+                width: "2rem",
+                height: "2rem",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#fef2f2";
+                e.currentTarget.style.color = "var(--danger)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "var(--slate-400)";
               }}
             >
-              <Trash2 size={16} color="var(--slate-400)" />
+              <Trash2 size={16} />
             </button>
           </div>
         ) : (
