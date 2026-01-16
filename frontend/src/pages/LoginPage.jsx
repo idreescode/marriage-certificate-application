@@ -1,14 +1,34 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/api';
-import toast from 'react-hot-toast';
-import { LogIn, Lock, Mail, ArrowLeft } from 'lucide-react';
-import logo from '../assets/logo.svg';
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { login } from "../services/api";
+import toast from "react-hot-toast";
+import { LogIn, Lock, Mail, ArrowLeft } from "lucide-react";
+import logo from "../assets/logo.svg";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [searchParams] = useSearchParams();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userType = localStorage.getItem("userType");
+    const redirectUrl = searchParams.get("redirect");
+
+    if (token) {
+      // User is already logged in
+      if (redirectUrl) {
+        // Redirect to the intended URL
+        navigate(decodeURIComponent(redirectUrl));
+      } else if (userType === "admin" || userType === "super_admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/applicant/dashboard");
+      }
+    }
+  }, [navigate, searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,21 +38,34 @@ export default function LoginPage() {
       const response = await login(formData);
       const { token, user } = response.data.data;
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('userType', user.role); // 'admin', 'super_admin', or 'applicant'
-      localStorage.setItem('userName', user.fullName);
+      localStorage.setItem("token", token);
+      localStorage.setItem("userType", user.role); // 'admin', 'super_admin', or 'applicant'
+      localStorage.setItem("userName", user.fullName);
+
+      // Get redirect URL from query params
+      const redirectUrl = searchParams.get("redirect");
 
       // Check if user is admin or super_admin
-      if (user.role === 'admin' || user.role === 'super_admin') {
+      if (user.role === "admin" || user.role === "super_admin") {
         toast.success(`Welcome back, ${user.fullName}`);
-        navigate('/admin/dashboard');
+        // If there's a redirect URL, go there, otherwise go to dashboard
+        if (redirectUrl) {
+          navigate(decodeURIComponent(redirectUrl));
+        } else {
+          navigate("/admin/dashboard");
+        }
       } else {
-        toast.success('Login successful');
-        navigate('/applicant/dashboard');
+        toast.success("Login successful");
+        // For applicants, also check redirect URL
+        if (redirectUrl && redirectUrl.startsWith("/applicant")) {
+          navigate(decodeURIComponent(redirectUrl));
+        } else {
+          navigate("/applicant/dashboard");
+        }
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Invalid credentials');
+      toast.error(err.response?.data?.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }

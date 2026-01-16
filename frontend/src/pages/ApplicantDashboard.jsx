@@ -16,51 +16,41 @@ export default function ApplicantDashboard() {
    const [currentView, setCurrentView] = useState('dashboard');
 
    useEffect(() => {
-      const token = localStorage.getItem('token');
-      const userType = localStorage.getItem('userType');
-      
-      if (!token) {
-         toast.error('Please login to continue');
-         navigate('/applicant/login');
-         return;
-      }
+     // Auth check is handled by ApplicantLayout, but we still check here as a safety measure
+     const token = localStorage.getItem("token");
+     const userType = localStorage.getItem("userType");
 
-      // Redirect admin users to admin dashboard
-      if (userType === 'admin' || userType === 'super_admin') {
-        toast.error('Admin users cannot access applicant dashboard');
-        navigate('/admin/dashboard');
-        return;
-      }
+     if (!token) {
+       const returnUrl = "/applicant/dashboard";
+       navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+       return;
+     }
 
-      fetchDashboard();
-   }, []);
+     // Redirect admin users to admin dashboard
+     if (userType === "admin" || userType === "super_admin") {
+       navigate("/admin/dashboard");
+       return;
+     }
+
+     fetchDashboard();
+   }, [navigate]);
 
    const fetchDashboard = async () => {
-      try {
-         const response = await getApplicantDashboard();
-         setData(response.data.data);
-      } catch (error) {
-         console.error('Error fetching dashboard:', error);
-         const errorMessage = error.response?.data?.message || 'Failed to load dashboard data';
+     try {
+       const response = await getApplicantDashboard();
+       setData(response.data.data);
+     } catch (error) {
+       // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+       if (error.response?.status !== 401) {
+         console.error("Error fetching dashboard:", error);
+         const errorMessage =
+           error.response?.data?.message || "Failed to load dashboard data";
          toast.error(errorMessage);
-         
-         // Handle auth errors - check user role for proper redirect
-         if (error.response?.status === 401 || error.response?.status === 403) {
-            const userType = localStorage.getItem('userType');
-            localStorage.removeItem('token');
-            localStorage.removeItem('userType');
-            
-            setTimeout(() => {
-               if (userType === 'admin' || userType === 'super_admin') {
-                  navigate('/admin/login');
-               } else {
-                  navigate('/applicant/login');
-               }
-            }, 2000);
-         }
-      } finally {
-         setLoading(false);
-      }
+       }
+       // For 401, redirect is handled by ApplicantLayout
+     } finally {
+       setLoading(false);
+     }
    };
 
    const handleReceiptUpload = async (e) => {

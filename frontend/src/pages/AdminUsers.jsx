@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import {
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function AdminUsers() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [filterRole, setFilterRole] = useState("all");
@@ -58,13 +60,24 @@ export default function AdminUsers() {
       const response = await getAllUsers(params);
       setUsers(response.data.data.users);
     } catch (error) {
-      toast.error("Failed to load users");
+      // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+      if (error.response?.status !== 401) {
+        toast.error("Failed to load users");
+      }
+      // For 401, just redirect without showing error (handled by AdminLayout)
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // Check authentication before making API call
+    const token = localStorage.getItem("token");
+    if (!token) {
+      const returnUrl = "/admin/users";
+      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRole]);
@@ -154,7 +167,10 @@ export default function AdminUsers() {
         full_name: createForm.full_name,
         password: createForm.password,
       });
-      toast.success("Admin user created successfully! Credentials sent via email.", { id: toastId });
+      toast.success(
+        "Admin user created successfully! Credentials sent via email.",
+        { id: toastId }
+      );
       closeModal();
       fetchUsers();
     } catch (error) {
@@ -213,10 +229,9 @@ export default function AdminUsers() {
       closeModal();
       fetchUsers();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to delete user",
-        { id: toastId }
-      );
+      toast.error(error.response?.data?.message || "Failed to delete user", {
+        id: toastId,
+      });
     }
   };
 
@@ -337,9 +352,7 @@ export default function AdminUsers() {
                   filterRole === "all" ? "var(--brand-600)" : "transparent",
                 color: filterRole === "all" ? "white" : "var(--slate-600)",
                 border:
-                  filterRole === "all"
-                    ? "none"
-                    : "1px solid var(--slate-300)",
+                  filterRole === "all" ? "none" : "1px solid var(--slate-300)",
               }}
             >
               All
@@ -418,13 +431,26 @@ export default function AdminUsers() {
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td>
-                    <div style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div
+                      style={{
+                        fontWeight: 500,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
                       <User size={16} style={{ color: "var(--slate-400)" }} />
                       {user.full_name || "N/A"}
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
                       <Mail size={14} style={{ color: "var(--slate-400)" }} />
                       {user.email}
                     </div>
@@ -781,7 +807,8 @@ export default function AdminUsers() {
                   marginBottom: "0.5rem",
                 }}
               >
-                Are you sure you want to delete {deleteUserData?.full_name || deleteUserData?.email}?
+                Are you sure you want to delete{" "}
+                {deleteUserData?.full_name || deleteUserData?.email}?
               </p>
               <p
                 style={{
@@ -888,7 +915,14 @@ export default function AdminUsers() {
               placeholder="Enter password (min 6 characters)"
               required
             />
-            <p style={{ fontSize: "0.75rem", color: "var(--slate-500)", marginTop: "0.5rem", marginBottom: 0 }}>
+            <p
+              style={{
+                fontSize: "0.75rem",
+                color: "var(--slate-500)",
+                marginTop: "0.5rem",
+                marginBottom: 0,
+              }}
+            >
               The admin will receive an email with these credentials.
             </p>
           </div>

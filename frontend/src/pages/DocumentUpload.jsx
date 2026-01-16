@@ -120,9 +120,14 @@ export default function DocumentUpload() {
         navigate("/applicant/dashboard");
       }, 1000);
     } catch (error) {
-      console.error("Upload error:", error);
-      const msg = error.response?.data?.message || "Failed to upload documents";
-      toast.error(msg, { id: toastId });
+      // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+      if (error.response?.status !== 401) {
+        console.error("Upload error:", error);
+        const msg =
+          error.response?.data?.message || "Failed to upload documents";
+        toast.error(msg, { id: toastId });
+      }
+      // For 401, redirect is handled by ApplicantLayout
     } finally {
       setUploading(false);
     }

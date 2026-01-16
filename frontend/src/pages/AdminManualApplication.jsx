@@ -264,6 +264,14 @@ export default function AdminManualApplication() {
 
   // Load application data for editing
   useEffect(() => {
+    // Check authentication before making API call
+    const token = localStorage.getItem("token");
+    if (!token) {
+      const returnUrl = isEditMode && id ? `/admin/applications/${id}/edit` : "/admin/applications/manual";
+      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
+
     if (isEditMode && id) {
       const loadApplication = async () => {
         try {
@@ -462,7 +470,10 @@ export default function AdminManualApplication() {
             }
           }
         } catch (error) {
-          toast.error("Failed to load application");
+          // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+          if (error.response?.status !== 401) {
+            toast.error("Failed to load application");
+          }
           navigate("/admin/applications");
         } finally {
           setInitialLoading(false);
@@ -604,10 +615,13 @@ export default function AdminManualApplication() {
         }
       }
     } catch (error) {
-      console.error(`Error ${isEditMode ? "updating" : "creating"} application:`, error);
-      toast.error(
-        error.response?.data?.message || `Failed to ${isEditMode ? "update" : "create"} application`
-      );
+      // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+      if (error.response?.status !== 401) {
+        console.error(`Error ${isEditMode ? "updating" : "creating"} application:`, error);
+        toast.error(
+          error.response?.data?.message || `Failed to ${isEditMode ? "update" : "create"} application`
+        );
+      }
     } finally {
       setLoading(false);
     }

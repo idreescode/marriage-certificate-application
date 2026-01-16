@@ -42,12 +42,12 @@ export default function AdminDashboard() {
     // Check if token exists
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Please login to continue");
-      navigate("/");
+      const returnUrl = "/admin/dashboard";
+      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
     fetchStats();
-  }, []);
+  }, [navigate]);
 
   const fetchStats = async () => {
     try {

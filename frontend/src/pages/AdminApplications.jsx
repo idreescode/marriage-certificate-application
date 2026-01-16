@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
 import {
@@ -33,6 +33,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 
 export default function AdminApplications() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
@@ -54,15 +55,26 @@ export default function AdminApplications() {
   const [verifyingDocuments, setVerifyingDocuments] = useState(false);
 
   useEffect(() => {
+    // Check authentication before making API call
+    const token = localStorage.getItem("token");
+    if (!token) {
+      const returnUrl = "/admin/applications";
+      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
     fetchApplications();
-  }, []);
+  }, [navigate]);
 
   const fetchApplications = async () => {
     try {
       const response = await getAllApplications();
       setApplications(response.data.data.applications);
     } catch (error) {
-      toast.error("Failed to load applications");
+      // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+      if (error.response?.status !== 401) {
+        toast.error("Failed to load applications");
+      }
+      // For 401, just redirect without showing error (handled by AdminLayout or redirect above)
     } finally {
       setLoading(false);
     }

@@ -34,8 +34,15 @@ export default function AdminApplicationDetails() {
   const [witnesses, setWitnesses] = useState([]);
 
   useEffect(() => {
+    // Check authentication before making API call
+    const token = localStorage.getItem("token");
+    if (!token) {
+      const returnUrl = `/admin/applications/${id}`;
+      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
     fetchApplicationDetails();
-  }, [id]);
+  }, [id, navigate]);
 
   const fetchApplicationDetails = async () => {
     try {
@@ -45,8 +52,12 @@ export default function AdminApplicationDetails() {
         setWitnesses(response.data.data.witnesses);
       }
     } catch (error) {
-      toast.error("Failed to load application details");
-      navigate("/admin/applications");
+      // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
+      if (error.response?.status !== 401) {
+        toast.error("Failed to load application details");
+        navigate("/admin/applications");
+      }
+      // For 401, just redirect without showing error (handled by AdminLayout or redirect above)
     } finally {
       setLoading(false);
     }
