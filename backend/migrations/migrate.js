@@ -23,6 +23,7 @@ const migrations = [
   require('./020_remove_phone_columns'),
   require('./021_remove_email_columns'),
   require('./022_add_approval_fields'),
+  require('./023_remove_super_admin_role'),
 ];
 
 // Run migrations
