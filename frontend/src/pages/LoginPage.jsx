@@ -19,10 +19,11 @@ export default function LoginPage() {
       const { token, user } = response.data.data;
 
       localStorage.setItem('token', token);
-      localStorage.setItem('userType', user.role); // 'admin' or 'applicant'
+      localStorage.setItem('userType', user.role); // 'admin', 'super_admin', or 'applicant'
       localStorage.setItem('userName', user.fullName);
 
-      if (user.role === 'admin') {
+      // Check if user is admin or super_admin
+      if (user.role === 'admin' || user.role === 'super_admin') {
         toast.success(`Welcome back, ${user.fullName}`);
         navigate('/admin/dashboard');
       } else {

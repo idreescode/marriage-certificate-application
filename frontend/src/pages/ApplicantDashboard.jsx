@@ -26,10 +26,10 @@ export default function ApplicantDashboard() {
       }
 
       // Redirect admin users to admin dashboard
-      if (userType === 'admin') {
-         toast.error('Admin users cannot access applicant dashboard');
-         navigate('/admin/dashboard');
-         return;
+      if (userType === 'admin' || userType === 'super_admin') {
+        toast.error('Admin users cannot access applicant dashboard');
+        navigate('/admin/dashboard');
+        return;
       }
 
       fetchDashboard();
@@ -51,7 +51,7 @@ export default function ApplicantDashboard() {
             localStorage.removeItem('userType');
             
             setTimeout(() => {
-               if (userType === 'admin') {
+               if (userType === 'admin' || userType === 'super_admin') {
                   navigate('/admin/login');
                } else {
                   navigate('/applicant/login');
