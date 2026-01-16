@@ -432,7 +432,9 @@ export default function AdminApplications() {
                 <th>Groom</th>
                 <th>Bride</th>
                 <th>Status</th>
-                <th>Date</th>
+                <th>Solemnised Date</th>
+                <th>Solemnised Place</th>
+                <th>Solemnised Address</th>
                 <th style={{ width: "220px" }}>Actions</th>
               </tr>
             </thead>
@@ -548,7 +550,15 @@ export default function AdminApplications() {
                     <StatusBadge status={app.status} app={app} />
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
-                    {new Date(app.created_at).toLocaleDateString()}
+                    {app.solemnised_date
+                      ? new Date(app.solemnised_date).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td style={{ color: "var(--slate-500)" }}>
+                    {app.solemnised_place || "-"}
+                  </td>
+                  <td style={{ color: "var(--slate-500)" }}>
+                    {app.solemnised_address || "-"}
                   </td>
                   <td>
                     <div
@@ -676,7 +686,7 @@ export default function AdminApplications() {
               {filteredApps.length === 0 && (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="8"
                     className="text-center"
                     style={{ padding: "3rem", color: "var(--slate-500)" }}
                   >
