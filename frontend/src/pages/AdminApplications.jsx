@@ -7,7 +7,6 @@ import {
   approveApplication as approveApplicationAPI,
   verifyDocuments as verifyDocumentsAPI,
   verifyPayment as verifyPaymentAPI,
-  scheduleAppointment as scheduleAPI,
   generateCertificate as generateCertAPI,
   deleteApplication as deleteApplicationAPI,
   updateApplicationNumber,
@@ -17,7 +16,6 @@ import {
   Search,
   Filter,
   Clock,
-  Calendar,
   Eye,
   FileText,
   User,
@@ -31,8 +29,6 @@ import {
   X,
   Pencil,
 } from "lucide-react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 import { useSearchParams } from "react-router-dom";
 
@@ -45,21 +41,13 @@ export default function AdminApplications() {
   );
 
   // Modal States
-  const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'schedule', 'view', 'delete'
+  const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'view', 'delete'
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [deleteAppData, setDeleteAppData] = useState(null); // { id, applicationNumber }
 
   // Edit Application Number State
   const [editingAppId, setEditingAppId] = useState(null);
   const [editingValue, setEditingValue] = useState("");
-
-  // Form States
-  const [appointmentData, setAppointmentData] = useState({
-    date: "",
-    time: "",
-    location: "",
-  });
-  const [selectedDate, setSelectedDate] = useState(null);
   
   // Loading states for actions
   const [verifyingDocuments, setVerifyingDocuments] = useState(false);
@@ -88,13 +76,6 @@ export default function AdminApplications() {
   const openVerifyPayment = (id) => {
     setSelectedAppId(id);
     setActiveModal("verify");
-  };
-
-  const openSchedule = (id) => {
-    setSelectedAppId(id);
-    setAppointmentData({ date: "", time: "", location: "" });
-    setSelectedDate(null);
-    setActiveModal("schedule");
   };
 
   const closeModal = () => {
@@ -172,26 +153,6 @@ export default function AdminApplications() {
         error.response?.data?.message || "Failed to delete application",
         { id: toastId }
       );
-    }
-  };
-
-  const handleScheduleAppointment = async (e) => {
-    e.preventDefault();
-    const { date, time, location } = appointmentData;
-    if (!date || !time || !location) return;
-
-    const toastId = toast.loading("Scheduling appointment...");
-    try {
-      await scheduleAPI(selectedAppId, {
-        appointmentDate: date,
-        appointmentTime: time,
-        appointmentLocation: location,
-      });
-      toast.success("Appointment scheduled successfully!", { id: toastId });
-      closeModal();
-      fetchApplications();
-    } catch (error) {
-      toast.error("Failed to schedule appointment", { id: toastId });
     }
   };
 
@@ -661,27 +622,6 @@ export default function AdminApplications() {
                             Verify Payment
                           </button>
                         )}
-                      {app.status === "payment_verified" && (
-                        <button
-                          onClick={() => openSchedule(app.id)}
-                          className="btn btn-sm"
-                          style={{
-                            whiteSpace: "nowrap",
-                            backgroundColor: "var(--brand-500)",
-                            color: "white",
-                            border: "none",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "0.4rem",
-                            minWidth: "130px",
-                            padding: "0.5rem 1rem",
-                          }}
-                        >
-                          <Calendar size={14} />
-                          Schedule
-                        </button>
-                      )}
                       {/* Show Generate Certificate button after payment is verified */}
                       {app.status === "payment_verified" && (
                         <button
@@ -824,8 +764,7 @@ export default function AdminApplications() {
               margin: 0,
             }}
           >
-            This action will mark the payment as verified and allow scheduling
-            the appointment.
+            This action will mark the payment as verified.
           </p>
         </div>
         <div
@@ -851,214 +790,6 @@ export default function AdminApplications() {
             Verify Payment
           </button>
         </div>
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === "schedule"}
-        onClose={closeModal}
-        title="Schedule Appointment"
-      >
-        <form onSubmit={handleScheduleAppointment}>
-          <div className="form-group" style={{ marginBottom: "1.25rem" }}>
-            <label
-              className="form-label"
-              style={{
-                marginBottom: "0.5rem",
-                display: "block",
-                fontWeight: 500,
-                color: "var(--slate-700)",
-              }}
-            >
-              Date
-            </label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => {
-                setSelectedDate(date);
-                // Format date as YYYY-MM-DD for backend
-                const formattedDate = date
-                  ? date.toISOString().split("T")[0]
-                  : "";
-                setAppointmentData({ ...appointmentData, date: formattedDate });
-              }}
-              dateFormat="dd/MM/yyyy"
-              minDate={new Date()}
-              placeholderText="Select appointment date"
-              required
-              className="form-input"
-              style={{ width: "100%" }}
-              wrapperClassName="date-picker-wrapper"
-            />
-            <style>{`
-              .date-picker-wrapper {
-                width: 100%;
-              }
-              .date-picker-wrapper .react-datepicker-wrapper {
-                width: 100%;
-              }
-              .date-picker-wrapper .react-datepicker__input-container input {
-                width: 100%;
-                height: 38px;
-                padding: 8px 12px;
-                border: 1px solid #cbd5e1;
-                border-radius: 6px;
-                font-size: 0.875rem;
-                font-family: inherit;
-                color: #334155;
-                background: white;
-                outline: none;
-                transition: all 0.2s;
-              }
-              .date-picker-wrapper .react-datepicker__input-container input:focus {
-                border-color: var(--brand-500);
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-              }
-              .react-datepicker {
-                font-family: inherit;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-              }
-              .react-datepicker__header {
-                background-color: var(--brand-600);
-                border-bottom: none;
-                border-radius: 8px 8px 0 0;
-                padding-top: 0.75rem;
-              }
-              .react-datepicker__current-month {
-                color: white;
-                font-weight: 600;
-                padding-bottom: 0.5rem;
-              }
-              .react-datepicker__day-name {
-                color: rgba(255, 255, 255, 0.9);
-                font-weight: 500;
-              }
-              .react-datepicker__day--selected,
-              .react-datepicker__day--keyboard-selected {
-                background-color: var(--brand-600);
-                border-radius: 4px;
-              }
-              .react-datepicker__day:hover {
-                background-color: var(--brand-100);
-                border-radius: 4px;
-              }
-              .react-datepicker__day--today {
-                font-weight: 600;
-              }
-              .react-datepicker__navigation-icon::before {
-                border-color: white;
-              }
-              .react-datepicker__navigation:hover *::before {
-                border-color: rgba(255, 255, 255, 0.8);
-              }
-            `}</style>
-          </div>
-          <div className="form-group" style={{ marginBottom: "1.25rem" }}>
-            <label
-              className="form-label"
-              style={{
-                marginBottom: "0.5rem",
-                display: "block",
-                fontWeight: 500,
-                color: "var(--slate-700)",
-              }}
-            >
-              Time
-            </label>
-            <input
-              type="time"
-              className="form-input"
-              value={appointmentData.time}
-              onChange={(e) =>
-                setAppointmentData({
-                  ...appointmentData,
-                  time: e.target.value,
-                })
-              }
-              required
-              style={{ width: "100%" }}
-            />
-            <style>{`
-              input[type="time"] {
-                accent-color: var(--brand-600);
-              }
-              input[type="time"]:focus {
-                border-color: var(--brand-500);
-                box-shadow: 0 0 0 3px rgba(202, 108, 64, 0.1);
-                outline: none;
-              }
-              input[type="time"]::-webkit-calendar-picker-indicator {
-                filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
-                cursor: pointer;
-              }
-              input[type="time"]::-webkit-calendar-picker-indicator:hover {
-                filter: invert(18%) sepia(50%) saturate(2878%) hue-rotate(346deg) brightness(90%) contrast(97%);
-              }
-            `}</style>
-          </div>
-          <div className="form-group" style={{ marginBottom: "1.25rem" }}>
-            <label
-              className="form-label"
-              style={{
-                marginBottom: "0.5rem",
-                display: "block",
-                fontWeight: 500,
-                color: "var(--slate-700)",
-              }}
-            >
-              Location
-            </label>
-            <input
-              type="text"
-              className="form-input"
-              value={appointmentData.location}
-              onChange={(e) =>
-                setAppointmentData({
-                  ...appointmentData,
-                  location: e.target.value,
-                })
-              }
-              placeholder="e.g. Main Hall"
-              required
-              style={{ width: "100%" }}
-            />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "0.75rem",
-              marginTop: "1.5rem",
-            }}
-          >
-            <button
-              type="button"
-              onClick={closeModal}
-              className="btn btn-secondary"
-              style={{ minWidth: "100px" }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn"
-              style={{
-                backgroundColor: "var(--brand-500)",
-                color: "white",
-                border: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                minWidth: "130px",
-                justifyContent: "center",
-              }}
-            >
-              <Calendar size={16} />
-              Schedule
-            </button>
-          </div>
-        </form>
       </Modal>
 
       {/* Delete Confirmation Modal */}

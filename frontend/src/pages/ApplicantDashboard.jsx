@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Loader from '../components/Loader';
-import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, createCheckoutSession, verifySession, getFileUrl, getCertificate } from '../services/api';
+import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, getFileUrl, getCertificate } from '../services/api';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { FileText, Calendar, CreditCard, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight, Download } from 'lucide-react';
@@ -13,7 +13,6 @@ export default function ApplicantDashboard() {
    const [loading, setLoading] = useState(true);
    const [data, setData] = useState(null);
    const [uploadingReceipt, setUploadingReceipt] = useState(false);
-   const [paymentMethod, setPaymentMethod] = useState(null); // 'online' | 'bank'
    const [currentView, setCurrentView] = useState('dashboard');
 
    useEffect(() => {
@@ -23,29 +22,7 @@ export default function ApplicantDashboard() {
          return;
       }
       fetchDashboard();
-      checkPaymentStatus();
    }, []);
-
-   const checkPaymentStatus = async () => {
-      const success = searchParams.get('payment_success');
-      const sessionId = searchParams.get('session_id');
-      const cancelled = searchParams.get('payment_cancelled');
-
-      if (success && sessionId) {
-         setSearchParams({}); // Clear params
-         const toastId = toast.loading('Verifying payment...');
-         try {
-            await verifySession(sessionId);
-            toast.success('Payment verified successfully!', { id: toastId });
-            fetchDashboard(); // Refresh data
-         } catch (error) {
-            toast.error('Payment verification failed: ' + (error.response?.data?.message || error.message), { id: toastId });
-         }
-      } else if (cancelled) {
-         setSearchParams({});
-         toast.error('Payment cancelled');
-      }
-   };
 
    const fetchDashboard = async () => {
       try {
@@ -73,34 +50,11 @@ export default function ApplicantDashboard() {
          await uploadReceiptAPI(formData);
          toast.success('Receipt uploaded successfully!', { id: toastId });
          fetchDashboard();
-         setPaymentMethod(null); // Reset selection
       } catch (error) {
          toast.error('Failed to upload receipt: ' + (error.response?.data?.message || error.message), { id: toastId });
       } finally {
          setUploadingReceipt(false);
       }
-   };
-
-   const handleOnlinePayment = async () => {
-      // Check if documents are uploaded and verified
-
-
-      const toastId = toast.loading('Redirecting to checkout...');
-      try {
-         const response = await createCheckoutSession();
-         if (response.data.url) {
-            window.location.href = response.data.url;
-         }
-      } catch (error) {
-         toast.error('Failed to initiate payment: ' + (error.response?.data?.message || 'Server Error'), { id: toastId });
-      }
-   };
-
-   const handleBankTransferClick = () => {
-      // Check if documents are uploaded and verified
-
-
-      setPaymentMethod('bank');
    };
 
    const handleDownloadCertificate = async () => {
@@ -521,123 +475,64 @@ export default function ApplicantDashboard() {
                            <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Payment Required</h3>
                         </div>
                         <div style={{ padding: '1.5rem' }}>
-                           <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', marginBottom: '1rem' }}>
-                              Please complete the payment of <strong style={{ fontSize: '1.1rem', color: 'var(--brand-600)' }}>£{app.deposit_amount}</strong> to proceed with your application.
+                           <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', marginBottom: '1.5rem' }}>
+                              Please complete the payment of <strong style={{ fontSize: '1.1rem', color: 'var(--brand-600)' }}>£{app.deposit_amount}</strong> via bank transfer to proceed with your application.
                            </p>
 
-                           {!paymentMethod && (
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                 <button 
-                                    onClick={handleOnlinePayment} 
-                                    className="btn btn-primary" 
-                                    style={{ 
-                                       width: '100%',
-                                       boxShadow: '0 4px 12px rgba(176, 90, 51, 0.3)',
-                                       transition: 'all 0.2s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                       e.currentTarget.style.transform = 'translateY(-2px)';
-                                       e.currentTarget.style.boxShadow = '0 6px 16px rgba(176, 90, 51, 0.4)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                       e.currentTarget.style.transform = 'translateY(0)';
-                                       e.currentTarget.style.boxShadow = '0 4px 12px rgba(176, 90, 51, 0.3)';
-                                    }}
-                                 >
-                                    💳 Pay Online Now
-                                 </button>
-                                 <button 
-                                    onClick={handleBankTransferClick} 
-                                    className="btn" 
-                                    style={{ 
-                                       width: '100%', 
-                                       background: 'white', 
-                                       border: '1px solid var(--slate-300)',
-                                       transition: 'all 0.2s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                       e.currentTarget.style.transform = 'translateY(-2px)';
-                                       e.currentTarget.style.borderColor = 'var(--slate-400)';
-                                       e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                       e.currentTarget.style.transform = 'translateY(0)';
-                                       e.currentTarget.style.borderColor = 'var(--slate-300)';
-                                       e.currentTarget.style.boxShadow = 'none';
-                                    }}
-                                 >
-                                    🏦 Bank Transfer
-                                 </button>
-                              </div>
-                           )}
-
-                           {paymentMethod === 'bank' && (
+                           <div style={{ 
+                              background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', 
+                              padding: '1.5rem', 
+                              borderRadius: 'var(--radius-md)', 
+                              border: '1px solid #cbd5e1',
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                           }}>
+                              <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--slate-800)', letterSpacing: '-0.01em' }}>Bank Transfer Details</h4>
                               <div style={{ 
-                                 background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', 
-                                 padding: '1.5rem', 
-                                 borderRadius: 'var(--radius-md)', 
-                                 border: '1px solid #cbd5e1',
-                                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                                 fontSize: '0.875rem', 
+                                 color: 'var(--slate-700)', 
+                                 marginBottom: '1.25rem',
+                                 background: 'white',
+                                 padding: '1rem',
+                                 borderRadius: 'var(--radius-md)',
+                                 border: '1px solid #e2e8f0'
                               }}>
-                                 <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--slate-800)', letterSpacing: '-0.01em' }}>Bank Transfer Details</h4>
-                                 <div style={{ 
-                                    fontSize: '0.875rem', 
-                                    color: 'var(--slate-700)', 
-                                    marginBottom: '1.25rem',
-                                    background: 'white',
-                                    padding: '1rem',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: '1px solid #e2e8f0'
-                                 }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                       <strong style={{ color: 'var(--slate-600)' }}>Account Name:</strong> <span style={{ fontWeight: 500 }}>Jamiyat Tabligh-ul-Islam</span>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                       <strong style={{ color: 'var(--slate-600)' }}>Sort Code:</strong> <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>30-63-55</span>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                       <strong style={{ color: 'var(--slate-600)' }}>Account No:</strong> <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>77990060</span>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid #e2e8f0' }}>
-                                       <strong style={{ color: 'var(--slate-600)' }}>Reference:</strong> <span style={{ color: 'var(--brand-600)', fontWeight: 700, fontSize: '0.95rem' }}>{app.application_number}</span>
-                                    </div>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                    <strong style={{ color: 'var(--slate-600)' }}>Account Name:</strong> <span style={{ fontWeight: 500 }}>Jamiyat Tabligh-ul-Islam</span>
                                  </div>
-                                 <p style={{ 
-                                    fontSize: '0.85rem', 
-                                    color: 'var(--slate-600)', 
-                                    marginBottom: '1rem',
-                                    padding: '0.75rem',
-                                    background: '#fffbeb',
-                                    border: '1px solid #fcd34d',
-                                    borderRadius: 'var(--radius-md)'
-                                 }}>
-                                    💡 After completing the transfer, upload your receipt below for verification.
-                                 </p>
-                                 <label style={{ display: 'block', width: '100%', marginBottom: '0.75rem' }}>
-                                    <input type="file" onChange={handleReceiptUpload} style={{ display: 'none' }} disabled={uploadingReceipt} />
-                                    <div className="btn btn-primary" style={{ 
-                                       width: '100%', 
-                                       textAlign: 'center', 
-                                       cursor: 'pointer',
-                                       boxShadow: '0 4px 12px rgba(176, 90, 51, 0.3)'
-                                    }}>
-                                       {uploadingReceipt ? '⏳ Uploading...' : '📎 Upload Receipt'}
-                                    </div>
-                                 </label>
-                                 <button 
-                                    onClick={() => setPaymentMethod(null)} 
-                                    className="btn btn-sm" 
-                                    style={{ 
-                                       width: '100%', 
-                                       background: 'white', 
-                                       color: 'var(--slate-600)',
-                                       border: '1px solid var(--slate-300)'
-                                    }}
-                                 >
-                                    ← Back to Payment Options
-                                 </button>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                    <strong style={{ color: 'var(--slate-600)' }}>Sort Code:</strong> <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>30-63-55</span>
+                                 </div>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                    <strong style={{ color: 'var(--slate-600)' }}>Account No:</strong> <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>77990060</span>
+                                 </div>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid #e2e8f0' }}>
+                                    <strong style={{ color: 'var(--slate-600)' }}>Reference:</strong> <span style={{ color: 'var(--brand-600)', fontWeight: 700, fontSize: '0.95rem' }}>{app.application_number}</span>
+                                 </div>
                               </div>
-                           )}
+                              <p style={{ 
+                                 fontSize: '0.85rem', 
+                                 color: 'var(--slate-600)', 
+                                 marginBottom: '1rem',
+                                 padding: '0.75rem',
+                                 background: '#fffbeb',
+                                 border: '1px solid #fcd34d',
+                                 borderRadius: 'var(--radius-md)'
+                              }}>
+                                 💡 After completing the transfer, upload your receipt below for verification.
+                              </p>
+                              <label style={{ display: 'block', width: '100%' }}>
+                                 <input type="file" onChange={handleReceiptUpload} accept="image/*,.pdf" style={{ display: 'none' }} disabled={uploadingReceipt} />
+                                 <div className="btn btn-primary" style={{ 
+                                    width: '100%', 
+                                    textAlign: 'center', 
+                                    cursor: uploadingReceipt ? 'not-allowed' : 'pointer',
+                                    boxShadow: '0 4px 12px rgba(176, 90, 51, 0.3)',
+                                    opacity: uploadingReceipt ? 0.7 : 1
+                                 }}>
+                                    {uploadingReceipt ? '⏳ Uploading...' : '📎 Upload Receipt'}
+                                 </div>
+                              </label>
+                           </div>
                         </div>
                      </div>
                   )}

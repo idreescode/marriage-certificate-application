@@ -163,12 +163,11 @@ export const createManualApplication = (data) => {
   return api.post('/admin/applications/manual', data);
 };
 
-// Payment APIs
-export const createCheckoutSession = () => api.post('/payment/create-checkout-session');
-
-export const verifySession = (sessionId) => api.post('/payment/verify-session', { sessionId });
-export const createPaymentIntent = () => api.post('/payment/create-payment-intent');
-export const confirmPayment = (data) => api.post('/payment/confirm-payment', data);
+// Payment APIs - Online payment disabled, only bank transfer is available
+// export const createCheckoutSession = () => api.post('/payment/create-checkout-session');
+// export const verifySession = (sessionId) => api.post('/payment/verify-session', { sessionId });
+// export const createPaymentIntent = () => api.post('/payment/create-payment-intent');
+// export const confirmPayment = (data) => api.post('/payment/confirm-payment', data);
 
 // Notification APIs
 export const getNotifications = () => api.get('/notifications');
