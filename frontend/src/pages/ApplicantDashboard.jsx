@@ -853,8 +853,9 @@ export default function ApplicantDashboard() {
 
                            {/* Step 4: Documents Verified (by Admin) */}
                            {(() => {
-                              const isVerified = app.documents_verified === true;
-                              const isActive = allDocumentsUploaded && !app.documents_verified && (app.status === 'admin_review' || app.status === 'payment_pending');
+                              // Handle both boolean true and numeric 1 from MySQL
+                              const isVerified = app.documents_verified === true || app.documents_verified === 1 || app.documents_verified === '1';
+                              const isActive = allDocumentsUploaded && !isVerified && (app.status === 'admin_review' || app.status === 'payment_pending');
                               return (
                                  <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isVerified ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isVerified ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
