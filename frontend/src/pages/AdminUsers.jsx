@@ -355,6 +355,7 @@ export default function AdminUsers() {
             justifyContent: "center",
             gap: "0.5rem",
             padding: "0.75rem 1.5rem",
+            width: "20%",
             background: "rgba(255,255,255,0.15)",
             border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: "var(--radius-md)",

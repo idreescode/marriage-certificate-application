@@ -1600,7 +1600,27 @@ td {
   }
 }
 
-/* Admin Applications - Table and Toolbar */
+/* Admin Applications - Desktop Styles */
+.admin-applications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-add-new-application {
+  width: auto;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+@media (min-width: 769px) {
+  .btn-add-new-application {
+    width: auto !important;
+    min-width: fit-content !important;
+  }
+}
+
+/* Admin Applications - Mobile Styles */
 @media (max-width: 768px) {
   /* Applications header - stack on mobile */
   .admin-applications-header {
@@ -1850,7 +1870,25 @@ td {
   }
 }
 
-/* Admin Users Page */
+/* Admin Users Page - Desktop Styles */
+.admin-users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-add-admin {
+  width: 20% !important;
+  flex-shrink: 0;
+}
+
+@media (min-width: 769px) {
+  .btn-add-admin {
+    width: 20% !important;
+  }
+}
+
+/* Admin Users Page - Mobile Styles */
 @media (max-width: 768px) {
   /* Users header - stack on mobile */
   .admin-users-header {
