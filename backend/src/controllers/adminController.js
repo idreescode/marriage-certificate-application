@@ -199,6 +199,7 @@ const approveApplication = async (req, res) => {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
+    const DEFAULT_DEPOSIT_AMOUNT = 200;
 
     // Get application data
     const [appRows] = await pool.execute(
@@ -240,14 +241,18 @@ const approveApplication = async (req, res) => {
     // Keep status as 'admin_review' - this indicates approved and waiting for documents
     // Status will change to 'payment_pending' only after documents are verified
     // Set approved_at timestamp to track approval
-    // Explicitly ensure status remains 'admin_review' (in case it was changed elsewhere)
+    // Set deposit amount when application is approved
     await pool.execute(
       `UPDATE applications 
        SET approved_at = NOW(),
            approved_by = ?,
+           deposit_amount = ?,
+           deposit_amount_set_by = ?,
+           deposit_amount_set_at = NOW(),
+           payment_status = 'amount_set',
            status = 'admin_review'
        WHERE id = ?`,
-      [adminId, id]
+      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, id]
     );
 
     // Send approval email with password
@@ -264,7 +269,7 @@ const approveApplication = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Application approved successfully",
+      message: "Application approved successfully. Deposit amount set to £200. Portal credentials sent to applicant.",
     });
   } catch (error) {
     console.error("Error approving application:", error);
@@ -281,7 +286,6 @@ const verifyDocuments = async (req, res) => {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
-    const DEFAULT_DEPOSIT_AMOUNT = 200;
 
     // Get application to check if documents exist (exclude deleted)
     const [appRows] = await pool.execute(
@@ -306,19 +310,24 @@ const verifyDocuments = async (req, res) => {
       });
     }
 
-    // Update application - mark documents as verified AND automatically set deposit amount to 200
+    // Check if deposit amount has been set (should be set when application is approved)
+    if (!app.deposit_amount || app.deposit_amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Deposit amount must be set before verifying documents. Please approve the application first.",
+      });
+    }
+
+    // Update application - mark documents as verified and change status to payment_pending
     await pool.execute(
       `UPDATE applications 
        SET documents_verified = TRUE, 
            documents_verified_by = ?, 
            documents_verified_at = NOW(),
-           deposit_amount = ?,
-           deposit_amount_set_by = ?,
-           deposit_amount_set_at = NOW(),
            payment_status = 'amount_set',
            status = 'payment_pending'
        WHERE id = ?`,
-      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, id]
+      [adminId, id]
     );
 
     // Get application data with user email for sending deposit amount email
@@ -343,7 +352,7 @@ const verifyDocuments = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Documents verified successfully and deposit amount set to £200",
+      message: "Documents verified successfully. Deposit amount email sent to applicant.",
     });
   } catch (error) {
     console.error("Error verifying documents:", error);

@@ -121,7 +121,7 @@ export default function AdminApplications() {
     try {
       await approveApplicationAPI(approveAppData.id);
       toast.success(
-        "Application approved successfully! User will receive portal credentials.",
+        "Application approved successfully! Deposit amount set to £200. User will receive portal credentials. Payment email will be sent after document verification.",
         { id: toastId }
       );
       closeModal();
@@ -142,7 +142,7 @@ export default function AdminApplications() {
     try {
       await verifyDocumentsAPI(selectedAppId);
       toast.success(
-        "Documents verified successfully! Deposit amount set to £200.",
+        "Documents verified successfully! Deposit amount email sent to applicant.",
         { id: toastId }
       );
       closeModal();
@@ -759,8 +759,8 @@ export default function AdminApplications() {
               margin: 0,
             }}
           >
-            This will automatically set the deposit amount to £200 and notify
-            the applicant to proceed with payment.
+            This will mark the documents as verified, change the application status to payment pending, and send the deposit amount email to the applicant.
+            Note: The deposit amount should already be set when the application was approved.
           </p>
         </div>
         <div
@@ -1036,8 +1036,8 @@ export default function AdminApplications() {
                   margin: 0,
                 }}
               >
-                This will approve the application and send portal access
-                credentials to the applicant via email.
+                This will approve the application, set the deposit amount to £200, and send portal access
+                credentials to the applicant via email. Payment details email will be sent after document verification.
               </p>
             </div>
           </div>
