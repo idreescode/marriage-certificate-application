@@ -347,15 +347,18 @@ export default function ApplicantDashboard() {
                   variant={allDocumentsUploaded ? 'green' : 'orange'}
                   subtitle={allDocumentsUploaded ? 'All documents received' : 'Action required'}
                />
-               <StatCard
-                  title="Payment Status"
-                  value={app.payment_verified_at ? 'Verified' : app.deposit_amount ? `£${app.deposit_amount}` : 'Pending'}
-                  icon={CreditCard}
-                  color="white"
-                  bg="rgba(255,255,255,0.15)"
-                  variant={app.payment_verified_at ? 'teal' : 'purple'}
-                  subtitle={app.payment_verified_at ? 'Payment confirmed' : app.deposit_amount ? 'Payment due' : 'Awaiting quote'}
-               />
+               {/* Show Payment Status only when payment is pending or verified */}
+               {(app.status === 'payment_pending' || app.payment_verified_at || app.status === 'payment_verified') && (
+                  <StatCard
+                     title="Payment Status"
+                     value={app.payment_verified_at ? 'Verified' : app.deposit_amount ? `£${app.deposit_amount}` : 'Pending'}
+                     icon={CreditCard}
+                     color="white"
+                     bg="rgba(255,255,255,0.15)"
+                     variant={app.payment_verified_at ? 'teal' : 'purple'}
+                     subtitle={app.payment_verified_at ? 'Payment confirmed' : app.deposit_amount ? 'Payment due' : 'Awaiting quote'}
+                  />
+               )}
                <StatCard
                   title="Nikah Date"
                   value={app.appointment_date ? new Date(app.appointment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBD'}
