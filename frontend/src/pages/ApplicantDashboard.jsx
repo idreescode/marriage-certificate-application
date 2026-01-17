@@ -138,13 +138,13 @@ export default function ApplicantDashboard() {
 
    const StatusPill = ({ status }) => {
       const styles = {
-         submitted: { bg: '#e0f2fe', color: '#0369a1', label: 'Submitted' },
-         admin_review: { bg: '#fff7ed', color: '#c2410c', label: 'Under Review' },
-         payment_pending: { bg: '#fef3c7', color: '#b45309', label: 'Payment Pending' },
-         payment_verified: { bg: '#dcfce7', color: '#15803d', label: 'Payment Verified' },
-         appointment_scheduled: { bg: '#f0f9ff', color: '#0369a1', label: 'Scheduled' },
-         completed: { bg: '#dcfce7', color: '#15803d', label: 'Completed' },
-         cancelled: { bg: '#fee2e2', color: '#b91c1c', label: 'Cancelled' }
+         submitted: { bg: '#dbeafe', color: '#1e40af', label: 'Submitted', borderColor: '#93c5fd' },
+         admin_review: { bg: '#fed7aa', color: '#9a3412', label: 'Under Review', borderColor: '#fdba74' },
+         payment_pending: { bg: '#fde68a', color: '#92400e', label: 'Payment Pending', borderColor: '#fcd34d' },
+         payment_verified: { bg: '#bbf7d0', color: '#166534', label: 'Payment Verified', borderColor: '#86efac' },
+         appointment_scheduled: { bg: '#dbeafe', color: '#1e40af', label: 'Scheduled', borderColor: '#93c5fd' },
+         completed: { bg: '#bbf7d0', color: '#166534', label: 'Completed', borderColor: '#86efac' },
+         cancelled: { bg: '#fecaca', color: '#991b1b', label: 'Cancelled', borderColor: '#fca5a5' }
       };
 
       const style = styles[status] || styles.submitted;
@@ -153,15 +153,16 @@ export default function ApplicantDashboard() {
          <span style={{
             backgroundColor: style.bg,
             color: style.color,
-            padding: '6px 16px',
-            borderRadius: '999px',
-            fontSize: '0.875rem',
-            fontWeight: 700,
+            padding: '8px 18px',
+            borderRadius: '20px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
             display: 'inline-block',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            letterSpacing: '0.02em',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+            letterSpacing: '0.5px',
             textTransform: 'uppercase',
-            border: '1px solid rgba(255, 255, 255, 0.3)'
+            border: `1.5px solid ${style.borderColor}`,
+            transition: 'all 0.2s ease'
          }}>
             {style.label}
          </span>
