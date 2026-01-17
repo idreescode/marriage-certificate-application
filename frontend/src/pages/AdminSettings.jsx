@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import { getSettings, updateSettings } from "../services/api";
 import toast from "react-hot-toast";
-import { Settings, Mail, DollarSign, Save, AlertCircle } from "lucide-react";
+import { Settings, Mail, PoundSterling, Save, AlertCircle } from "lucide-react";
 
 export default function AdminSettings() {
   const navigate = useNavigate();
@@ -193,7 +193,7 @@ export default function AdminSettings() {
           <div className="settings-section">
             <div className="settings-section-header">
               <div className="settings-icon-wrapper">
-                <DollarSign size={20} />
+                <PoundSterling size={20} />
               </div>
               <div>
                 <h2 className="settings-section-title">Default Deposit Amount</h2>
