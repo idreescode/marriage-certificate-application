@@ -102,8 +102,11 @@ export default function AdminApplications() {
         setApplications(data);
       }
       
-      // Set pagination info if available
-      if (data.total !== undefined) {
+      // Set pagination info - backend returns data.pagination { total, pages }
+      if (data.pagination) {
+        setTotalApplications(data.pagination.total);
+        setTotalPages(data.pagination.pages);
+      } else if (data.total !== undefined) {
         setTotalApplications(data.total);
         setTotalPages(Math.ceil(data.total / itemsPerPage));
       } else if (data.totalPages !== undefined) {

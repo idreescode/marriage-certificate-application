@@ -78,8 +78,11 @@ export default function AdminUsers() {
         setUsers(data);
       }
       
-      // Set pagination info if available
-      if (data.total !== undefined) {
+      // Set pagination info - backend returns data.pagination { total, pages }
+      if (data.pagination) {
+        setTotalUsers(data.pagination.total);
+        setTotalPages(data.pagination.pages);
+      } else if (data.total !== undefined) {
         setTotalUsers(data.total);
         setTotalPages(Math.ceil(data.total / itemsPerPage));
       } else if (data.totalPages !== undefined) {
