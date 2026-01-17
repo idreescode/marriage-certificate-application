@@ -54,7 +54,12 @@ export default function AdminUsers() {
     setLoading(true);
     try {
       const params = {};
-      if (filterRole !== "all") params.role = filterRole;
+      if (filterRole !== "all") {
+        params.role = filterRole;
+      } else {
+        // When showing all users, increase limit to ensure all users are loaded
+        params.limit = 1000;
+      }
       if (searchTerm) params.search = searchTerm;
 
       const response = await getAllUsers(params);
