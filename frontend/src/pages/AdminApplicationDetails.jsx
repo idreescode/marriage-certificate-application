@@ -4,6 +4,7 @@ import {
   getApplicationById,
   getFileUrl,
   generateCertificate,
+  approveApplication,
 } from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
@@ -22,6 +23,7 @@ import {
   MoreVertical,
   ExternalLink,
   Printer,
+  CheckCircle,
 } from "lucide-react";
 
 export default function AdminApplicationDetails() {
@@ -60,6 +62,37 @@ export default function AdminApplicationDetails() {
       // For 401, just redirect without showing error (handled by AdminLayout or redirect above)
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!application) {
+      toast.error("Application data not loaded");
+      return;
+    }
+
+    // Check if application is in the correct status for approval
+    if (application.status !== "admin_review") {
+      toast.error(
+        "Application is not in review status or has already been processed"
+      );
+      return;
+    }
+
+    const toastId = toast.loading("Approving application...");
+    try {
+      await approveApplication(id);
+      toast.success(
+        "Application approved successfully! Deposit amount set to £200. Portal credentials sent to applicant.",
+        { id: toastId }
+      );
+      // Refresh application data
+      fetchApplicationDetails();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to approve application",
+        { id: toastId }
+      );
     }
   };
 
@@ -468,6 +501,39 @@ export default function AdminApplicationDetails() {
                     {new Date(application.preferred_date).toLocaleDateString()}
                   </span>
                 )}
+                {/* Solemnised Information */}
+                {(application.solemnised_date ||
+                  application.solemnised_place ||
+                  application.solemnised_address) && (
+                  <div
+                    style={{
+                      marginTop: "0.75rem",
+                      paddingTop: "0.75rem",
+                      borderTop: "1px solid rgba(255,255,255,0.2)",
+                    }}
+                  >
+                    {application.solemnised_date && (
+                      <span className="flex items-center gap-1.5">
+                        <Calendar size={16} /> Solemnised Date:{" "}
+                        {new Date(
+                          application.solemnised_date
+                        ).toLocaleDateString(undefined, { dateStyle: "long" })}
+                      </span>
+                    )}
+                    {application.solemnised_place && (
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={16} /> Solemnised Place:{" "}
+                        {application.solemnised_place}
+                      </span>
+                    )}
+                    {application.solemnised_address && (
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={16} /> Solemnised Address:{" "}
+                        {application.solemnised_address}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -480,6 +546,25 @@ export default function AdminApplicationDetails() {
                 width: "100%",
               }}
             >
+              {application.status === "admin_review" && !application.approved_at && (
+                <button
+                  onClick={handleApprove}
+                  className="btn-back-nav"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    width: "100%",
+                    background: "rgba(255, 255, 255, 0.2)",
+                    border: "1px solid rgba(255, 255, 255, 0.3)",
+                    color: "white",
+                    fontWeight: "600",
+                  }}
+                >
+                  <CheckCircle size={16} /> Approve Application
+                </button>
+              )}
               <button
                 onClick={handlePrint}
                 className="btn-back-nav print-button"
