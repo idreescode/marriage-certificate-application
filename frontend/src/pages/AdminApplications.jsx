@@ -40,6 +40,10 @@ export default function AdminApplications() {
   const [filterStatus, setFilterStatus] = useState(
     searchParams.get("status") || "all"
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalApplications, setTotalApplications] = useState(0);
+  const itemsPerPage = 10;
 
   // Modal States
   const [activeModal, setActiveModal] = useState(null); // 'documents', 'verify', 'view', 'delete', 'approve'
@@ -62,13 +66,54 @@ export default function AdminApplications() {
       navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
+    setCurrentPage(1); // Reset to first page when component mounts
     fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when filter changes
+    fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStatus]);
+
+  useEffect(() => {
+    fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   const fetchApplications = async () => {
     try {
-      const response = await getAllApplications();
-      setApplications(response.data.data.applications);
+      const params = {
+        page: currentPage,
+        limit: itemsPerPage,
+      };
+      if (filterStatus !== "all") {
+        params.status = filterStatus;
+      }
+
+      const response = await getAllApplications(params);
+      const data = response.data.data;
+      
+      // Handle both paginated and non-paginated responses
+      if (data.applications) {
+        setApplications(data.applications);
+      } else if (Array.isArray(data)) {
+        setApplications(data);
+      }
+      
+      // Set pagination info if available
+      if (data.total !== undefined) {
+        setTotalApplications(data.total);
+        setTotalPages(Math.ceil(data.total / itemsPerPage));
+      } else if (data.totalPages !== undefined) {
+        setTotalPages(data.totalPages);
+        setTotalApplications(data.total || applications.length);
+      } else {
+        // Fallback: calculate from applications array
+        setTotalApplications(applications.length);
+        setTotalPages(1);
+      }
     } catch (error) {
       // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
       if (error.response?.status !== 401) {
@@ -279,17 +324,28 @@ export default function AdminApplications() {
     );
   };
 
-  // Filtering
-  const filteredApps =
-    filterStatus === "all"
-      ? applications
-      : applications.filter((app) => app.status === filterStatus);
+  // Filtering (server-side filtering is preferred, but keep client-side as fallback)
+  const filteredApps = applications;
+
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   if (loading) return <Loader fullscreen />;
 
   return (
     <div>
       <div
+        className="admin-applications-header"
         style={{
           background: "var(--brand-600)",
           padding: "1.5rem 2rem",
@@ -298,9 +354,11 @@ export default function AdminApplications() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "1rem",
         }}
       >
-        <div>
+        <div style={{ flex: "1 1 auto", minWidth: "200px" }}>
           <h1 style={{ fontSize: "2rem", margin: 0, color: "white" }}>
             Applications
           </h1>
@@ -316,9 +374,11 @@ export default function AdminApplications() {
         </div>
         <Link
           to="/admin/applications/manual"
+          className="btn-add-new-application"
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: "0.5rem",
             padding: "0.75rem 1.5rem",
             background: "rgba(255,255,255,0.15)",
@@ -329,6 +389,8 @@ export default function AdminApplications() {
             fontWeight: 500,
             fontSize: "0.875rem",
             transition: "all 0.2s",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.background = "rgba(255,255,255,0.25)";
@@ -720,14 +782,34 @@ export default function AdminApplications() {
             alignItems: "center",
             fontSize: "0.9rem",
             color: "var(--slate-500)",
+            flexWrap: "wrap",
+            gap: "1rem",
           }}
         >
-          <span>Showing {filteredApps.length} results</span>
+          <span>
+            Showing {filteredApps.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, totalApplications)} of {totalApplications} results
+          </span>
           <div className="d-flex gap-2">
-            <button className="btn btn-sm btn-secondary" disabled>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              style={{
+                opacity: currentPage === 1 ? 0.5 : 1,
+                cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              }}
+            >
               <ChevronLeft size={16} />
             </button>
-            <button className="btn btn-sm btn-secondary" disabled>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+              style={{
+                opacity: currentPage >= totalPages ? 0.5 : 1,
+                cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+              }}
+            >
               <ChevronRight size={16} />
             </button>
           </div>

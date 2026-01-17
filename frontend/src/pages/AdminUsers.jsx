@@ -21,6 +21,8 @@ import {
   Shield,
   Mail,
   User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function AdminUsers() {
@@ -29,6 +31,10 @@ export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [filterRole, setFilterRole] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const itemsPerPage = 10;
 
   // Modal States
   const [activeModal, setActiveModal] = useState(null); // 'view', 'edit', 'delete', 'create'
@@ -53,17 +59,37 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = {
+        page: currentPage,
+        limit: itemsPerPage,
+      };
       if (filterRole !== "all") {
         params.role = filterRole;
-      } else {
-        // When showing all users, increase limit to ensure all users are loaded
-        params.limit = 1000;
       }
       if (searchTerm) params.search = searchTerm;
 
       const response = await getAllUsers(params);
-      setUsers(response.data.data.users);
+      const data = response.data.data;
+      
+      // Handle both paginated and non-paginated responses
+      if (data.users) {
+        setUsers(data.users);
+      } else if (Array.isArray(data)) {
+        setUsers(data);
+      }
+      
+      // Set pagination info if available
+      if (data.total !== undefined) {
+        setTotalUsers(data.total);
+        setTotalPages(Math.ceil(data.total / itemsPerPage));
+      } else if (data.totalPages !== undefined) {
+        setTotalPages(data.totalPages);
+        setTotalUsers(data.total || users.length);
+      } else {
+        // Fallback: calculate from users array
+        setTotalUsers(users.length);
+        setTotalPages(1);
+      }
     } catch (error) {
       // Only show error if it's not a 401 (unauthorized) - auth errors are handled by redirect
       if (error.response?.status !== 401) {
@@ -83,13 +109,20 @@ export default function AdminUsers() {
       navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
+    setCurrentPage(1); // Reset to first page when filter changes
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRole]);
 
+  useEffect(() => {
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page when search changes
       fetchUsers();
     }, 500);
 
@@ -265,17 +298,28 @@ export default function AdminUsers() {
     );
   };
 
-  // Filtering
-  const filteredUsers =
-    filterRole === "all"
-      ? users
-      : users.filter((user) => user.role === filterRole);
+  // Filtering (if needed client-side, but server-side filtering is preferred)
+  const filteredUsers = users;
+
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   if (loading) return <Loader fullscreen />;
 
   return (
     <div>
       <div
+        className="admin-users-header"
         style={{
           background: "var(--brand-600)",
           padding: "1.5rem 2rem",
@@ -284,9 +328,11 @@ export default function AdminUsers() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "1rem",
         }}
       >
-        <div>
+        <div style={{ flex: "1 1 auto", minWidth: "200px" }}>
           <h1 style={{ fontSize: "2rem", margin: 0, color: "white" }}>
             User Management
           </h1>
@@ -302,13 +348,13 @@ export default function AdminUsers() {
         </div>
         <button
           onClick={openCreateModal}
+          className="btn-add-admin"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "0.5rem",
             padding: "0.75rem 1.5rem",
-            width: "20%",
             background: "rgba(255,255,255,0.15)",
             border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: "var(--radius-md)",
@@ -319,6 +365,7 @@ export default function AdminUsers() {
             cursor: "pointer",
             transition: "all 0.2s",
             whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.background = "rgba(255,255,255,0.25)";
@@ -547,9 +594,37 @@ export default function AdminUsers() {
             alignItems: "center",
             fontSize: "0.9rem",
             color: "var(--slate-500)",
+            flexWrap: "wrap",
+            gap: "1rem",
           }}
         >
-          <span>Showing {filteredUsers.length} results</span>
+          <span>
+            Showing {filteredUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, totalUsers)} of {totalUsers} results
+          </span>
+          <div className="d-flex gap-2">
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              style={{
+                opacity: currentPage === 1 ? 0.5 : 1,
+                cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+              style={{
+                opacity: currentPage >= totalPages ? 0.5 : 1,
+                cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+              }}
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
