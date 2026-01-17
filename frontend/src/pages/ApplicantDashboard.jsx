@@ -379,7 +379,7 @@ export default function ApplicantDashboard() {
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                   {/* Action Cards Section */}
-                  {(!app.deposit_amount && !allDocumentsUploaded) && (
+                  {app.approved_at && !allDocumentsUploaded && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',
