@@ -20,7 +20,9 @@ const {
   getUserById,
   updateUser,
   deleteUser,
-  createAdmin
+  createAdmin,
+  getSettings,
+  updateSettings
 } = require('../controllers/adminController');
 const { uploadDocuments } = require('../middleware/upload');
 
@@ -113,5 +115,12 @@ router.put('/users/:id', updateUser);
 
 // DELETE /api/admin/users/:id - Delete user
 router.delete('/users/:id', deleteUser);
+
+// Settings Routes
+// GET /api/admin/settings - Get all settings
+router.get('/settings', getSettings);
+
+// PUT /api/admin/settings - Update settings
+router.put('/settings', updateSettings);
 
 module.exports = router;

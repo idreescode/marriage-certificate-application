@@ -122,7 +122,7 @@ export default function AdminNavbar() {
               <NavLink to="/admin/applications" label="Applications" />
               <NavLink to="/admin/users" label="Users" />
               {/* <NavLink to="/admin/payments" label="Payments" /> */}
-              {/* <NavLink to="/admin/settings" label="Settings" /> */}
+              <NavLink to="/admin/settings" label="Settings" />
             </div>
 
             {/* User Profile / Logout */}

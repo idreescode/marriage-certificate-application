@@ -41,8 +41,24 @@ const renderTemplate = (templateName, data) => {
   return template;
 };
 
-// Get admin emails from environment variable (supports comma-separated multiple emails)
-const getAdminEmails = () => {
+// Get admin emails from database (with fallback to environment variable)
+const getAdminEmails = async () => {
+  try {
+    // Try to get from database first
+    const [rows] = await pool.execute(
+      "SELECT setting_value FROM settings WHERE setting_key = 'admin_emails'"
+    );
+    
+    if (rows.length > 0 && rows[0].setting_value) {
+      const adminEmails = rows[0].setting_value;
+      // Split by comma, trim whitespace, and filter out empty strings
+      return adminEmails.split(',').map(email => email.trim()).filter(email => email.length > 0);
+    }
+  } catch (error) {
+    console.error('Error getting admin emails from database:', error);
+  }
+  
+  // Fallback to environment variable
   const adminEmails = process.env.ADMIN_EMAILS || 'admin@jamiyat.org';
   // Split by comma, trim whitespace, and filter out empty strings
   return adminEmails.split(',').map(email => email.trim()).filter(email => email.length > 0);
@@ -231,7 +247,7 @@ const sendDepositAmountEmail = async (applicationData) => {
 // 3. Payment Receipt Uploaded (to Admin)
 const sendReceiptUploadedNotification = async (applicationData) => {
   const { application_number, groom_full_name, bride_full_name, id } = applicationData;
-  const adminEmails = getAdminEmails();
+  const adminEmails = await getAdminEmails();
 
   const html = renderTemplate('admin-payment-receipt.html', {
     application_number,
@@ -341,7 +357,7 @@ const sendCertificateReadyEmail = async (applicationData) => {
 // 7. Send Bank Details Request Notification to Admin
 const sendBankDetailsRequestEmail = async (applicationData) => {
   const { application_number, groom_full_name, bride_full_name, id } = applicationData;
-  const adminEmails = getAdminEmails();
+  const adminEmails = await getAdminEmails();
 
   const html = renderTemplate('admin-bank-details.html', {
     application_number,
@@ -373,7 +389,7 @@ const sendBankDetailsRequestEmail = async (applicationData) => {
 // 8. Admin New Application Notification
 const sendAdminNewApplicationEmail = async (applicationData) => {
   const { id } = applicationData;
-  const adminEmails = getAdminEmails();
+  const adminEmails = await getAdminEmails();
 
   // Fetch full application data from database
   const [applications] = await pool.execute(

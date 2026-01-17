@@ -2147,3 +2147,117 @@ td {
     box-shadow: none !important;
   }
 }
+
+/* Settings Page Styles */
+.settings-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.settings-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.settings-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--brand-100);
+  color: var(--brand-600);
+  flex-shrink: 0;
+}
+
+.settings-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--slate-900);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.settings-section-description {
+  font-size: 0.9rem;
+  color: var(--slate-600);
+  margin: 0;
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--slate-500);
+  margin-top: var(--space-2);
+  line-height: 1.5;
+}
+
+.input-error {
+  border-color: #ef4444 !important;
+}
+
+.input-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: 0.875rem;
+  color: #ef4444;
+}
+
+.error-message svg {
+  flex-shrink: 0;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--slate-200);
+}
+
+.settings-actions .btn {
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 768px) {
+  .settings-section {
+    padding: var(--space-4);
+  }
+
+  .settings-section-header {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .settings-actions {
+    flex-direction: column;
+  }
+
+  .settings-actions .btn {
+    width: 100%;
+  }
+}

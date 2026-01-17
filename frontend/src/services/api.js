@@ -181,4 +181,8 @@ export const getNotifications = () => api.get('/notifications');
 export const markNotificationRead = (id) => api.put(`/notifications/${id}/read`);
 export const markAllNotificationsRead = () => api.put('/notifications/read-all');
 
+// Settings APIs
+export const getSettings = () => api.get('/admin/settings');
+export const updateSettings = (settings) => api.put('/admin/settings', { settings });
+
 export default api;

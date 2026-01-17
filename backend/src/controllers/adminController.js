@@ -194,12 +194,132 @@ const getApplicationById = async (req, res) => {
   }
 };
 
+// Get Settings
+const getSettings = async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      "SELECT setting_key, setting_value, description, updated_at FROM settings"
+    );
+
+    const settings = {};
+    rows.forEach((row) => {
+      settings[row.setting_key] = {
+        value: row.setting_value,
+        description: row.description,
+        updated_at: row.updated_at,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: settings,
+    });
+  } catch (error) {
+    console.error("Error getting settings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get settings",
+      error: error.message,
+    });
+  }
+};
+
+// Update Settings
+const updateSettings = async (req, res) => {
+  try {
+    const { settings } = req.body;
+    const adminId = req.user.id;
+
+    if (!settings || typeof settings !== "object") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid settings data",
+      });
+    }
+
+    // Validate and update each setting
+    for (const [key, value] of Object.entries(settings)) {
+      // Validate admin_emails
+      if (key === "admin_emails") {
+        const emails = value.split(",").map((e) => e.trim()).filter((e) => e.length > 0);
+        if (emails.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: "At least one admin email is required",
+          });
+        }
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        for (const email of emails) {
+          if (!emailRegex.test(email)) {
+            return res.status(400).json({
+              success: false,
+              message: `Invalid email format: ${email}`,
+            });
+          }
+        }
+      }
+
+      // Validate default_deposit_amount
+      if (key === "default_deposit_amount") {
+        const amount = parseFloat(value);
+        if (isNaN(amount) || amount <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: "Default deposit amount must be a positive number",
+          });
+        }
+      }
+
+      // Update or insert setting
+      await pool.execute(
+        `INSERT INTO settings (setting_key, setting_value, updated_by) 
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE 
+         setting_value = VALUES(setting_value),
+         updated_by = VALUES(updated_by),
+         updated_at = NOW()`,
+        [key, String(value), adminId]
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Settings updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update settings",
+      error: error.message,
+    });
+  }
+};
+
+// Helper function to get setting value from database
+const getSettingValue = async (key, defaultValue = null) => {
+  try {
+    const [rows] = await pool.execute(
+      "SELECT setting_value FROM settings WHERE setting_key = ?",
+      [key]
+    );
+    return rows.length > 0 ? rows[0].setting_value : defaultValue;
+  } catch (error) {
+    console.error(`Error getting setting ${key}:`, error);
+    return defaultValue;
+  }
+};
+
 // Approve Application
 const approveApplication = async (req, res) => {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
-    const DEFAULT_DEPOSIT_AMOUNT = 200;
+    
+    // Get default deposit amount from settings, fallback to 200
+    const defaultDepositStr = await getSettingValue("default_deposit_amount", "200");
+    const DEFAULT_DEPOSIT_AMOUNT = parseFloat(defaultDepositStr) || 200;
 
     // Get application data
     const [appRows] = await pool.execute(
@@ -2460,4 +2580,7 @@ module.exports = {
   updateUser,
   deleteUser,
   createAdmin,
+  getSettings,
+  updateSettings,
+  getSettingValue,
 };

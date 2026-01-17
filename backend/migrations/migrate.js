@@ -24,6 +24,7 @@ const migrations = [
   require('./021_remove_email_columns'),
   require('./022_add_approval_fields'),
   require('./023_remove_super_admin_role'),
+  require('./024_create_settings_table'),
 ];
 
 // Run migrations

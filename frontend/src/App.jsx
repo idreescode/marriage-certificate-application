@@ -15,6 +15,7 @@ import AdminApplications from './pages/AdminApplications';
 import AdminApplicationDetails from './pages/AdminApplicationDetails';
 import AdminManualApplication from './pages/AdminManualApplication';
 import AdminUsers from './pages/AdminUsers';
+import AdminSettings from './pages/AdminSettings';
 const basename = '/';
 
 function App() {
@@ -77,7 +78,7 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           {/* Fallback for now */}
           <Route path="payments" element={<div className="p-8 text-center text-slate-500">Payments Module Coming Soon</div>} />
-          <Route path="settings" element={<div className="p-8 text-center text-slate-500">Settings Module Coming Soon</div>} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
 
         {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
