@@ -2,6 +2,8 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createManualApplication, getApplicationById, updateApplication, getFileUrl } from "../services/api";
 import toast from "react-hot-toast";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   ArrowLeft,
   Save,
@@ -78,81 +80,121 @@ const FormField = ({
   formData,
   handleChange,
   ...props
-}) => (
-  <div style={{ gridColumn: span === 2 ? "span 2" : "span 1" }}>
-    <label
-      style={{
-        display: "block",
-        marginBottom: "10px",
-        fontFamily: "Montserrat, sans-serif",
-        fontSize: "clamp(16px, 3vw, 25px)",
-        fontWeight: 400,
-        color: "#2E2E2E",
-      }}
-    >
-      {label} {required && <span style={{ color: "#FF0000" }}>*</span>}
-    </label>
-    {type === "textarea" ? (
-      <textarea
-        name={name}
-        value={formData[name] || ""}
-        onChange={handleChange}
-        required={required}
+}) => {
+  // Handle date picker changes
+  const handleDateChange = (date) => {
+    const event = {
+      target: {
+        name: name,
+        value: date ? date.toISOString().split('T')[0] : '' // Format: YYYY-MM-DD
+      }
+    };
+    handleChange(event);
+  };
+
+  // Convert string date to Date object for DatePicker
+  const getDateValue = () => {
+    const value = formData[name] || "";
+    if (value && typeof value === 'string') {
+      // Handle YYYY-MM-DD format
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? null : date;
+      }
+    }
+    return null;
+  };
+
+  return (
+    <div style={{ gridColumn: span === 2 ? "span 2" : "span 1" }}>
+      <label
         style={{
-          width: "100%",
-          height: "54px",
-          padding: "15px",
-          border: "2.7px solid #CA6C41",
-          borderRadius: "10px",
-          fontSize: "16px",
+          display: "block",
+          marginBottom: "10px",
           fontFamily: "Montserrat, sans-serif",
-          color: "#333",
-          background: "#FFFFFF",
-          outline: "none",
-          resize: "vertical",
-          minHeight: "80px",
-          transition: "box-shadow 0.2s",
+          fontSize: "clamp(16px, 3vw, 25px)",
+          fontWeight: 400,
+          color: "#2E2E2E",
         }}
-        onFocus={(e) => {
-          e.target.style.boxShadow = "0 0 0 4px rgba(202, 108, 65, 0.2)";
-        }}
-        onBlur={(e) => {
-          e.target.style.boxShadow = "none";
-        }}
-        rows={3}
-        {...props}
-      />
-    ) : (
-      <input
-        type={type}
-        name={name}
-        value={formData[name] || ""}
-        onChange={handleChange}
-        required={required}
-        style={{
-          width: "100%",
-          height: "54px",
-          padding: "15px",
-          border: "2.7px solid #CA6C41",
-          borderRadius: "10px",
-          fontSize: "16px",
-          fontFamily: "Montserrat, sans-serif",
-          color: "#333",
-          background: "#FFFFFF",
-          outline: "none",
-          transition: "box-shadow 0.2s",
-        }}
-        onFocus={(e) => {
-          e.target.style.boxShadow = "0 0 0 4px rgba(202, 108, 65, 0.2)";
-        }}
-        onBlur={(e) => {
-          e.target.style.boxShadow = "none";
-        }}
-        {...props}
-      />
-    )}
-  </div>
-);
+      >
+        {label} {required && <span style={{ color: "#FF0000" }}>*</span>}
+      </label>
+      {type === "textarea" ? (
+        <textarea
+          name={name}
+          value={formData[name] || ""}
+          onChange={handleChange}
+          required={required}
+          style={{
+            width: "100%",
+            height: "54px",
+            padding: "15px",
+            border: "2.7px solid #CA6C41",
+            borderRadius: "10px",
+            fontSize: "16px",
+            fontFamily: "Montserrat, sans-serif",
+            color: "#333",
+            background: "#FFFFFF",
+            outline: "none",
+            resize: "vertical",
+            minHeight: "80px",
+            transition: "box-shadow 0.2s",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 4px rgba(202, 108, 65, 0.2)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "none";
+          }}
+          rows={3}
+          {...props}
+        />
+      ) : type === "date" ? (
+        <DatePicker
+          selected={getDateValue()}
+          onChange={handleDateChange}
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Select date"
+          required={required}
+          className="date-picker-input"
+          wrapperClassName="custom-datepicker-wrapper"
+          showYearDropdown
+          showMonthDropdown
+          dropdownMode="select"
+          maxDate={name === 'solemnisedDate' ? null : new Date()} // Allow future dates only for solemnisedDate
+        />
+      ) : (
+        <input
+          type={type}
+          name={name}
+          value={formData[name] || ""}
+          onChange={handleChange}
+          required={required}
+          style={{
+            width: "100%",
+            height: "54px",
+            padding: "15px",
+            border: "2.7px solid #CA6C41",
+            borderRadius: "10px",
+            fontSize: "16px",
+            fontFamily: "Montserrat, sans-serif",
+            color: "#333",
+            background: "#FFFFFF",
+            outline: "none",
+            transition: "box-shadow 0.2s",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 4px rgba(202, 108, 65, 0.2)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "none";
+          }}
+          {...props}
+        />
+      )}
+    </div>
+  );
+};
 
 export default function AdminManualApplication() {
   const navigate = useNavigate();
@@ -2430,6 +2472,76 @@ export default function AdminManualApplication() {
           </button>
         </div>
       </form>
+      <style>{`
+        /* Date Picker Custom Styling */
+        .custom-datepicker-wrapper {
+          width: 100%;
+        }
+        
+        .custom-datepicker-wrapper .react-datepicker__input-container {
+          width: 100%;
+        }
+        
+        .custom-datepicker-wrapper .react-datepicker__input-container input {
+          width: 100% !important;
+          height: 54px;
+          padding: 15px;
+          border: 2.7px solid #CA6C41;
+          border-radius: 10px;
+          font-size: 16px;
+          font-family: Montserrat, sans-serif;
+          color: #333;
+          background: #FFFFFF;
+          outline: none;
+          transition: box-shadow 0.2s;
+          cursor: pointer;
+        }
+        
+        .custom-datepicker-wrapper .react-datepicker__input-container input:focus {
+          box-shadow: 0 0 0 4px rgba(202, 108, 65, 0.2);
+        }
+        
+        /* Date Picker Calendar Styling */
+        .react-datepicker {
+          font-family: Montserrat, sans-serif;
+          border: 2px solid #CA6C41;
+          border-radius: 10px;
+        }
+        
+        .react-datepicker__header {
+          background-color: #CA6C41;
+          border-bottom: 2px solid #CA6C41;
+          border-radius: 8px 8px 0 0;
+        }
+        
+        .react-datepicker__current-month,
+        .react-datepicker__day-name {
+          color: white;
+          font-weight: 600;
+        }
+        
+        .react-datepicker__day--selected,
+        .react-datepicker__day--keyboard-selected {
+          background-color: #CA6C41;
+          border-radius: 5px;
+        }
+        
+        .react-datepicker__day:hover {
+          background-color: rgba(202, 108, 65, 0.2);
+          border-radius: 5px;
+        }
+        
+        .react-datepicker__navigation-icon::before {
+          border-color: white;
+        }
+        
+        .react-datepicker__year-dropdown,
+        .react-datepicker__month-dropdown {
+          background-color: white;
+          border: 1px solid #CA6C41;
+          border-radius: 5px;
+        }
+      `}</style>
     </div>
   );
 }

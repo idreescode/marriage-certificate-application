@@ -124,7 +124,7 @@ export default function AdminSettings() {
   }
 
   return (
-    <div>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
       <div
         style={{
           background: "var(--brand-600)",
