@@ -1046,103 +1046,23 @@ export default function AdminApplicationDetails() {
               </div>
             </div>
 
-            {/* Documents Card */}
-            <div className="details-card bg-documents-card">
-              <div className="card-title-row">
-                <div className="icon-box icon-box-teal-sidebar">
-                  <FileText size={22} />
+            {/* Payment Receipt Card (Optional) */}
+            {application.payment_receipt_url && (
+              <div className="details-card bg-payment-card">
+                <div className="card-title-row">
+                  <div className="icon-box icon-box-green">
+                    <CreditCard size={22} />
+                  </div>
+                  <h2 className="card-title-text">Payment Receipt</h2>
                 </div>
-                <h2 className="card-title-text">Documents</h2>
-              </div>
-              <div className="card-body p-4">
-                <div className="grid grid-cols-1 gap-3">
-                  {application.payment_receipt_url && (
-                    <DocumentCard
-                      title="Payment Receipt"
-                      path={application.payment_receipt_url}
-                    />
-                  )}
-                  {application.groom_id_path && (
-                    <DocumentCard
-                      title="Groom ID Card"
-                      path={application.groom_id_path}
-                    />
-                  )}
-                  {application.bride_id_path && (
-                    <DocumentCard
-                      title="Bride ID Card"
-                      path={application.bride_id_path}
-                    />
-                  )}
-                  {application.witness1_id_path && (
-                    <DocumentCard
-                      title="Witness 1 ID"
-                      path={application.witness1_id_path}
-                    />
-                  )}
-                  {application.witness2_id_path && (
-                    <DocumentCard
-                      title="Witness 2 ID"
-                      path={application.witness2_id_path}
-                    />
-                  )}
-                  {application.mahr_declaration_path && (
-                    <DocumentCard
-                      title="Mahr Declaration"
-                      path={application.mahr_declaration_path}
-                    />
-                  )}
-                  {application.civil_divorce_doc_path && (
-                    <DocumentCard
-                      title="Civil Divorce"
-                      path={application.civil_divorce_doc_path}
-                    />
-                  )}
-                  {application.islamic_divorce_doc_path && (
-                    <DocumentCard
-                      title="Islamic Divorce"
-                      path={application.islamic_divorce_doc_path}
-                    />
-                  )}
-                  {application.groom_conversion_cert_path && (
-                    <DocumentCard
-                      title="Groom Conversion Certificate"
-                      path={application.groom_conversion_cert_path}
-                    />
-                  )}
-                  {application.bride_conversion_cert_path && (
-                    <DocumentCard
-                      title="Bride Conversion Certificate"
-                      path={application.bride_conversion_cert_path}
-                    />
-                  )}
-                  {application.statutory_declaration_path && (
-                    <DocumentCard
-                      title="Statutory Decl."
-                      path={application.statutory_declaration_path}
-                    />
-                  )}
+                <div className="card-body p-4">
+                  <DocumentCard
+                    title="Payment Receipt"
+                    path={application.payment_receipt_url}
+                  />
                 </div>
-
-                {![
-                  application.payment_receipt_url,
-                  application.groom_id_path,
-                  application.bride_id_path,
-                  application.witness1_id_path,
-                  application.witness2_id_path,
-                  application.mahr_declaration_path,
-                  application.civil_divorce_doc_path,
-                  application.islamic_divorce_doc_path,
-                  application.groom_conversion_cert_path,
-                  application.bride_conversion_cert_path,
-                  application.statutory_declaration_path,
-                ].some(Boolean) && (
-                  <p className="text-center text-slate-400 text-sm py-8 italic">
-                    No documents uploaded.
-                  </p>
-                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
 

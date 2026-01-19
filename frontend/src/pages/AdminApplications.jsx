@@ -5,7 +5,6 @@ import Modal from "../components/Modal";
 import {
   getAllApplications,
   approveApplication as approveApplicationAPI,
-  verifyDocuments as verifyDocumentsAPI,
   verifyPayment as verifyPaymentAPI,
   generateCertificate as generateCertAPI,
   deleteApplication as deleteApplicationAPI,
@@ -56,7 +55,6 @@ export default function AdminApplications() {
   const [editingValue, setEditingValue] = useState("");
 
   // Loading states for actions
-  const [verifyingDocuments, setVerifyingDocuments] = useState(false);
 
   useEffect(() => {
     // Check authentication before making API call
@@ -129,11 +127,6 @@ export default function AdminApplications() {
   };
 
   // Open Handlers
-  const openVerifyDocuments = (id) => {
-    setSelectedAppId(id);
-    setActiveModal("documents");
-  };
-
   const openVerifyPayment = (id) => {
     setSelectedAppId(id);
     setActiveModal("verify");
@@ -182,28 +175,6 @@ export default function AdminApplications() {
     }
   };
 
-  const handleVerifyDocuments = async () => {
-    if (verifyingDocuments) return; // Prevent multiple clicks
-
-    setVerifyingDocuments(true);
-    const toastId = toast.loading("Verifying documents...");
-    try {
-      await verifyDocumentsAPI(selectedAppId);
-      toast.success(
-        "Documents verified successfully! Deposit amount email sent to applicant.",
-        { id: toastId }
-      );
-      closeModal();
-      fetchApplications();
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to verify documents",
-        { id: toastId }
-      );
-    } finally {
-      setVerifyingDocuments(false);
-    }
-  };
 
   const handleVerifyPayment = async () => {
     const toastId = toast.loading("Verifying payment...");
@@ -711,18 +682,6 @@ export default function AdminApplications() {
                             </button>
                           )}
 
-                          {/* Show Verify Documents button if documents are uploaded but not verified (after approval) */}
-                          {app.approved_at &&
-                            (app.groom_id_path || app.bride_id_path) &&
-                            !app.documents_verified && (
-                              <button
-                                onClick={() => openVerifyDocuments(app.id)}
-                                className="btn btn-sm btn-primary"
-                                style={{ whiteSpace: "nowrap" }}
-                              >
-                                Verify Documents
-                              </button>
-                            )}
                         </>
                       )}
 
@@ -820,60 +779,6 @@ export default function AdminApplications() {
       </div>
 
       {/* Modals - Reused from previous implementation */}
-      <Modal
-        isOpen={activeModal === "documents"}
-        onClose={closeModal}
-        title="Verify Documents"
-      >
-        <div style={{ marginBottom: "1.5rem" }}>
-          <p
-            style={{
-              color: "var(--slate-700)",
-              fontSize: "0.95rem",
-              lineHeight: "1.6",
-              margin: 0,
-            }}
-          >
-            Have you reviewed and verified all the uploaded documents?
-          </p>
-          <p
-            style={{
-              color: "var(--slate-500)",
-              fontSize: "0.875rem",
-              marginTop: "0.5rem",
-              margin: 0,
-            }}
-          >
-            This will mark the documents as verified, change the application status to payment pending, and send the deposit amount email to the applicant.
-            Note: The deposit amount should already be set when the application was approved.
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "0.75rem",
-            marginTop: "1.75rem",
-          }}
-        >
-          <button
-            onClick={closeModal}
-            className="btn btn-secondary"
-            style={{ minWidth: "100px" }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleVerifyDocuments}
-            className="btn btn-primary"
-            style={{ minWidth: "140px" }}
-            disabled={verifyingDocuments}
-          >
-            {verifyingDocuments ? "Verifying..." : "Verify Documents"}
-          </button>
-        </div>
-      </Modal>
-
       <Modal
         isOpen={activeModal === "verify"}
         onClose={closeModal}

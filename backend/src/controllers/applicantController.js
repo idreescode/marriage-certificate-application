@@ -82,8 +82,16 @@ const uploadReceipt = async (req, res) => {
     const receiptUrl = `/uploads/receipts/${req.file.filename}`;
 
     // Update application with receipt
+    // Payment is optional, so only change status to payment_pending if not already in a later stage
     await pool.execute(
-      'UPDATE applications SET payment_receipt_url = ?, payment_status = "paid", status = "payment_pending" WHERE id = ?',
+      `UPDATE applications 
+       SET payment_receipt_url = ?, 
+           payment_status = "paid",
+           status = CASE 
+             WHEN status IN ('appointment_scheduled', 'completed') THEN status
+             ELSE 'payment_pending'
+           END
+       WHERE id = ?`,
       [receiptUrl, applicationId]
     );
 

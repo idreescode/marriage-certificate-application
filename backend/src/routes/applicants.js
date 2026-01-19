@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken, verifyApplicant } = require('../middleware/auth');
-const { uploadReceipt, uploadDocuments } = require('../middleware/upload');
+const { uploadReceipt } = require('../middleware/upload');
 const {
   getDashboard,
   uploadReceipt: uploadReceiptController,
   downloadCertificate,
-  requestBankDetails,
-  uploadDocuments: uploadDocumentsController
+  requestBankDetails
 } = require('../controllers/applicantController');
 
 // POST /api/applicants/login - REMOVED (Use /api/auth/login)
@@ -28,18 +27,6 @@ router.post('/request-bank-details', requestBankDetails);
 // GET /api/applicants/certificate - Download certificate
 router.get('/certificate', downloadCertificate);
 
-// POST /api/applicants/upload-documents - Upload application documents
-router.post('/upload-documents', uploadDocuments.fields([
-  { name: 'groomId', maxCount: 1 },
-  { name: 'brideId', maxCount: 1 },
-  { name: 'witness1Id', maxCount: 1 },
-  { name: 'witness2Id', maxCount: 1 },
-  { name: 'mahrDeclaration', maxCount: 1 },
-  { name: 'civilDivorceDoc', maxCount: 1 },
-  { name: 'islamicDivorceDoc', maxCount: 1 },
-  { name: 'groomConversionCert', maxCount: 1 },
-  { name: 'brideConversionCert', maxCount: 1 },
-  { name: 'statutoryDeclaration', maxCount: 1 }
-]), uploadDocumentsController);
+// POST /api/applicants/upload-documents - REMOVED (Documents no longer required)
 
 module.exports = router;

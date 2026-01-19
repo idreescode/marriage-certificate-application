@@ -8,7 +8,6 @@ import ApplicantDashboard from './pages/ApplicantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import DocumentUpload from './pages/DocumentUpload';
 import AdminLayout from './layouts/AdminLayout';
 import ApplicantLayout from './layouts/ApplicantLayout';
 import AdminApplications from './pages/AdminApplications';
@@ -61,7 +60,6 @@ function App() {
         {/* Applicant Routes with Layout */}
         <Route path="/applicant" element={<ApplicantLayout />}>
           <Route path="dashboard" element={<ApplicantDashboard />} />
-          <Route path="upload-documents" element={<DocumentUpload />} />
         </Route>
 
         {/* Applicant Auth (no layout) */}

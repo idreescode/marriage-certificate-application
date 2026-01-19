@@ -401,13 +401,14 @@ const approveApplication = async (req, res) => {
   }
 };
 
-// Verify Documents
+// Verify Documents (Deprecated - Documents are no longer required, but kept for backward compatibility)
+// This function now just allows progression without requiring documents
 const verifyDocuments = async (req, res) => {
   try {
     const { id } = req.params;
     const adminId = req.user.id;
 
-    // Get application to check if documents exist (exclude deleted)
+    // Get application (exclude deleted)
     const [appRows] = await pool.execute(
       "SELECT * FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [id]
@@ -422,30 +423,23 @@ const verifyDocuments = async (req, res) => {
 
     const app = appRows[0];
 
-    // Check if required documents are uploaded
-    if (!app.groom_id_path || !app.bride_id_path) {
-      return res.status(400).json({
-        success: false,
-        message: "Required documents are not uploaded yet",
-      });
-    }
-
     // Check if deposit amount has been set (should be set when application is approved)
     if (!app.deposit_amount || app.deposit_amount <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Deposit amount must be set before verifying documents. Please approve the application first.",
+        message: "Deposit amount must be set before proceeding. Please approve the application first.",
       });
     }
 
-    // Update application - mark documents as verified and change status to payment_pending
+    // Update application - mark as ready for appointment scheduling (skip payment_pending)
+    // Documents are no longer required, so we can proceed directly
     await pool.execute(
       `UPDATE applications 
        SET documents_verified = TRUE, 
            documents_verified_by = ?, 
            documents_verified_at = NOW(),
            payment_status = 'amount_set',
-           status = 'payment_pending'
+           status = 'admin_review'
        WHERE id = ?`,
       [adminId, id]
     );
@@ -472,13 +466,13 @@ const verifyDocuments = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Documents verified successfully. Deposit amount email sent to applicant.",
+      message: "Application ready for appointment scheduling. Deposit amount email sent to applicant.",
     });
   } catch (error) {
-    console.error("Error verifying documents:", error);
+    console.error("Error processing application:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to verify documents",
+      message: "Failed to process application",
       error: error.message,
     });
   }
@@ -588,6 +582,29 @@ const scheduleAppointment = async (req, res) => {
   try {
     const { id } = req.params;
     const { appointmentDate, appointmentTime, appointmentLocation } = req.body;
+
+    // Get application to check status
+    const [appRows] = await pool.execute(
+      "SELECT status FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
+      [id]
+    );
+
+    if (appRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    // Allow scheduling from admin_review, payment_pending, or payment_verified status
+    // Payment is now optional, so we don't require payment_verified
+    const allowedStatuses = ['admin_review', 'payment_pending', 'payment_verified'];
+    if (!allowedStatuses.includes(appRows[0].status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot schedule appointment from current status: ${appRows[0].status}`,
+      });
+    }
 
     // Update application
     await pool.execute(

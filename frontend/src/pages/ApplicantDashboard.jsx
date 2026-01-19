@@ -169,27 +169,6 @@ export default function ApplicantDashboard() {
       );
    };
 
-   // Check if all documents are uploaded
-   const areAllDocumentsUploaded = () => {
-      if (!app) return false;
-
-      const basicDocs = app.groom_id_path && app.bride_id_path && app.witness1_id_path && app.witness2_id_path && app.mahr_declaration_path;
-      if (!basicDocs) return false;
-
-      // Conditional: Previously Married
-      if (app.bride_previously_married) {
-         if (app.bride_divorce_type === 'civil' && !app.civil_divorce_doc_path) return false;
-         if (app.bride_divorce_type === 'islamic' && !app.islamic_divorce_doc_path) return false;
-         if (app.bride_divorce_type === 'both' && (!app.civil_divorce_doc_path || !app.islamic_divorce_doc_path)) return false;
-      }
-
-      // Conditional: Ahle Kitab
-      if (app.bride_ahle_kitab && !app.statutory_declaration_path) return false;
-
-      return true;
-   };
-
-   const allDocumentsUploaded = areAllDocumentsUploaded();
 
    const StatCard = ({ title, value, icon: Icon, color, bg, variant, subtitle }) => (
       <div 
@@ -340,22 +319,13 @@ export default function ApplicantDashboard() {
                   subtitle={new Date(app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                />
                <StatCard
-                  title="Documents Status"
-                  value={allDocumentsUploaded ? 'Uploaded' : 'Pending'}
-                  icon={FileCheck}
-                  color="white"
-                  bg="rgba(255,255,255,0.15)"
-                  variant={allDocumentsUploaded ? 'green' : 'orange'}
-                  subtitle={allDocumentsUploaded ? 'All documents received' : 'Action required'}
-               />
-               <StatCard
                   title="Payment Status"
                   value={
                      app.payment_verified_at 
                         ? 'Verified' 
                         : app.status === 'payment_pending' && app.deposit_amount 
                            ? `£${app.deposit_amount}` 
-                           : 'Pending'
+                           : 'Optional'
                   }
                   icon={CreditCard}
                   color="white"
@@ -365,8 +335,8 @@ export default function ApplicantDashboard() {
                      app.payment_verified_at 
                         ? 'Payment confirmed' 
                         : app.status === 'payment_pending' && app.deposit_amount 
-                           ? 'Payment due' 
-                           : 'Awaiting quote'
+                           ? 'Optional - Payment due' 
+                           : 'Payment is optional'
                   }
                />
                <StatCard
@@ -391,84 +361,6 @@ export default function ApplicantDashboard() {
                {/* Left Column: Actions & Details */}
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                  {/* Action Cards Section */}
-                  {app.approved_at && !allDocumentsUploaded && (
-                     <div style={{
-                        background: 'white',
-                        borderRadius: 'var(--radius-lg)',
-                        overflow: 'hidden',
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-                        border: '1px solid var(--slate-200)',
-                        transition: 'box-shadow 0.3s ease'
-                     }}
-                     onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)'}
-                     onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)'}
-                     >
-                        <div style={{
-                           background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%)',
-                           padding: '1rem 1.5rem',
-                           display: 'flex',
-                           alignItems: 'center',
-                           gap: '0.5rem'
-                        }}>
-                           <AlertCircle size={18} color="white" />
-                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Action Required</h3>
-                        </div>
-                        <div style={{ padding: '1.5rem' }}>
-                           <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '1.25rem',
-                              background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                              borderRadius: 'var(--radius-md)',
-                              border: '1px solid #e2e8f0',
-                              marginBottom: '1rem',
-                              transition: 'all 0.2s ease'
-                           }}
-                           onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#cbd5e1';
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
-                           }}
-                           onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#e2e8f0';
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
-                           }}
-                           >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                 <div style={{
-                                    width: '52px',
-                                    height: '52px',
-                                    borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
-                                 }}>
-                                    <Upload size={24} color="white" />
-                                 </div>
-                                 <div>
-                                    <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: 'var(--slate-800)', letterSpacing: '-0.01em' }}>Upload Documents</h4>
-                                    <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--slate-500)', marginTop: '0.25rem' }}>Submit required ID proofs and documents</p>
-                                 </div>
-                              </div>
-                              <button
-                                 onClick={() => navigate('/applicant/upload-documents')}
-                                 className="btn btn-primary"
-                                 style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '0.5rem',
-                                    boxShadow: '0 4px 12px rgba(176, 90, 51, 0.3)'
-                                 }}
-                              >
-                                 Start <ChevronRight size={16} />
-                              </button>
-                           </div>
-                        </div>
-                     </div>
-                  )}
 
                   {/* Payment Receipt Submitted Confirmation */}
                   {app.status === 'payment_pending' && app.payment_receipt_url && !app.payment_verified_at && (
@@ -667,11 +559,11 @@ export default function ApplicantDashboard() {
                            gap: '0.5rem'
                         }}>
                            <AlertCircle size={18} color="white" />
-                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Payment Required</h3>
+                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Payment (Optional)</h3>
                         </div>
                         <div style={{ padding: '1.5rem' }}>
                            <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', marginBottom: '1.5rem' }}>
-                              Please complete the payment of <strong style={{ fontSize: '1.1rem', color: 'var(--brand-600)' }}>£{app.deposit_amount}</strong> via bank transfer to proceed with your application.
+                              Payment is <strong style={{ fontSize: '1rem', color: 'var(--brand-600)' }}>optional</strong>. If you wish to make a payment, you can complete the payment of <strong style={{ fontSize: '1.1rem', color: 'var(--brand-600)' }}>£{app.deposit_amount}</strong> via bank transfer. Your application will proceed regardless of payment.
                            </p>
 
                            <div style={{ 
@@ -837,71 +729,40 @@ export default function ApplicantDashboard() {
                               );
                            })()}
 
-                           {/* Step 3: Documents Uploaded (by User) */}
-                           {(() => {
-                              const docsUploaded = allDocumentsUploaded;
-                              const isActive = app.approved_at != null && app.status === 'admin_review';
-                              return (
-                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
-                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: docsUploaded ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: docsUploaded ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
-                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: docsUploaded ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Documents Uploaded</h4>
-                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                       {docsUploaded ? 'All documents submitted' : (isActive ? 'Action required - Upload documents' : 'Waiting for approval')}
-                                    </p>
-                                 </div>
-                              );
-                           })()}
-
-                           {/* Step 4: Documents Verified (by Admin) */}
-                           {(() => {
-                              // Handle both boolean true and numeric 1 from MySQL
-                              const isVerified = app.documents_verified === true || app.documents_verified === 1 || app.documents_verified === '1';
-                              const isActive = allDocumentsUploaded && !isVerified && (app.status === 'admin_review' || app.status === 'payment_pending');
-                              return (
-                                 <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
-                                    <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isVerified ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isVerified ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
-                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Documents Verified</h4>
-                                    <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                       {isVerified ? (app.documents_verified_at ? `Verified ${new Date(app.documents_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Verified by admin') : (isActive ? 'Waiting for admin verification' : 'Not yet')}
-                                    </p>
-                                 </div>
-                              );
-                           })()}
-
-                           {/* Step 5: Payment (by User) */}
+                           {/* Step 3: Payment (Optional - by User) */}
                            {(() => {
                               const paymentDone = app.payment_receipt_url != null;
-                              const isActive = app.documents_verified && app.deposit_amount != null && app.status === 'payment_pending';
+                              const isActive = app.approved_at != null && app.deposit_amount != null && (app.status === 'admin_review' || app.status === 'payment_pending');
                               return (
                                  <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: paymentDone ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: paymentDone ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
-                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: paymentDone ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Made</h4>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: paymentDone ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment (Optional)</h4>
                                     <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                       {paymentDone ? `Receipt uploaded` : (isActive ? `Action required - Pay £${app.deposit_amount}` : (app.deposit_amount ? `£${app.deposit_amount} required` : 'Not yet'))}
+                                       {paymentDone ? `Receipt uploaded` : (isActive ? `Optional - Pay £${app.deposit_amount}` : (app.deposit_amount ? `£${app.deposit_amount} (optional)` : 'Not required'))}
                                     </p>
                                  </div>
                               );
                            })()}
 
-                           {/* Step 6: Payment Verified (by Admin) */}
+                           {/* Step 4: Payment Verified (Optional - by Admin) */}
                            {(() => {
                               const isVerified = app.payment_verified_at != null || app.status === 'payment_verified';
                               const isActive = app.payment_receipt_url && !app.payment_verified_at && app.status === 'payment_pending';
                               return (
                                  <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isVerified ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isVerified ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
-                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Verified</h4>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Verified (Optional)</h4>
                                     <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                       {isVerified ? (app.payment_verified_at ? `Verified ${new Date(app.payment_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Verified by admin') : (isActive ? 'Waiting for admin verification' : 'Pending')}
+                                       {isVerified ? (app.payment_verified_at ? `Verified ${new Date(app.payment_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Verified by admin') : (isActive ? 'Waiting for admin verification' : 'Not required')}
                                     </p>
                                  </div>
                               );
                            })()}
 
-                           {/* Step 7: Certificate Generated (by Admin) */}
+                           {/* Step 5: Certificate Generated (by Admin) */}
                            {(() => {
                               const isCompleted = app.status === 'completed' || (app.certificate_url != null);
-                              const isActive = app.status === 'payment_verified' || app.status === 'appointment_scheduled';
+                              const isActive = app.status === 'admin_review' || app.status === 'payment_verified' || app.status === 'appointment_scheduled';
                               return (
                                  <div style={{ position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isCompleted ? '#10b981' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isCompleted ? '0 0 0 3px #10b981' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
