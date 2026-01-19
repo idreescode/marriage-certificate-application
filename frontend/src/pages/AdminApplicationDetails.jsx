@@ -1057,7 +1057,7 @@ export default function AdminApplicationDetails() {
                   subValue={
                     application.payment_verified_at
                       ? "Verified"
-                      : application.payment_choice === false || application.payment_choice === 0
+                      : application.payment_choice === false || application.payment_choice === 0 || application.payment_status === 'skipped'
                       ? "Skipped"
                       : application.payment_choice === true || application.payment_choice === 1
                       ? application.payment_receipt_url
