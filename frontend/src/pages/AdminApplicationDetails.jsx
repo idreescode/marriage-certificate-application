@@ -288,7 +288,7 @@ export default function AdminApplicationDetails() {
     }
   };
 
-  const StatusBadge = ({ status }) => {
+  const StatusBadge = ({ status, application }) => {
     const config = {
       submitted: { color: "bg-blue-100 text-blue-700", label: "Submitted" },
       admin_review: {
@@ -314,6 +314,15 @@ export default function AdminApplicationDetails() {
       cancelled: { color: "bg-red-100 text-red-700", label: "Cancelled" },
     };
 
+    // Update label for admin_review if approved
+    let label = config[status]?.label || status;
+    if (status === "admin_review" && application?.approved_at) {
+      label = "Approved";
+      if (application.payment_choice === false || application.payment_choice === 0) {
+        label = "Approved (Payment Skipped)";
+      }
+    }
+
     const style = config[status] || {
       color: "bg-gray-100 text-gray-700",
       label: status,
@@ -323,7 +332,7 @@ export default function AdminApplicationDetails() {
       <span
         className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${style.color}`}
       >
-        {style.label}
+        {label}
       </span>
     );
   };
@@ -463,7 +472,7 @@ export default function AdminApplicationDetails() {
                     Nikkah Application
                   </h1>
                   <div className="bg-white rounded-full px-2 py-1">
-                    <StatusBadge status={application.status} />
+                    <StatusBadge status={application.status} application={application} />
                   </div>
                 </div>
               </div>

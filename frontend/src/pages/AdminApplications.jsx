@@ -282,6 +282,7 @@ export default function AdminApplications() {
 
     // For admin_review status:
     // - If approved_at exists, it means approved → "APPROVED"
+    // - If payment_choice is false, payment was skipped → show "APPROVED"
     // - Otherwise, it's not approved yet → "UNDER REVIEW"
     if (status === "admin_review") {
       if (app && app.approved_at) {
@@ -289,6 +290,11 @@ export default function AdminApplications() {
       } else {
         statusText.admin_review = "UNDER REVIEW";
       }
+    }
+    
+    // Show payment status in status badge if payment is skipped
+    if ((app.payment_choice === false || app.payment_choice === 0) && status === "admin_review" && app.approved_at) {
+      statusText.admin_review = "APPROVED";
     }
 
     return (

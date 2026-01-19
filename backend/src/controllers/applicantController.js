@@ -143,12 +143,15 @@ const skipPayment = async (req, res) => {
 
     // Update application to mark payment as skipped
     // Set payment_choice = false to indicate user chose to skip payment
+    // Update status appropriately based on current status
     await pool.execute(
       `UPDATE applications 
        SET payment_status = 'skipped',
            payment_choice = FALSE,
            status = CASE 
              WHEN status = 'payment_pending' THEN 'admin_review'
+             WHEN status = 'admin_review' THEN 'admin_review'  -- Keep admin_review, ready for appointment/certificate
+             WHEN status IN ('submitted', 'pending_admin_review') THEN 'admin_review'
              ELSE status
            END
        WHERE id = ?`,
