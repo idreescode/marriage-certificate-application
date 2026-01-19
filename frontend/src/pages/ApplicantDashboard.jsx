@@ -388,7 +388,7 @@ export default function ApplicantDashboard() {
                            ? `£${app.deposit_amount}` 
                            : app.payment_choice === null
                               ? 'Pending'
-                              : 'Optional'
+                              : 'Not Set'
                   }
                   icon={CreditCard}
                   color="white"

@@ -159,13 +159,13 @@ const sendApplicationConfirmation = async (applicationData) => {
       status_bg_color: "#fff7ed", // Orange/amber background
       status_text_color: "#c2410c", // Dark orange text
       main_message:
-        "Your nikah certificate application has been successfully received. Our team will review your application and verify your documents.",
+        "Your nikah certificate application has been successfully received. Our team will review your application.",
       password_display: portalPassword
         ? portalPassword
         : "Use your existing password",
       show_password_row: portalPassword ? "true" : "false",
       next_steps_section:
-        '<h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Next Steps</h3><p style="font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">Please upload all required documents through your portal. Once your documents are verified, you will be notified to proceed with payment. After payment verification, your nikah date will be scheduled.</p>',
+        '<h3 style="margin: 30px 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 600;">Next Steps</h3><p style="font-size: 15px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">Please log into your portal using the credentials above. Once your application is approved, you will be notified to proceed with payment. After payment verification or if you choose to skip payment, your nikah date will be scheduled.</p>',
     };
   }
 

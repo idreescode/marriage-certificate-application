@@ -1069,7 +1069,7 @@ export default function AdminApplicationDetails() {
               </div>
             </div>
 
-            {/* Payment Receipt Card (Optional) */}
+            {/* Payment Receipt Card */}
             {application.payment_receipt_url && (
               <div className="details-card bg-payment-card">
                 <div className="card-title-row">

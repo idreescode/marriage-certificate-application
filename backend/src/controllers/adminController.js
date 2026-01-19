@@ -358,8 +358,8 @@ const approveApplication = async (req, res) => {
       app.user_id,
     ]);
 
-    // Keep status as 'admin_review' - this indicates approved and waiting for documents
-    // Status will change to 'payment_pending' only after documents are verified
+    // Keep status as 'admin_review' - this indicates approved
+    // User can now choose to pay or skip payment
     // Set approved_at timestamp to track approval
     // Set deposit amount when application is approved
     await pool.execute(

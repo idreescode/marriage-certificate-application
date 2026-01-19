@@ -162,7 +162,7 @@ export default function AdminApplications() {
     try {
       await approveApplicationAPI(approveAppData.id);
       toast.success(
-        "Application approved successfully! Deposit amount set to £200. User will receive portal credentials. Payment email will be sent after document verification.",
+        "Application approved successfully! Deposit amount set to £200. User will receive portal credentials. User can now choose to pay or skip payment.",
         { id: toastId }
       );
       closeModal();
@@ -1050,7 +1050,7 @@ export default function AdminApplications() {
                 }}
               >
                 This will approve the application, set the deposit amount to £200, and send portal access
-                credentials to the applicant via email. Payment details email will be sent after document verification.
+                credentials to the applicant via email. User can then choose to pay or skip payment.
               </p>
             </div>
           </div>
