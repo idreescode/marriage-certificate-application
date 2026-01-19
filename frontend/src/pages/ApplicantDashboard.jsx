@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Loader from '../components/Loader';
-import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, skipPayment as skipPaymentAPI, requestBankDetails as requestBankDetailsAPI, getFileUrl, getCertificate } from '../services/api';
+import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, skipPayment as skipPaymentAPI, chooseToPay as chooseToPayAPI, requestBankDetails as requestBankDetailsAPI, getFileUrl, getCertificate } from '../services/api';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { FileText, Calendar, CreditCard, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight, Download } from 'lucide-react';
@@ -42,9 +42,10 @@ export default function ApplicantDashboard() {
       if (data?.application) {
          const app = data.application;
          // Use payment_choice from backend - this is the source of truth
-         if (app.payment_choice === false) {
+         // MySQL returns BOOLEAN as 0/1, so check both false/0 and true/1
+         if (app.payment_choice === false || app.payment_choice === 0) {
             setUserWantsToPay(false);
-         } else if (app.payment_choice === true) {
+         } else if (app.payment_choice === true || app.payment_choice === 1) {
             setUserWantsToPay(true);
          } else {
             // payment_choice is null - user hasn't made a choice yet
@@ -71,13 +72,26 @@ export default function ApplicantDashboard() {
      }
    };
 
-   const handlePaymentChoice = (wantsToPay) => {
+   const handlePaymentChoice = async (wantsToPay) => {
       setUserWantsToPay(wantsToPay);
       setShowPaymentChoice(false);
       
       if (!wantsToPay) {
          // User chose to skip payment - mark it in backend
          handleSkipPayment();
+      } else {
+         // User chose to pay - mark it in backend
+         const toastId = toast.loading('Recording your payment choice...');
+         try {
+            await chooseToPayAPI();
+            toast.success('Payment choice recorded. Please proceed with bank transfer.', { id: toastId });
+            fetchDashboard(); // Refresh to get updated data
+         } catch (error) {
+            console.error('Error choosing to pay:', error);
+            toast.error('Failed to record payment choice: ' + (error.response?.data?.message || error.message), { id: toastId });
+            // Reset state on error
+            setUserWantsToPay(null);
+         }
       }
    };
 
@@ -368,20 +382,34 @@ export default function ApplicantDashboard() {
                   value={
                      app.payment_verified_at 
                         ? 'Verified' 
+                        : app.payment_choice === false || app.payment_choice === 0
+                           ? 'Skipped'
                         : app.status === 'payment_pending' && app.deposit_amount 
                            ? `£${app.deposit_amount}` 
-                           : 'Optional'
+                           : app.payment_choice === null
+                              ? 'Pending'
+                              : 'Optional'
                   }
                   icon={CreditCard}
                   color="white"
                   bg="rgba(255,255,255,0.15)"
-                  variant={app.payment_verified_at ? 'teal' : 'purple'}
+                  variant={
+                     app.payment_verified_at 
+                        ? 'teal' 
+                        : app.payment_choice === false || app.payment_choice === 0
+                           ? 'orange'
+                           : 'purple'
+                  }
                   subtitle={
                      app.payment_verified_at 
                         ? 'Payment confirmed' 
+                        : app.payment_choice === false || app.payment_choice === 0
+                           ? 'Payment skipped'
                         : app.status === 'payment_pending' && app.deposit_amount 
                            ? 'Payment due' 
-                           : 'Pending'
+                           : app.payment_choice === null
+                              ? 'Decision pending'
+                              : 'Pending'
                   }
                />
                <StatCard
@@ -480,8 +508,8 @@ export default function ApplicantDashboard() {
                      </div>
                   )}
 
-                  {/* Payment Skipped Message - Show when payment_choice is false */}
-                  {app.approved_at && app.deposit_amount && app.payment_choice === false && (
+                  {/* Payment Skipped Message - Show when payment_choice is false/0 */}
+                  {app.approved_at && app.deposit_amount && (app.payment_choice === false || app.payment_choice === 0) && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',
@@ -687,7 +715,7 @@ export default function ApplicantDashboard() {
                   )}
 
                   {/* Payment Action Card - Show when payment_choice is true and receipt not uploaded */}
-                  {app.approved_at && app.deposit_amount && app.payment_choice === true && !app.payment_receipt_url && (
+                  {app.approved_at && app.deposit_amount && (app.payment_choice === true || app.payment_choice === 1) && !app.payment_receipt_url && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',
@@ -889,8 +917,8 @@ export default function ApplicantDashboard() {
                               );
                            })()}
 
-                           {/* Step 3: Payment (by User) - Only show if payment_choice is true */}
-                           {app.payment_choice === true && (() => {
+                           {/* Step 3: Payment (by User) - Only show if payment_choice is true/1 */}
+                           {(app.payment_choice === true || app.payment_choice === 1) && (() => {
                               const paymentDone = app.payment_receipt_url != null;
                               const isActive = app.approved_at != null && app.deposit_amount != null && (app.status === 'admin_review' || app.status === 'payment_pending');
                               return (
@@ -904,8 +932,8 @@ export default function ApplicantDashboard() {
                               );
                            })()}
 
-                           {/* Step 4: Payment Verified (by Admin) - Only show if payment_choice is true */}
-                           {app.payment_choice === true && (() => {
+                           {/* Step 4: Payment Verified (by Admin) - Only show if payment_choice is true/1 */}
+                           {(app.payment_choice === true || app.payment_choice === 1) && (() => {
                               const isVerified = app.payment_verified_at != null || app.status === 'payment_verified';
                               const isActive = app.payment_receipt_url && !app.payment_verified_at && app.status === 'payment_pending';
                               return (

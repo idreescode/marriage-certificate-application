@@ -688,8 +688,11 @@ export default function AdminApplications() {
                         </>
                       )}
 
-                      {app.status === "payment_pending" &&
-                        app.payment_receipt_url && (
+                      {/* Show Verify Payment button when payment_choice is true, receipt uploaded, and not verified */}
+                      {((app.payment_choice === true || app.payment_choice === 1) &&
+                        app.status === "payment_pending" &&
+                        app.payment_receipt_url && 
+                        !app.payment_verified_at) && (
                           <button
                             onClick={() => openVerifyPayment(app.id)}
                             className="btn btn-sm btn-primary"

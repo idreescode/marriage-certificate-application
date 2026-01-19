@@ -7,7 +7,7 @@
 <style>
 /* ===== PDF PAGE SETUP ===== */
 @page{
-  size: A3 landscape;
+  size: A4;
   margin: 10mm;
 }
 
@@ -15,13 +15,14 @@ body{
   margin:0;
   padding:0;
   font-family: "Times New Roman", serif;
-  font-size:13px;
+  font-size:11px;
+  overflow-x: hidden;
 }
 
 /* ===== CONTAINER ===== */
 .certificate-container{
-  width: 1587px;
-    margin: 0 auto; /* A3 Landscape width */
+  width: 794px;
+  margin: 0 auto; /* A4 width (210mm) */
 }
 
 /* ===== TABLE RESET ===== */
@@ -33,23 +34,27 @@ table{
 
 td, th{
   border:1px solid #000;
-  padding:4px 6px;
+  padding:3px 4px;
   vertical-align:top;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  font-size:11px;
 }
 
 .no-border{ border:none !important; }
 .center{ text-align:center; }
 .bold{ font-weight:bold; }
-.small{ font-size:11px; }
+.small{ font-size:9px; line-height:1.3; }
 
 /* ===== HEADER ===== */
 .title{
-  font-size:16px;
+  font-size:14px;
   font-style:italic;
   letter-spacing:-0.5px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  white-space:normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height:1.2;
 }
 
 .logo-cell{
@@ -67,24 +72,25 @@ td, th{
 
 .cert-number{
   width:130px;
-  font-size:11px;
-  white-space:nowrap;
-  overflow:hidden;
+  font-size:10px;
+  white-space:normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ===== ROW HEIGHTS ===== */
-.height-lg{ height:40px; }
-.height-xl{ height:55px; }
+.height-lg{ height:35px; min-height:35px; }
+.height-xl{ height:45px; min-height:45px; }
 
 /* ===== COLUMN WIDTHS (MAIN TABLE) ===== */
-.col-role{ width:18%; }
-.col-name{ width:16%; }
-.col-father{ width:14%; }
-.col-dob{ width:12%; }
-.col-address{ width:20%; }
-.col-marital{ width:6%; }
-.col-rep{ width:7%; }
-.col-sign{ width:7%; }
+.col-role{ width:15%; }
+.col-name{ width:15%; }
+.col-father{ width:13%; }
+.col-dob{ width:13%; }
+.col-address{ width:18%; }
+.col-marital{ width:8%; }
+.col-rep{ width:9%; }
+.col-sign{ width:9%; }
 
 /* ===== FOOTER ===== */
 .footer{
@@ -109,11 +115,11 @@ td, th{
     <td class="no-border logo-cell">
       <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" class="logo-img">
     </td>
-    <td class="no-border center bold title" style="padding:6px 4px; white-space:nowrap;">
+    <td class="no-border center bold title" style="padding:4px 3px;">
       MARRIAGE CERTIFICATE ACCORDING TO ISLAMIC LAWS
     </td>
-    <td class="no-border center bold cert-number" style="padding:6px 4px; white-space:nowrap;">
-      No. <span style="color:red; white-space:nowrap;">{{application_number}}</span>
+    <td class="no-border center bold cert-number" style="padding:4px 3px;">
+      No. <span style="color:red;">{{application_number}}</span>
     </td>
   </tr>
 </table>
@@ -235,7 +241,7 @@ td, th{
 
     <td width="25%">
       <b>Marriage Solemnized</b><br><br>
-      Date: {{solemnised_date_formatted}}<br><br>
+      Date & Time: {{solemnised_date_formatted}}<br><br>
       Place: {{solemnised_place}}<br><br>
       <b>Marriage Solemnized by</b><br><br>
       Name: {{solemnised_by_name}}<br><br>

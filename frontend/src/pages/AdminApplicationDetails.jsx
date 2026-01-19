@@ -1046,7 +1046,15 @@ export default function AdminApplicationDetails() {
                       : "Not Set"
                   }
                   subValue={
-                    application.payment_status || "Pending Verification"
+                    application.payment_verified_at
+                      ? "Verified"
+                      : application.payment_choice === false || application.payment_choice === 0
+                      ? "Skipped"
+                      : application.payment_choice === true || application.payment_choice === 1
+                      ? application.payment_receipt_url
+                        ? "Receipt Uploaded"
+                        : "Payment Required"
+                      : application.payment_status || "Pending Verification"
                   }
                 />
               </div>

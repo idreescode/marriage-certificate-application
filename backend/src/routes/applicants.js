@@ -6,6 +6,7 @@ const {
   getDashboard,
   uploadReceipt: uploadReceiptController,
   skipPayment,
+  chooseToPay,
   downloadCertificate,
   requestBankDetails
 } = require('../controllers/applicantController');
@@ -24,6 +25,9 @@ router.post('/upload-receipt', uploadReceipt.single('receipt'), uploadReceiptCon
 
 // POST /api/applicants/skip-payment - Skip payment
 router.post('/skip-payment', skipPayment);
+
+// POST /api/applicants/choose-to-pay - Choose to pay (set payment_choice = true)
+router.post('/choose-to-pay', chooseToPay);
 
 // POST /api/applicants/request-bank-details - Request bank transfer details
 router.post('/request-bank-details', requestBankDetails);

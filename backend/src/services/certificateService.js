@@ -108,7 +108,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       // Solemnization
       solemnised_date_formatted: applicationData.solemnised_date 
         ? formatDateFull(applicationData.solemnised_date, true) 
-        : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date) : ''),
+        : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date, true) : ''),
       solemnised_place: applicationData.solemnised_place || applicationData.appointment_location || '',
       solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed
       solemnised_address: applicationData.solemnised_address || '',
@@ -168,10 +168,10 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     const page = await browser.newPage();
     
     try {
-      // Set viewport for A3 Landscape size (wider page)
+      // Set viewport for A4 Portrait size
       await page.setViewport({
-        width: 1587,  // 420mm in pixels at 96 DPI (A3 landscape width)
-        height: 1123, // 297mm in pixels at 96 DPI (A3 landscape height)
+        width: 794,   // 210mm in pixels at 96 DPI (A4 width)
+        height: 1123, // 297mm in pixels at 96 DPI (A4 height)
         deviceScaleFactor: 1
       });
       
@@ -185,11 +185,11 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       // Using Promise-based delay instead of deprecated waitForTimeout
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Generate PDF in A3 Landscape orientation (wider page)
+      // Generate PDF in A4 Portrait orientation
       await page.pdf({
         path: filePath,
-        format: 'A3',
-        landscape: true,  // Landscape orientation
+        format: 'A4',
+        landscape: false,  // Portrait orientation
         printBackground: true,
         preferCSSPageSize: true,
         margin: {
