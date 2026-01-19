@@ -17,8 +17,9 @@ const generatePassword = (length = 10) => {
 };
 
 // Normalize date from WordPress format (DD-MM-YYYY) to MySQL format (YYYY-MM-DD)
+// Also handles datetime format (DD-MM-YYYY HH:MM AM/PM) for solemnised_date
 // WordPress sends dates in DD-MM-YYYY format (e.g., "15-01-2024")
-const normalizeDate = (dateString) => {
+const normalizeDate = (dateString, includeTime = false) => {
   // Return null for falsy values
   if (!dateString || typeof dateString !== 'string') {
     return null;
@@ -32,11 +33,63 @@ const normalizeDate = (dateString) => {
     return null;
   }
 
-  // Already in MySQL format (YYYY-MM-DD)
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+  // Handle datetime format: DD-MM-YYYY HH:MM AM/PM (e.g., "08-01-2026 12:00 PM")
+  if (includeTime && /^\d{2}-\d{2}-\d{4}\s+\d{1,2}:\d{2}\s+(AM|PM)$/i.test(trimmed)) {
+    const parts = trimmed.split(' ');
+    const datePart = parts[0]; // DD-MM-YYYY
+    const timePart = parts[1]; // HH:MM
+    const ampm = parts[2].toUpperCase(); // AM/PM
+    
+    const dateParts = datePart.split('-');
+    const day = dateParts[0];
+    const month = dateParts[1];
+    const year = dateParts[2];
+    
+    const timeParts = timePart.split(':');
+    let hours = parseInt(timeParts[0]);
+    const minutes = timeParts[1];
+    
+    // Convert to 24-hour format
+    if (ampm === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (ampm === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    
+    const hours24 = String(hours).padStart(2, '0');
+    
+    // Validate date
+    const date = new Date(`${year}-${month}-${day}T${hours24}:${minutes}:00`);
+    if (!isNaN(date.getTime()) && 
+        date.getDate() === parseInt(day) && 
+        date.getMonth() === parseInt(month) - 1 && 
+        date.getFullYear() === parseInt(year)) {
+      return `${year}-${month}-${day} ${hours24}:${minutes}:00`;
+    }
+  }
+
+  // Handle datetime-local format: YYYY-MM-DDTHH:mm (e.g., "2026-01-08T12:00")
+  if (includeTime && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+    const dateTimeParts = trimmed.split('T');
+    const datePart = dateTimeParts[0]; // YYYY-MM-DD
+    const timePart = dateTimeParts[1]; // HH:mm
+    
+    const timeParts = timePart.split(':');
+    const hours = timeParts[0];
+    const minutes = timeParts[1];
+    
+    // Validate date
+    const date = new Date(`${datePart}T${hours}:${minutes}:00`);
+    if (!isNaN(date.getTime())) {
+      return `${datePart} ${hours}:${minutes}:00`;
+    }
+  }
+
+  // Already in MySQL format (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
+  if (/^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}:\d{2})?$/.test(trimmed)) {
     // Validate it's a real date
-    const date = new Date(trimmed + 'T00:00:00');
-    if (!isNaN(date.getTime()) && date.toISOString().startsWith(trimmed)) {
+    const date = new Date(trimmed.includes(' ') ? trimmed : trimmed + 'T00:00:00');
+    if (!isNaN(date.getTime())) {
       return trimmed;
     }
   }

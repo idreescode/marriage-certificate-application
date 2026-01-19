@@ -281,11 +281,11 @@ export default function AdminApplications() {
     };
 
     // For admin_review status:
-    // - If approved_at exists, it means approved → "DOCUMENT PENDING"
+    // - If approved_at exists, it means approved → "APPROVED"
     // - Otherwise, it's not approved yet → "UNDER REVIEW"
     if (status === "admin_review") {
       if (app && app.approved_at) {
-        statusText.admin_review = "DOCUMENT PENDING";
+        statusText.admin_review = "APPROVED";
       } else {
         statusText.admin_review = "UNDER REVIEW";
       }
@@ -599,7 +599,10 @@ export default function AdminApplications() {
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
                     {app.solemnised_date
-                      ? new Date(app.solemnised_date).toLocaleDateString()
+                      ? new Date(app.solemnised_date).toLocaleString(undefined, {
+                          dateStyle: "short",
+                          timeStyle: "short"
+                        })
                       : "-"}
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
@@ -695,8 +698,16 @@ export default function AdminApplications() {
                             Verify Payment
                           </button>
                         )}
-                      {/* Show Generate Certificate button after payment is verified */}
-                      {app.status === "payment_verified" && (
+                      {/* Show Generate Certificate button when: 
+                          - payment_choice is false/0 (skipped) OR 
+                          - payment is verified OR 
+                          - appointment is scheduled OR
+                          - admin_review status with payment_status skipped (for backward compatibility) */}
+                      {((app.payment_choice === false || app.payment_choice === 0 || 
+                          (app.status === "admin_review" && app.payment_status === "skipped") ||
+                          app.status === "payment_verified" || 
+                          app.status === "appointment_scheduled") && 
+                          app.status !== "completed" && !app.certificate_url) && (
                         <button
                           onClick={() => handleGenerateCertificate(app.id)}
                           className="btn btn-sm btn-success text-white"
@@ -987,7 +998,10 @@ export default function AdminApplications() {
                   }}
                 >
                   <strong>Solemnised Date:</strong>{" "}
-                  {new Date(approveAppData.solemnisedDate).toLocaleDateString()}
+                  {new Date(approveAppData.solemnisedDate).toLocaleString(undefined, {
+                    dateStyle: "long",
+                    timeStyle: "short"
+                  })}
                 </p>
               )}
               {approveAppData?.solemnisedPlace && (

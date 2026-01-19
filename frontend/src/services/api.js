@@ -117,6 +117,7 @@ export const getApplicantDashboard = () => api.get('/applicants/dashboard');
 export const uploadReceipt = (formData) => api.post('/applicants/upload-receipt', formData, {
   headers: { 'Content-Type': 'multipart/form-data' }
 });
+export const skipPayment = () => api.post('/applicants/skip-payment');
 export const requestBankDetails = () => api.post('/applicants/request-bank-details');
 export const getCertificate = () => api.get('/applicants/certificate');
 export const uploadDocuments = (formData) => api.post('/applicants/upload-documents', formData, {

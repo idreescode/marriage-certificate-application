@@ -36,9 +36,21 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       }
     };
 
-    const formatDateFull = (dateString) => {
+    const formatDateFull = (dateString, includeTime = false) => {
       if (!dateString) return '';
-      return new Date(dateString).toLocaleDateString('en-GB', { 
+      const date = new Date(dateString);
+      if (includeTime) {
+        return date.toLocaleString('en-GB', { 
+          weekday: 'long',
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+      return date.toLocaleDateString('en-GB', { 
         weekday: 'long',
         year: 'numeric', 
         month: 'long', 
@@ -95,7 +107,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       
       // Solemnization
       solemnised_date_formatted: applicationData.solemnised_date 
-        ? formatDateFull(applicationData.solemnised_date) 
+        ? formatDateFull(applicationData.solemnised_date, true) 
         : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date) : ''),
       solemnised_place: applicationData.solemnised_place || applicationData.appointment_location || '',
       solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed

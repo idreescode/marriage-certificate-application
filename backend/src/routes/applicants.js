@@ -5,6 +5,7 @@ const { uploadReceipt } = require('../middleware/upload');
 const {
   getDashboard,
   uploadReceipt: uploadReceiptController,
+  skipPayment,
   downloadCertificate,
   requestBankDetails
 } = require('../controllers/applicantController');
@@ -20,6 +21,9 @@ router.get('/dashboard', getDashboard);
 
 // POST /api/applicants/upload-receipt - Upload payment receipt
 router.post('/upload-receipt', uploadReceipt.single('receipt'), uploadReceiptController);
+
+// POST /api/applicants/skip-payment - Skip payment
+router.post('/skip-payment', skipPayment);
 
 // POST /api/applicants/request-bank-details - Request bank transfer details
 router.post('/request-bank-details', requestBankDetails);

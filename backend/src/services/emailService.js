@@ -411,10 +411,21 @@ const sendAdminNewApplicationEmail = async (applicationData) => {
   );
 
   // Format dates
-  const formatDateForEmail = (date) => {
+  const formatDateForEmail = (date, includeTime = false) => {
     if (!date) return 'N/A';
     try {
-      return new Date(date).toLocaleDateString('en-GB', { 
+      const dateObj = new Date(date);
+      if (includeTime) {
+        return dateObj.toLocaleString('en-GB', { 
+          day: '2-digit', 
+          month: 'long', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+      return dateObj.toLocaleDateString('en-GB', { 
         day: '2-digit', 
         month: 'long', 
         year: 'numeric' 
@@ -456,7 +467,7 @@ const sendAdminNewApplicationEmail = async (applicationData) => {
     bride_rep_address: application.bride_rep_address || 'N/A',
     mahr_amount: application.mahr_amount || 'N/A',
     mahr_type: application.mahr_type || 'N/A',
-    solemnised_date: formatDateForEmail(application.solemnised_date),
+    solemnised_date: formatDateForEmail(application.solemnised_date, true),
     solemnised_place: application.solemnised_place || 'N/A',
     solemnised_address: application.solemnised_address || 'N/A',
     witness1_name: witnesses[0]?.witness_name || 'N/A',

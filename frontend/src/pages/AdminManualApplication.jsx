@@ -149,20 +149,48 @@ const FormField = ({
           rows={3}
           {...props}
         />
-      ) : type === "date" ? (
-        <DatePicker
-          selected={getDateValue()}
-          onChange={handleDateChange}
-          dateFormat="yyyy-MM-dd"
-          placeholderText="Select date"
-          required={required}
-          className="date-picker-input"
-          wrapperClassName="custom-datepicker-wrapper"
-          showYearDropdown
-          showMonthDropdown
-          dropdownMode="select"
-          maxDate={name === 'solemnisedDate' ? null : new Date()} // Allow future dates only for solemnisedDate
-        />
+      ) : type === "date" || type === "datetime-local" ? (
+        type === "datetime-local" && name === "solemnisedDate" ? (
+          <input
+            type="datetime-local"
+            name={name}
+            value={formData[name] || ""}
+            onChange={handleChange}
+            required={required}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              border: "1px solid #cbd5e1",
+              borderRadius: "8px",
+              fontSize: "16px",
+              fontFamily: "inherit",
+              backgroundColor: "#fff",
+              transition: "border-color 0.2s, box-shadow 0.2s",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#CA6C40";
+              e.target.style.boxShadow = "0 0 0 4px rgba(202, 108, 65, 0.2)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#cbd5e1";
+              e.target.style.boxShadow = "none";
+            }}
+          />
+        ) : (
+          <DatePicker
+            selected={getDateValue()}
+            onChange={handleDateChange}
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Select date"
+            required={required}
+            className="date-picker-input"
+            wrapperClassName="custom-datepicker-wrapper"
+            showYearDropdown
+            showMonthDropdown
+            dropdownMode="select"
+            maxDate={name === 'solemnisedDate' ? null : new Date()} // Allow future dates only for solemnisedDate
+          />
+        )
       ) : (
         <input
           type={type}
@@ -347,12 +375,21 @@ export default function AdminManualApplication() {
             
             // Format dates for input fields (YYYY-MM-DD)
             // Handle dates directly to avoid timezone conversion issues
-            const formatDate = (date) => {
+            const formatDate = (date, includeTime = false) => {
               if (!date) return "";
               try {
-                // If it's already in YYYY-MM-DD format, return it directly
-                if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-                  return date;
+                // If it's already in YYYY-MM-DD or YYYY-MM-DDTHH:mm format, return it directly
+                if (typeof date === 'string') {
+                  if (includeTime && /^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}$/.test(date)) {
+                    // MySQL DATETIME format: convert to datetime-local format
+                    return date.replace(' ', 'T').substring(0, 16);
+                  }
+                  if (includeTime && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(date)) {
+                    return date.substring(0, 16);
+                  }
+                  if (!includeTime && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                    return date;
+                  }
                 }
                 // If it's a Date object or other format, parse it
                 const d = new Date(date);
@@ -361,6 +398,11 @@ export default function AdminManualApplication() {
                 const year = d.getFullYear();
                 const month = String(d.getMonth() + 1).padStart(2, '0');
                 const day = String(d.getDate()).padStart(2, '0');
+                if (includeTime) {
+                  const hours = String(d.getHours()).padStart(2, '0');
+                  const minutes = String(d.getMinutes()).padStart(2, '0');
+                  return `${year}-${month}-${day}T${hours}:${minutes}`;
+                }
                 return `${year}-${month}-${day}`;
               } catch (e) {
                 console.error("Error formatting date:", date, e);
@@ -470,7 +512,7 @@ export default function AdminManualApplication() {
               mahrAmount: app.mahr_amount || "",
               mahrDeferred: app.mahr_type === "deferred",
               mahrPrompt: app.mahr_type === "prompt",
-              solemnisedDate: formatDate(app.solemnised_date),
+              solemnisedDate: formatDate(app.solemnised_date, true),
               solemnisedPlace: app.solemnised_place || "",
               solemnisedAddress: app.solemnised_address || "",
               email: app.portal_email || "",
@@ -1774,9 +1816,9 @@ export default function AdminManualApplication() {
         <FormSection title="NIKAH DATE AND PLACE">
           <FormRow>
             <FormField
-              label="Date"
+              label="Date & Time"
               name="solemnisedDate"
-              type="date"
+              type="datetime-local"
               formData={formData}
               handleChange={handleChange}
             />

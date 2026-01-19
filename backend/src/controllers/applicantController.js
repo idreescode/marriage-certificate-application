@@ -82,11 +82,13 @@ const uploadReceipt = async (req, res) => {
     const receiptUrl = `/uploads/receipts/${req.file.filename}`;
 
     // Update application with receipt
+    // Set payment_choice = true to indicate user chose to pay
     // Payment is optional, so only change status to payment_pending if not already in a later stage
     await pool.execute(
       `UPDATE applications 
        SET payment_receipt_url = ?, 
            payment_status = "paid",
+           payment_choice = TRUE,
            status = CASE 
              WHEN status IN ('appointment_scheduled', 'completed') THEN status
              ELSE 'payment_pending'
@@ -117,6 +119,52 @@ const uploadReceipt = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to upload receipt',
+      error: error.message
+    });
+  }
+};
+
+// Skip Payment
+const skipPayment = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Find application first (exclude deleted)
+    const [rows] = await pool.execute(
+      'SELECT id, application_number FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
+    const applicationId = rows[0].id;
+
+    // Update application to mark payment as skipped
+    // Set payment_choice = false to indicate user chose to skip payment
+    await pool.execute(
+      `UPDATE applications 
+       SET payment_status = 'skipped',
+           payment_choice = FALSE,
+           status = CASE 
+             WHEN status = 'payment_pending' THEN 'admin_review'
+             ELSE status
+           END
+       WHERE id = ?`,
+      [applicationId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Payment skipped successfully. Your application will proceed.',
+    });
+
+  } catch (error) {
+    console.error('Error skipping payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to skip payment',
       error: error.message
     });
   }
@@ -279,6 +327,7 @@ const uploadDocuments = async (req, res) => {
 module.exports = {
   getDashboard,
   uploadReceipt,
+  skipPayment,
   downloadCertificate,
   requestBankDetails,
   uploadDocuments

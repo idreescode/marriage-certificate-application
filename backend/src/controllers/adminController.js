@@ -1134,7 +1134,7 @@ const createManualApplication = async (req, res) => {
       const normalizedBrideRepDob = normalizeDate(brideRepDateOfBirth);
       const normalizedWitness1Dob = normalizeDate(witness1DateOfBirth);
       const normalizedWitness2Dob = normalizeDate(witness2DateOfBirth);
-      const normalizedSolemnisedDate = normalizeDate(solemnisedDate);
+      const normalizedSolemnisedDate = normalizeDate(solemnisedDate, true); // includeTime=true for datetime
       const normalizedPreferredDate = normalizeDate(preferredDate);
       const normalizedAppointmentDate = normalizeDate(appointmentDate);
 

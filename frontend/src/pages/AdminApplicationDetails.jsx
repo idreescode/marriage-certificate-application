@@ -517,7 +517,10 @@ export default function AdminApplicationDetails() {
                         <Calendar size={16} /> Solemnised Date:{" "}
                         {new Date(
                           application.solemnised_date
-                        ).toLocaleDateString(undefined, { dateStyle: "long" })}
+                        ).toLocaleString(undefined, { 
+                          dateStyle: "long",
+                          timeStyle: "short"
+                        })}
                       </span>
                     )}
                     {application.solemnised_place && (
@@ -917,7 +920,10 @@ export default function AdminApplicationDetails() {
                       label="Date of Solemnisation"
                       value={new Date(
                         application.solemnised_date
-                      ).toLocaleDateString(undefined, { dateStyle: "long" })}
+                      ).toLocaleString(undefined, { 
+                        dateStyle: "long",
+                        timeStyle: "short"
+                      })}
                     />
                   )}
                   {application.solemnised_place && (
@@ -1528,8 +1534,11 @@ export default function AdminApplicationDetails() {
               <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>
                 Date:{" "}
                 {application.solemnised_date
-                  ? new Date(application.solemnised_date).toLocaleDateString(
-                      "en-GB"
+                  ? new Date(application.solemnised_date).toLocaleString(
+                      "en-GB", {
+                        dateStyle: "long",
+                        timeStyle: "short"
+                      }
                     )
                   : "NIL"}
               </p>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Loader from '../components/Loader';
-import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, requestBankDetails as requestBankDetailsAPI, getFileUrl, getCertificate } from '../services/api';
+import { getApplicantDashboard, uploadReceipt as uploadReceiptAPI, skipPayment as skipPaymentAPI, requestBankDetails as requestBankDetailsAPI, getFileUrl, getCertificate } from '../services/api';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { FileText, Calendar, CreditCard, Upload, CheckCircle, AlertCircle, FileCheck, User, TrendingUp, ChevronRight, Download } from 'lucide-react';
@@ -14,6 +14,8 @@ export default function ApplicantDashboard() {
    const [data, setData] = useState(null);
    const [uploadingReceipt, setUploadingReceipt] = useState(false);
    const [currentView, setCurrentView] = useState('dashboard');
+   const [showPaymentChoice, setShowPaymentChoice] = useState(false);
+   const [userWantsToPay, setUserWantsToPay] = useState(null);
 
    useEffect(() => {
      // Auth check is handled by ApplicantLayout, but we still check here as a safety measure
@@ -35,6 +37,22 @@ export default function ApplicantDashboard() {
      fetchDashboard();
    }, [navigate]);
 
+   // Set userWantsToPay based on payment_choice from backend
+   useEffect(() => {
+      if (data?.application) {
+         const app = data.application;
+         // Use payment_choice from backend - this is the source of truth
+         if (app.payment_choice === false) {
+            setUserWantsToPay(false);
+         } else if (app.payment_choice === true) {
+            setUserWantsToPay(true);
+         } else {
+            // payment_choice is null - user hasn't made a choice yet
+            setUserWantsToPay(null);
+         }
+      }
+   }, [data]);
+
    const fetchDashboard = async () => {
      try {
        const response = await getApplicantDashboard();
@@ -53,9 +71,35 @@ export default function ApplicantDashboard() {
      }
    };
 
+   const handlePaymentChoice = (wantsToPay) => {
+      setUserWantsToPay(wantsToPay);
+      setShowPaymentChoice(false);
+      
+      if (!wantsToPay) {
+         // User chose to skip payment - mark it in backend
+         handleSkipPayment();
+      }
+   };
+
+   const handleSkipPayment = async () => {
+      const toastId = toast.loading('Skipping payment...');
+      try {
+         // Call API to mark payment as skipped
+         await skipPaymentAPI();
+         toast.success('Payment skipped. Your application will proceed.', { id: toastId });
+         fetchDashboard();
+      } catch (error) {
+         console.error('Error skipping payment:', error);
+         toast.error('Failed to skip payment: ' + (error.response?.data?.message || error.message), { id: toastId });
+      }
+   };
+
    const handleReceiptUpload = async (e) => {
       const file = e.target.files[0];
-      if (!file) return;
+      if (!file) {
+         toast.error('Please select a receipt file');
+         return;
+      }
 
       const formData = new FormData();
       formData.append('receipt', file);
@@ -66,6 +110,7 @@ export default function ApplicantDashboard() {
       try {
          await uploadReceiptAPI(formData);
          toast.success('Receipt uploaded successfully!', { id: toastId });
+         setUserWantsToPay(true); // Mark that user chose to pay
          fetchDashboard();
       } catch (error) {
          toast.error('Failed to upload receipt: ' + (error.response?.data?.message || error.message), { id: toastId });
@@ -335,8 +380,8 @@ export default function ApplicantDashboard() {
                      app.payment_verified_at 
                         ? 'Payment confirmed' 
                         : app.status === 'payment_pending' && app.deposit_amount 
-                           ? 'Optional - Payment due' 
-                           : 'Payment is optional'
+                           ? 'Payment due' 
+                           : 'Pending'
                   }
                />
                <StatCard
@@ -361,6 +406,106 @@ export default function ApplicantDashboard() {
                {/* Left Column: Actions & Details */}
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+                  {/* Payment Choice Card - Show when approved but payment_choice is null (no choice made yet) */}
+                  {app.approved_at && app.deposit_amount && app.payment_choice === null && (
+                     <div style={{
+                        background: 'white',
+                        borderRadius: 'var(--radius-lg)',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(59, 130, 246, 0.15)',
+                        border: '2px solid #3b82f6',
+                        transition: 'box-shadow 0.3s ease'
+                     }}>
+                        <div style={{
+                           background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                           padding: '1.5rem',
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: '0.75rem'
+                        }}>
+                           <AlertCircle size={20} color="white" />
+                           <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'white', fontWeight: 600 }}>
+                              Payment Decision Required
+                           </h3>
+                        </div>
+                        <div style={{ padding: '1.5rem' }}>
+                           <p style={{
+                              fontSize: '1rem',
+                              color: 'var(--slate-700)',
+                              marginBottom: '1.5rem',
+                              lineHeight: '1.6'
+                           }}>
+                              Your application has been approved. The deposit amount is <strong style={{ color: 'var(--brand-600)', fontSize: '1.2rem' }}>£{app.deposit_amount}</strong>.
+                           </p>
+                           <p style={{
+                              fontSize: '0.95rem',
+                              color: 'var(--slate-600)',
+                              marginBottom: '2rem'
+                           }}>
+                              Would you like to make the payment now? If you choose to pay, you'll need to upload a receipt after completing the bank transfer.
+                           </p>
+                           <div style={{
+                              display: 'flex',
+                              gap: '1rem',
+                              flexWrap: 'wrap'
+                           }}>
+                              <button
+                                 onClick={() => handlePaymentChoice(false)}
+                                 className="btn btn-secondary"
+                                 style={{
+                                    flex: 1,
+                                    minWidth: '150px',
+                                    padding: '0.875rem 1.5rem',
+                                    fontSize: '1rem',
+                                    fontWeight: 600
+                                 }}
+                              >
+                                 Skip Payment
+                              </button>
+                              <button
+                                 onClick={() => handlePaymentChoice(true)}
+                                 className="btn btn-primary"
+                                 style={{
+                                    flex: 1,
+                                    minWidth: '150px',
+                                    padding: '0.875rem 1.5rem',
+                                    fontSize: '1rem',
+                                    fontWeight: 600
+                                 }}
+                              >
+                                 Yes, I'll Pay
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  )}
+
+                  {/* Payment Skipped Message - Show when payment_choice is false */}
+                  {app.approved_at && app.deposit_amount && app.payment_choice === false && (
+                     <div style={{
+                        background: 'white',
+                        borderRadius: 'var(--radius-lg)',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        border: '1px solid #cbd5e1',
+                        padding: '1.5rem'
+                     }}>
+                        <div style={{
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: '0.75rem',
+                           marginBottom: '0.5rem'
+                        }}>
+                           <CheckCircle size={20} color="#10b981" />
+                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--slate-800)', fontWeight: 600 }}>
+                              Payment Skipped
+                           </h3>
+                        </div>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--slate-600)', margin: 0 }}>
+                           You have chosen to skip payment. Your application will proceed without payment.
+                        </p>
+                     </div>
+                  )}
 
                   {/* Payment Receipt Submitted Confirmation */}
                   {app.status === 'payment_pending' && app.payment_receipt_url && !app.payment_verified_at && (
@@ -391,7 +536,8 @@ export default function ApplicantDashboard() {
                   )}
 
                   {/* Certificate Generation Awaiting Card */}
-                  {app.status === 'payment_verified' && !app.certificate_url && (
+                  {/* Show when: payment_choice is false (skipped) OR payment is verified OR appointment is scheduled */}
+                  {((app.payment_choice === false || app.status === 'payment_verified' || app.status === 'appointment_scheduled') && !app.certificate_url) && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',
@@ -415,7 +561,9 @@ export default function ApplicantDashboard() {
                         </div>
                         <div style={{ padding: '1.5rem' }}>
                            <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', marginBottom: '1rem' }}>
-                              <strong style={{ color: '#059669' }}>Excellent!</strong> Your payment has been verified. Our admin team will now generate your marriage certificate.
+                              <strong style={{ color: '#059669' }}>Excellent!</strong> {app.payment_choice === false 
+                                 ? 'Your application has been approved. Our admin team will now generate your marriage certificate.'
+                                 : 'Your payment has been verified. Our admin team will now generate your marriage certificate.'}
                            </p>
                            <div style={{
                               background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
@@ -538,8 +686,8 @@ export default function ApplicantDashboard() {
                      </div>
                   )}
 
-                  {/* Urgent Payment Action Card */}
-                  {app.status === 'payment_pending' && app.deposit_amount && !app.payment_verified_at && !app.payment_receipt_url && (
+                  {/* Payment Action Card - Show when payment_choice is true and receipt not uploaded */}
+                  {app.approved_at && app.deposit_amount && app.payment_choice === true && !app.payment_receipt_url && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',
@@ -559,11 +707,11 @@ export default function ApplicantDashboard() {
                            gap: '0.5rem'
                         }}>
                            <AlertCircle size={18} color="white" />
-                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Payment (Optional)</h3>
+                           <h3 style={{ fontSize: '1rem', margin: 0, color: 'white', fontWeight: 600 }}>Payment Required</h3>
                         </div>
                         <div style={{ padding: '1.5rem' }}>
                            <p style={{ fontSize: '0.95rem', color: 'var(--slate-700)', marginBottom: '1.5rem' }}>
-                              Payment is <strong style={{ fontSize: '1rem', color: 'var(--brand-600)' }}>optional</strong>. If you wish to make a payment, you can complete the payment of <strong style={{ fontSize: '1.1rem', color: 'var(--brand-600)' }}>£{app.deposit_amount}</strong> via bank transfer. Your application will proceed regardless of payment.
+                              Please complete the payment of <strong style={{ fontSize: '1.1rem', color: 'var(--brand-600)' }}>£{app.deposit_amount}</strong> via bank transfer. <strong style={{ color: '#dc2626' }}>Receipt upload is required</strong> to proceed.
                            </p>
 
                            <div style={{ 
@@ -598,25 +746,37 @@ export default function ApplicantDashboard() {
                               </div>
                               <p style={{ 
                                  fontSize: '0.85rem', 
-                                 color: 'var(--slate-600)', 
+                                 color: '#dc2626', 
                                  marginBottom: '1rem',
                                  padding: '0.75rem',
-                                 background: '#fffbeb',
-                                 border: '1px solid #fcd34d',
-                                 borderRadius: 'var(--radius-md)'
+                                 background: '#fef2f2',
+                                 border: '1px solid #fca5a5',
+                                 borderRadius: 'var(--radius-md)',
+                                 fontWeight: 600
                               }}>
-                                 💡 After completing the transfer, upload your receipt below for verification.
+                                 ⚠️ Receipt upload is mandatory. Please complete the bank transfer and upload your receipt below.
                               </p>
                               <label style={{ display: 'block', width: '100%' }}>
-                                 <input type="file" onChange={handleReceiptUpload} accept="image/*,.pdf" style={{ display: 'none' }} disabled={uploadingReceipt} />
-                                 <div className="btn btn-primary" style={{ 
-                                    width: '100%', 
-                                    textAlign: 'center', 
-                                    cursor: uploadingReceipt ? 'not-allowed' : 'pointer',
-                                    boxShadow: '0 4px 12px rgba(176, 90, 51, 0.3)',
-                                    opacity: uploadingReceipt ? 0.7 : 1
-                                 }}>
-                                    {uploadingReceipt ? '⏳ Uploading...' : '📎 Upload Receipt'}
+                                 <input 
+                                    type="file" 
+                                    onChange={handleReceiptUpload} 
+                                    accept="image/*,.pdf" 
+                                    id="receipt-upload"
+                                    style={{ display: 'none' }} 
+                                    disabled={uploadingReceipt} 
+                                 />
+                                 <div 
+                                    onClick={() => document.getElementById('receipt-upload')?.click()}
+                                    className="btn btn-primary" 
+                                    style={{ 
+                                       width: '100%', 
+                                       textAlign: 'center', 
+                                       cursor: uploadingReceipt ? 'not-allowed' : 'pointer',
+                                       boxShadow: '0 4px 12px rgba(176, 90, 51, 0.3)',
+                                       opacity: uploadingReceipt ? 0.7 : 1
+                                    }}
+                                 >
+                                    {uploadingReceipt ? '⏳ Uploading...' : '📎 Upload Receipt (Required)'}
                                  </div>
                               </label>
                            </div>
@@ -729,29 +889,29 @@ export default function ApplicantDashboard() {
                               );
                            })()}
 
-                           {/* Step 3: Payment (Optional - by User) */}
-                           {(() => {
+                           {/* Step 3: Payment (by User) - Only show if payment_choice is true */}
+                           {app.payment_choice === true && (() => {
                               const paymentDone = app.payment_receipt_url != null;
                               const isActive = app.approved_at != null && app.deposit_amount != null && (app.status === 'admin_review' || app.status === 'payment_pending');
                               return (
                                  <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: paymentDone ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: paymentDone ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
-                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: paymentDone ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment (Optional)</h4>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: paymentDone ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment</h4>
                                     <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
-                                       {paymentDone ? `Receipt uploaded` : (isActive ? `Optional - Pay £${app.deposit_amount}` : (app.deposit_amount ? `£${app.deposit_amount} (optional)` : 'Not required'))}
+                                       {paymentDone ? `Receipt uploaded` : (isActive ? `Pay £${app.deposit_amount}` : (app.deposit_amount ? `£${app.deposit_amount}` : 'Not required'))}
                                     </p>
                                  </div>
                               );
                            })()}
 
-                           {/* Step 4: Payment Verified (Optional - by Admin) */}
-                           {(() => {
+                           {/* Step 4: Payment Verified (by Admin) - Only show if payment_choice is true */}
+                           {app.payment_choice === true && (() => {
                               const isVerified = app.payment_verified_at != null || app.status === 'payment_verified';
                               const isActive = app.payment_receipt_url && !app.payment_verified_at && app.status === 'payment_pending';
                               return (
                                  <div style={{ marginBottom: '1.75rem', position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isVerified ? '#2563eb' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isVerified ? '0 0 0 3px #2563eb' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>
-                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Verified (Optional)</h4>
+                                    <h4 style={{ fontSize: '0.95rem', margin: 0, color: isVerified ? '#1e293b' : (isActive ? '#d97706' : '#94a3b8'), fontWeight: 600 }}>Payment Verified</h4>
                                     <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, marginTop: '0.25rem' }}>
                                        {isVerified ? (app.payment_verified_at ? `Verified ${new Date(app.payment_verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : 'Verified by admin') : (isActive ? 'Waiting for admin verification' : 'Not required')}
                                     </p>
@@ -759,10 +919,13 @@ export default function ApplicantDashboard() {
                               );
                            })()}
 
-                           {/* Step 5: Certificate Generated (by Admin) */}
+                           {/* Step 3/5: Certificate Generated (by Admin) - Show as Step 3 if payment_choice is false, Step 5 otherwise */}
                            {(() => {
                               const isCompleted = app.status === 'completed' || (app.certificate_url != null);
-                              const isActive = app.status === 'admin_review' || app.status === 'payment_verified' || app.status === 'appointment_scheduled';
+                              // If payment_choice is false (skipped), show as active when approved. Otherwise, show when payment verified or appointment scheduled
+                              const isActive = app.payment_choice === false 
+                                 ? (app.approved_at != null || app.status === 'admin_review' || app.status === 'appointment_scheduled')
+                                 : (app.status === 'admin_review' || app.status === 'payment_verified' || app.status === 'appointment_scheduled');
                               return (
                                  <div style={{ position: 'relative' }}>
                                     <div style={{ position: 'absolute', left: '-26px', top: '3px', width: '16px', height: '16px', borderRadius: '50%', background: isCompleted ? '#10b981' : (isActive ? '#f59e0b' : '#cbd5e1'), border: '3px solid white', boxShadow: isCompleted ? '0 0 0 3px #10b981' : (isActive ? '0 0 0 3px #f59e0b' : 'none') }}></div>

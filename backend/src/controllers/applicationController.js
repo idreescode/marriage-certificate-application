@@ -94,7 +94,7 @@ const submitApplication = async (req, res) => {
     const mahrType = formData.mahrType || null;
 
     // Solemnised
-    const solemnisedDate = normalizeDate(formData.solemnisedDate);
+    const solemnisedDate = normalizeDate(formData.solemnisedDate, true); // includeTime=true for datetime
     const solemnisedPlace = formData.solemnisedPlace || null;
     const solemnisedAddress = formData.solemnisedAddress || null;
 

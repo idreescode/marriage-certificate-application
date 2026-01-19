@@ -25,6 +25,8 @@ const migrations = [
   require('./022_add_approval_fields'),
   require('./023_remove_super_admin_role'),
   require('./024_create_settings_table'),
+  require('./025_change_solemnised_date_to_datetime'),
+  require('./026_add_payment_choice_column'),
 ];
 
 // Run migrations
