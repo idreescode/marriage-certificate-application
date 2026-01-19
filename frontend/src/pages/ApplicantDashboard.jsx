@@ -414,12 +414,12 @@ export default function ApplicantDashboard() {
                />
                <StatCard
                   title="Nikah Date"
-                  value={app.appointment_date ? new Date(app.appointment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBD'}
+                  value={app.solemnised_date ? new Date(app.solemnised_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'TBD'}
                   icon={Calendar}
                   color="white"
                   bg="rgba(255,255,255,0.15)"
-                  variant={app.appointment_date ? 'indigo' : 'orange'}
-                  subtitle={app.appointment_date ? `${app.appointment_time || ''}` : 'Not scheduled yet'}
+                  variant={app.solemnised_date ? 'indigo' : 'orange'}
+                  subtitle={app.solemnised_date ? new Date(app.solemnised_date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Not set yet'}
                />
             </div>
 
