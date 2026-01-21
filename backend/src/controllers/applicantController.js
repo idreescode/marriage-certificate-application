@@ -174,7 +174,14 @@ const skipPayment = async (req, res) => {
 };
 
 // Download Certificate
+// DISABLED: Certificate download is disabled - users cannot download certificates
 const downloadCertificate = async (req, res) => {
+  return res.status(403).json({
+    success: false,
+    message: 'Certificate download is not available to users',
+  });
+  
+  /* DISABLED CODE - Certificate download disabled
   try {
     const userId = req.user.id;
 
@@ -227,6 +234,7 @@ const downloadCertificate = async (req, res) => {
       error: error.message
     });
   }
+  */
 };
 
 // Request Bank Details (Placeholder logic)
