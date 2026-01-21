@@ -83,23 +83,66 @@ const FormField = ({
 }) => {
   // Handle date picker changes
   const handleDateChange = (date) => {
-    const event = {
-      target: {
-        name: name,
-        value: date ? date.toISOString().split('T')[0] : '' // Format: YYYY-MM-DD
-      }
-    };
-    handleChange(event);
+    if (!date) {
+      const event = {
+        target: {
+          name: name,
+          value: ''
+        }
+      };
+      handleChange(event);
+      return;
+    }
+
+    if (type === "datetime-local") {
+      // Format: YYYY-MM-DDTHH:mm for datetime-local
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const value = `${year}-${month}-${day}T${hours}:${minutes}`;
+      
+      const event = {
+        target: {
+          name: name,
+          value: value
+        }
+      };
+      handleChange(event);
+    } else {
+      // Format: YYYY-MM-DD for date
+      const event = {
+        target: {
+          name: name,
+          value: date.toISOString().split('T')[0]
+        }
+      };
+      handleChange(event);
+    }
   };
 
   // Convert string date to Date object for DatePicker
   const getDateValue = () => {
     const value = formData[name] || "";
     if (value && typeof value === 'string') {
-      // Handle YYYY-MM-DD format
-      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-        const date = new Date(value);
-        return isNaN(date.getTime()) ? null : date;
+      if (type === "datetime-local") {
+        // Handle YYYY-MM-DDTHH:mm format
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
+          const date = new Date(value);
+          return isNaN(date.getTime()) ? null : date;
+        }
+        // Also handle YYYY-MM-DDTHH:mm:ss format
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
+          const date = new Date(value);
+          return isNaN(date.getTime()) ? null : date;
+        }
+      } else {
+        // Handle YYYY-MM-DD format
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const date = new Date(value);
+          return isNaN(date.getTime()) ? null : date;
+        }
       }
     }
     return null;
@@ -150,47 +193,22 @@ const FormField = ({
           {...props}
         />
       ) : type === "date" || type === "datetime-local" ? (
-        type === "datetime-local" && name === "solemnisedDate" ? (
-          <input
-            type="datetime-local"
-            name={name}
-            value={formData[name] || ""}
-            onChange={handleChange}
-            required={required}
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              border: "1px solid #cbd5e1",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontFamily: "inherit",
-              backgroundColor: "#fff",
-              transition: "border-color 0.2s, box-shadow 0.2s",
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = "#CA6C40";
-              e.target.style.boxShadow = "0 0 0 4px rgba(202, 108, 65, 0.2)";
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#cbd5e1";
-              e.target.style.boxShadow = "none";
-            }}
-          />
-        ) : (
-          <DatePicker
-            selected={getDateValue()}
-            onChange={handleDateChange}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Select date"
-            required={required}
-            className="date-picker-input"
-            wrapperClassName="custom-datepicker-wrapper"
-            showYearDropdown
-            showMonthDropdown
-            dropdownMode="select"
-            maxDate={name === 'solemnisedDate' ? null : new Date()} // Allow future dates only for solemnisedDate
-          />
-        )
+        <DatePicker
+          selected={getDateValue()}
+          onChange={handleDateChange}
+          dateFormat={type === "datetime-local" ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd"}
+          placeholderText={type === "datetime-local" ? "Select date and time" : "Select date"}
+          required={required}
+          className="date-picker-input"
+          wrapperClassName="custom-datepicker-wrapper"
+          showYearDropdown
+          showMonthDropdown
+          dropdownMode="select"
+          showTimeSelect={type === "datetime-local"}
+          timeIntervals={15}
+          timeCaption="Time"
+          maxDate={name === 'solemnisedDate' ? null : new Date()} // Allow future dates only for solemnisedDate
+        />
       ) : (
         <input
           type={type}
@@ -1576,7 +1594,7 @@ export default function AdminManualApplication() {
           </FormRow>
           <FormRow>
             <FormField
-              label="Present Address"
+              label="Address"
               name="groomRepAddress"
               type="textarea"
               span={2}
@@ -1621,7 +1639,7 @@ export default function AdminManualApplication() {
           </FormRow>
           <FormRow>
             <FormField
-              label="Present Address"
+              label="Address"
               name="brideRepAddress"
               type="textarea"
               span={2}
@@ -1666,7 +1684,7 @@ export default function AdminManualApplication() {
           </FormRow>
           <FormRow>
             <FormField
-              label="Witness residence"
+              label="Address"
               name="witness1Address"
               type="textarea"
               span={2}
@@ -1711,7 +1729,7 @@ export default function AdminManualApplication() {
           </FormRow>
           <FormRow>
             <FormField
-              label="Witness residence"
+              label="Address"
               name="witness2Address"
               type="textarea"
               span={2}
@@ -1882,13 +1900,11 @@ export default function AdminManualApplication() {
                 title="Groom's ID Proof"
                 subtitle="Passport or Driving Licence"
                 name="groomIdFile"
-                required
               />
               <UploadCard
                 title="Bride's ID Proof"
                 subtitle="Passport or Driving Licence"
                 name="brideIdFile"
-                required
               />
             </div>
           </FormSection>
@@ -1906,13 +1922,11 @@ export default function AdminManualApplication() {
                 title="Witness 1 ID"
                 subtitle="Muslim Male Witness ID"
                 name="witness1IdFile"
-                required
               />
               <UploadCard
                 title="Witness 2 ID"
                 subtitle="Muslim Male Witness ID"
                 name="witness2IdFile"
-                required
               />
             </div>
           </FormSection>
@@ -1930,7 +1944,6 @@ export default function AdminManualApplication() {
                 title="Mahr Declaration"
                 subtitle="Signed by both parties"
                 name="mahrDeclarationFile"
-                required
               />
             </div>
           </FormSection>
@@ -2104,7 +2117,6 @@ export default function AdminManualApplication() {
                               title="Groom's Certificate"
                               subtitle="Certificate of Conversion"
                               name="groomConversionCertFile"
-                              required
                             />
                           </div>
                         )}
@@ -2161,7 +2173,6 @@ export default function AdminManualApplication() {
                               title="Bride's Certificate"
                               subtitle="Certificate of Conversion"
                               name="brideConversionCertFile"
-                              required
                             />
                           </div>
                         )}
@@ -2258,7 +2269,6 @@ export default function AdminManualApplication() {
                         title="Statutory Declaration"
                         subtitle="Affidavit signed by Solicitor/Commissioner"
                         name="statutoryDeclarationFile"
-                        required
                       />
                     </div>
                   </div>
@@ -2428,7 +2438,6 @@ export default function AdminManualApplication() {
                           title="Civil Divorce Doc"
                           subtitle="Decree Absolute"
                           name="civilDivorceDocFile"
-                          required
                         />
                       )}
                       {(brideDivorceType === "islamic" ||
@@ -2437,7 +2446,6 @@ export default function AdminManualApplication() {
                           title="Islamic Divorce Doc"
                           subtitle="Talaq / Khula / Faskh"
                           name="islamicDivorceDocFile"
-                          required
                         />
                       )}
                     </div>

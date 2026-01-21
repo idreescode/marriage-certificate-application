@@ -643,7 +643,7 @@ export default function AdminApplicationDetails() {
                   )}
                   <InfoItem
                     icon={MapPin}
-                    label="Residential Address"
+                    label="Address"
                     value={application.groom_address}
                   />
                 </div>
@@ -686,7 +686,7 @@ export default function AdminApplicationDetails() {
                   )}
                   <InfoItem
                     icon={MapPin}
-                    label="Residential Address"
+                    label="Address"
                     value={application.bride_address}
                   />
                 </div>
@@ -741,7 +741,7 @@ export default function AdminApplicationDetails() {
                       {application.groom_rep_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Residential Address"
+                          label="Address"
                           value={application.groom_rep_address}
                         />
                       )}
@@ -794,7 +794,7 @@ export default function AdminApplicationDetails() {
                       {application.bride_rep_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Residential Address"
+                          label="Address"
                           value={application.bride_rep_address}
                         />
                       )}
@@ -862,7 +862,7 @@ export default function AdminApplicationDetails() {
                         {witness.witness_address && (
                           <InfoItem
                             icon={MapPin}
-                            label="Residential Address"
+                            label="Address"
                             value={witness.witness_address}
                           />
                         )}
@@ -945,7 +945,7 @@ export default function AdminApplicationDetails() {
                   {application.solemnised_address && (
                     <InfoItem
                       icon={MapPin}
-                      label="Solemnisation Address"
+                      label="Address"
                       value={application.solemnised_address}
                     />
                   )}
@@ -1147,7 +1147,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  Present Address
+                  Address
                 </th>
                 <th
                   style={{
