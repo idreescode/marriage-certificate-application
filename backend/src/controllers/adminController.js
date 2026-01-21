@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const {
   generatePassword,
   generateApplicationNumber,
+  generateSequentialRegistrationNumber,
   normalizeDate,
 } = require("../utils/helpers");
 const {
@@ -1045,17 +1046,17 @@ const createManualApplication = async (req, res) => {
       hashedPassword = await bcrypt.hash(portalPassword, 10);
     }
 
-    // Use provided application number or generate one
-    let applicationNumber =
-      providedApplicationNumber && providedApplicationNumber.trim()
-        ? providedApplicationNumber.trim()
-        : generateApplicationNumber();
-
     // GET CONNECTION FOR TRANSACTION
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     try {
+      // Use provided application number or generate sequential one starting from 1000
+      let applicationNumber =
+        providedApplicationNumber && providedApplicationNumber.trim()
+          ? providedApplicationNumber.trim()
+          : await generateSequentialRegistrationNumber(pool);
+
       // Check if application number already exists (within transaction)
       const [existingApp] = await connection.execute(
         "SELECT id FROM applications WHERE application_number = ?",

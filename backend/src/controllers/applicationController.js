@@ -2,6 +2,7 @@ const { pool } = require("../config/database");
 const bcrypt = require("bcryptjs");
 const {
   generateApplicationNumber,
+  generateSequentialRegistrationNumber,
   generatePassword,
   normalizeDate,
 } = require("../utils/helpers");
@@ -161,19 +162,19 @@ const submitApplication = async (req, res) => {
       contactNumber,
     });
 
-    // Generate unique application number
-    const applicationNumber = generateApplicationNumber();
-
-    // Use the email provided in the form
-    const portalEmail = email;
-    const portalPassword = generatePassword();
-    const hashedPassword = await bcrypt.hash(portalPassword, 10);
-
     // GET CONNECTION FOR TRANSACTION
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     try {
+      // Generate sequential registration number starting from 1000
+      const applicationNumber = await generateSequentialRegistrationNumber(pool);
+
+      // Use the email provided in the form
+      const portalEmail = email;
+      const portalPassword = generatePassword();
+      const hashedPassword = await bcrypt.hash(portalPassword, 10);
+
       // Check if email already exists
       const [existingUser] = await connection.execute(
         "SELECT id FROM users WHERE email = ?",

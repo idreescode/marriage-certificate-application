@@ -1,9 +1,45 @@
-// Generate unique application number
+// Generate unique application number (legacy - kept for backward compatibility)
 const generateApplicationNumber = () => {
   const prefix = 'JAM';
   const timestamp = Date.now().toString().slice(-8);
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   return `${prefix}-${timestamp}-${random}`;
+};
+
+// Generate sequential registration number starting from 1000 with JAM- prefix
+// This function queries the database to get the next sequential number
+const generateSequentialRegistrationNumber = async (pool) => {
+  try {
+    // Get the highest registration number with JAM- prefix from the database
+    // Extract numeric part from JAM-XXXX format
+    const [rows] = await pool.execute(
+      `SELECT application_number 
+       FROM applications 
+       WHERE application_number LIKE 'JAM-%' 
+       ORDER BY CAST(SUBSTRING(application_number, 5) AS UNSIGNED) DESC 
+       LIMIT 1`
+    );
+
+    let nextNumber = 1000; // Start from 1000
+
+    if (rows.length > 0 && rows[0].application_number) {
+      // Extract number part after "JAM-"
+      const numberPart = rows[0].application_number.replace('JAM-', '');
+      const highestNumber = parseInt(numberPart, 10);
+      
+      // If highest number is less than 1000, start from 1000
+      // Otherwise, increment from highest
+      if (!isNaN(highestNumber)) {
+        nextNumber = highestNumber < 1000 ? 1000 : highestNumber + 1;
+      }
+    }
+
+    return `JAM-${nextNumber}`;
+  } catch (error) {
+    console.error('Error generating sequential registration number:', error);
+    // Fallback: start from 1000 if there's an error
+    return 'JAM-1000';
+  }
 };
 
 // Generate random password for portal access
@@ -212,6 +248,7 @@ const getStatusColor = (status) => {
 
 module.exports = {
   generateApplicationNumber,
+  generateSequentialRegistrationNumber,
   generatePassword,
   normalizeDate,
   formatDate,
