@@ -593,6 +593,8 @@ const sendApplicationApprovedEmail = async (applicationData) => {
     portal_email,
     portalPassword,
     id,
+    total_fee,
+    default_deposit_amount,
   } = applicationData;
 
   if (!portal_email) {
@@ -610,12 +612,39 @@ const sendApplicationApprovedEmail = async (applicationData) => {
     return;
   }
 
+  // Build fee information section if total_fee is provided
+  let feeSectionHtml = '';
+  if (total_fee) {
+    const totalFeeFormatted = `£${total_fee.toFixed(2)}`;
+    const depositAmountFormatted = default_deposit_amount ? `£${default_deposit_amount.toFixed(2)}` : '';
+    
+    feeSectionHtml = `
+              <!-- Total Fee Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #fff7ed; border: 2px solid #b05a33; border-radius: 8px; margin-bottom: 25px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 15px 0; color: #b05a33; font-size: 16px; font-weight: 600;">Fee Information</h3>
+                    <p style="font-size: 15px; color: #1f2937; margin: 0 0 15px 0; line-height: 1.6;">
+                      <strong>Total Fee:</strong> <span style="color: #b05a33; font-size: 18px; font-weight: 700;">${totalFeeFormatted}</span>
+                    </p>
+                    ${depositAmountFormatted ? `
+                    <p style="font-size: 14px; color: #4b5563; margin: 0; line-height: 1.6;">
+                      You need to deposit the default amount of <strong style="color: #b05a33;">${depositAmountFormatted}</strong> to proceed with your application.
+                    </p>
+                    ` : ''}
+                  </td>
+                </tr>
+              </table>
+    `;
+  }
+
   const html = renderTemplate('application-approved.html', {
     application_number,
     groom_full_name: groom_full_name || "N/A",
     bride_full_name: bride_full_name || "N/A",
     portal_email,
     portalPassword,
+    fee_section: feeSectionHtml,
     frontend_url: process.env.FRONTEND_URL || "",
     email_user: process.env.EMAIL_USER,
   });

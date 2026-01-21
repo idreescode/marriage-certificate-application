@@ -276,6 +276,19 @@ const updateSettings = async (req, res) => {
         }
       }
 
+      // Validate total_fee
+      if (key === "total_fee") {
+        if (value && value.trim() !== "") {
+          const totalFee = parseFloat(value);
+          if (isNaN(totalFee) || totalFee <= 0) {
+            return res.status(400).json({
+              success: false,
+              message: "Total fee must be a positive number",
+            });
+          }
+        }
+      }
+
       // Update or insert setting
       await pool.execute(
         `INSERT INTO settings (setting_key, setting_value, updated_by) 
@@ -325,6 +338,10 @@ const approveApplication = async (req, res) => {
     // Get default deposit amount from settings, fallback to 200
     const defaultDepositStr = await getSettingValue("default_deposit_amount", "200");
     const DEFAULT_DEPOSIT_AMOUNT = parseFloat(defaultDepositStr) || 200;
+
+    // Get total fee from settings
+    const totalFeeStr = await getSettingValue("total_fee", "");
+    const TOTAL_FEE = totalFeeStr ? parseFloat(totalFeeStr) : null;
 
     // Get application data
     const [appRows] = await pool.execute(
@@ -388,6 +405,8 @@ const approveApplication = async (req, res) => {
       bride_full_name: app.bride_full_name,
       portal_email: app.portal_email,
       portalPassword: portalPassword,
+      total_fee: TOTAL_FEE,
+      default_deposit_amount: DEFAULT_DEPOSIT_AMOUNT,
     };
 
     await sendApplicationApprovedEmail(applicationData);

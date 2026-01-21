@@ -646,6 +646,29 @@ export default function AdminApplicationDetails() {
                     label="Address"
                     value={application.groom_address}
                   />
+                  {application.groom_id_number && (
+                    <InfoItem
+                      icon={FileText}
+                      label="ID Number"
+                      value={application.groom_id_number}
+                    />
+                  )}
+                  <InfoItem
+                    icon={CheckCircle}
+                    label="I confirm that I have the power, fitness and capacity to marry in Islamic law and fulfil my duties in an Islamic marriage"
+                    value={(application.groom_confirm === 1 || application.groom_confirm === true) ? "Yes" : "No"}
+                  />
+                  <InfoItem
+                    icon={User}
+                    label="Personally/Representative"
+                    value={
+                      (application.groom_personally === 1 || application.groom_personally === true)
+                        ? "Personally"
+                        : (application.groom_representative === 1 || application.groom_representative === true)
+                        ? "Representative"
+                        : "Not Specified"
+                    }
+                  />
                 </div>
               </div>
 
@@ -688,6 +711,29 @@ export default function AdminApplicationDetails() {
                     icon={MapPin}
                     label="Address"
                     value={application.bride_address}
+                  />
+                  {application.bride_id_number && (
+                    <InfoItem
+                      icon={FileText}
+                      label="ID Number"
+                      value={application.bride_id_number}
+                    />
+                  )}
+                  <InfoItem
+                    icon={CheckCircle}
+                    label="I confirm that I have the power, fitness and capacity to marry in Islamic law and fulfil my duties in an Islamic marriage"
+                    value={(application.bride_confirm === 1 || application.bride_confirm === true) ? "Yes" : "No"}
+                  />
+                  <InfoItem
+                    icon={User}
+                    label="Personally/Representative"
+                    value={
+                      (application.bride_personally === 1 || application.bride_personally === true)
+                        ? "Personally"
+                        : (application.bride_representative === 1 || application.bride_representative === true)
+                        ? "Representative"
+                        : "Not Specified"
+                    }
                   />
                 </div>
               </div>
@@ -903,7 +949,9 @@ export default function AdminApplicationDetails() {
                       value={
                         application.mahr_type === "prompt"
                           ? "Prompt (Immediate)"
-                          : "Deferred"
+                          : application.mahr_type === "deferred"
+                          ? "Deferred"
+                          : "Not Specified"
                       }
                     />
                   )}

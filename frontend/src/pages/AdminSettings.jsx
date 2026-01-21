@@ -12,6 +12,7 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState({
     admin_emails: "",
     default_deposit_amount: "",
+    total_fee: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -36,6 +37,7 @@ export default function AdminSettings() {
       setSettings({
         admin_emails: settingsData.admin_emails?.value || "",
         default_deposit_amount: settingsData.default_deposit_amount?.value || "200",
+        total_fee: settingsData.total_fee?.value || "",
       });
     } catch (error) {
       if (error.response?.status !== 401) {
@@ -73,6 +75,14 @@ export default function AdminSettings() {
       newErrors.default_deposit_amount = "Default deposit amount must be a positive number";
     }
 
+    // Validate total fee
+    if (settings.total_fee.trim()) {
+      const totalFee = parseFloat(settings.total_fee);
+      if (isNaN(totalFee) || totalFee <= 0) {
+        newErrors.total_fee = "Total fee must be a positive number";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -90,6 +100,7 @@ export default function AdminSettings() {
       await updateSettings({
         admin_emails: settings.admin_emails.trim(),
         default_deposit_amount: settings.default_deposit_amount.trim(),
+        total_fee: settings.total_fee.trim(),
       });
       
       toast.success("Settings updated successfully");
@@ -225,6 +236,46 @@ export default function AdminSettings() {
               )}
               <p className="form-hint">
                 This amount will be automatically set when you approve a new application. You can still change it individually for each application.
+              </p>
+            </div>
+          </div>
+
+          {/* Total Fee Section */}
+          <div className="settings-section">
+            <div className="settings-section-header">
+              <div className="settings-icon-wrapper">
+                <PoundSterling size={20} />
+              </div>
+              <div>
+                <h2 className="settings-section-title">Total Fee</h2>
+                <p className="settings-section-description">
+                  Total fee amount that will be displayed in approval emails
+                </p>
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="total_fee" className="form-label">
+                Total Fee (£)
+              </label>
+              <input
+                type="number"
+                id="total_fee"
+                className={`form-input ${errors.total_fee ? "input-error" : ""}`}
+                value={settings.total_fee}
+                onChange={(e) => handleChange("total_fee", e.target.value)}
+                placeholder="500"
+                min="0"
+                step="0.01"
+              />
+              {errors.total_fee && (
+                <div className="error-message">
+                  <AlertCircle size={16} />
+                  <span>{errors.total_fee}</span>
+                </div>
+              )}
+              <p className="form-hint">
+                This total fee amount will be included in the approval email sent to applicants. They will be informed about the total fee and the default deposit amount they need to pay.
               </p>
             </div>
           </div>
