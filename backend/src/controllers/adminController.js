@@ -85,23 +85,27 @@ const getAllApplications = async (req, res) => {
     const { status, search, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
+    // Join with users table to get portal_email from users.email
     let query =
-      "SELECT * FROM applications WHERE is_deleted = FALSE OR is_deleted IS NULL";
+      `SELECT a.*, u.email as portal_email
+       FROM applications a
+       LEFT JOIN users u ON a.user_id = u.id
+       WHERE (a.is_deleted = FALSE OR a.is_deleted IS NULL)`;
     const params = [];
 
     if (status) {
-      query += " AND status = ?";
+      query += " AND a.status = ?";
       params.push(status);
     }
 
     if (search) {
       query +=
-        " AND (application_number LIKE ? OR groom_full_name LIKE ? OR bride_full_name LIKE ?)";
+        " AND (a.application_number LIKE ? OR a.groom_full_name LIKE ? OR a.bride_full_name LIKE ?)";
       const searchTerm = `%${search}%`;
       params.push(searchTerm, searchTerm, searchTerm);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${parseInt(
+    query += ` ORDER BY a.created_at DESC LIMIT ${parseInt(
       limit
     )} OFFSET ${parseInt(offset)}`;
     // params for limit/offset removed because they are now injected
