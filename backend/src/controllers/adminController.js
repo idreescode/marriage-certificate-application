@@ -381,7 +381,7 @@ const approveApplication = async (req, res) => {
     ]);
 
     // Keep status as 'admin_review' - this indicates approved
-    // User can now choose to pay or skip payment
+    // Set payment status to verified when admin approves
     // Set approved_at timestamp to track approval
     // Set deposit amount when application is approved
     await pool.execute(
@@ -391,10 +391,12 @@ const approveApplication = async (req, res) => {
            deposit_amount = ?,
            deposit_amount_set_by = ?,
            deposit_amount_set_at = NOW(),
-           payment_status = 'amount_set',
+           payment_status = 'verified',
+           payment_verified_by = ?,
+           payment_verified_at = NOW(),
            status = 'admin_review'
        WHERE id = ?`,
-      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, id]
+      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, adminId, id]
     );
 
     // Send approval email with password
@@ -695,14 +697,15 @@ const markComplete = async (req, res) => {
 };
 
 // Generate Certificate
+// Certificate generation is enabled only when admin prints the application
 const generateCertificate = async (req, res) => {
   const { generateCertificatePDF } = require("../services/certificateService");
 
   try {
     const { id } = req.params;
-    // Check if email notification should be sent (default: true)
-    // If notify=false is passed, skip sending email (e.g., when admin just wants to print)
-    const shouldNotify = req.query.notify !== "false";
+    // Check if email notification should be sent (default: false for print)
+    // When printing, notify=false is passed to skip sending email to applicant
+    const shouldNotify = req.query.notify === "true";
 
     // Get application data (exclude deleted)
     const [appRows] = await pool.execute(
@@ -753,12 +756,11 @@ const generateCertificate = async (req, res) => {
     // Generate PDF Certificate
     const certificateUrl = await generateCertificatePDF(application, witnesses);
 
-    // Update application
+    // Update application with certificate URL (don't automatically change status)
     await pool.execute(
       `UPDATE applications 
        SET certificate_url = ?, 
-           certificate_generated_at = NOW(),
-           status = 'completed'
+           certificate_generated_at = NOW()
        WHERE id = ?`,
       [certificateUrl, id]
     );
@@ -1410,7 +1412,8 @@ const createManualApplication = async (req, res) => {
           [applicationId]
         );
 
-        // For manual applications: Generate certificate automatically
+        // Certificate generation disabled - commented out per user request
+        /* DISABLED: Certificate generation is disabled
         try {
           const {
             generateCertificatePDF,
@@ -1478,6 +1481,7 @@ const createManualApplication = async (req, res) => {
           // Don't fail the request if certificate generation fails, just log it
           console.error("❌ Error generating certificate:", certError);
         }
+        */
 
         // Send confirmation email if email is provided
         console.log("📧 ========== EMAIL SENDING PROCESS START ==========");

@@ -329,7 +329,8 @@ export default function ApplicantDashboard() {
                      <StatusPill status={app.status} />
                   </div>
                </div>
-               {app.status === 'completed' && app.certificate_url && (
+               {/* Certificate download button disabled - hidden from users */}
+               {false && app.status === 'completed' && app.certificate_url && (
                   <button
                      onClick={handleDownloadCertificate}
                      className="btn btn-primary"
@@ -563,9 +564,9 @@ export default function ApplicantDashboard() {
                      </div>
                   )}
 
-                  {/* Certificate Generation Awaiting Card */}
-                  {/* Show when: payment_choice is false (skipped) OR payment is verified OR appointment is scheduled */}
-                  {((app.payment_choice === false || app.status === 'payment_verified' || app.status === 'appointment_scheduled') && !app.certificate_url) && (
+                  {/* Certificate Generation Awaiting Card - DISABLED */}
+                  {/* Certificate generation is disabled - card hidden from users */}
+                  {false && ((app.payment_choice === false || app.status === 'payment_verified' || app.status === 'appointment_scheduled') && !app.certificate_url) && (
                      <div style={{
                         background: 'white',
                         borderRadius: 'var(--radius-lg)',

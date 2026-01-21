@@ -328,6 +328,7 @@ const sendAppointmentEmail = async (applicationData) => {
 };
 
 // 6. Certificate Ready Email
+// NOTE: This email does NOT attach the PDF certificate. Users must log in to download it.
 const sendCertificateReadyEmail = async (applicationData) => {
   const { application_number, groom_full_name, portal_email, id } = applicationData;
 
@@ -337,11 +338,13 @@ const sendCertificateReadyEmail = async (applicationData) => {
     frontend_url: process.env.FRONTEND_URL
   });
 
+  // Email notification only - no PDF attachment
   const mailOptions = {
     from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
     subject: `Your Nikah Certificate is Ready - #${application_number}`,
     html
+    // No attachments - users must download from portal
   };
 
   try {
