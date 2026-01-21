@@ -485,6 +485,8 @@ export default function AdminApplications() {
                 <th>Ref #</th>
                 <th>Groom</th>
                 <th>Bride</th>
+                <th>Email</th>
+                <th>Contact</th>
                 <th>Status</th>
                 <th>Solemnised Date</th>
                 <th>Solemnised Place</th>
@@ -599,6 +601,12 @@ export default function AdminApplications() {
                   </td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{app.bride_full_name}</div>
+                  </td>
+                  <td style={{ color: "var(--slate-600)", fontSize: "0.875rem" }}>
+                    {app.portal_email || "-"}
+                  </td>
+                  <td style={{ color: "var(--slate-600)", fontSize: "0.875rem" }}>
+                    {app.contact_number || "-"}
                   </td>
                   <td>
                     <StatusBadge status={app.status} app={app} />

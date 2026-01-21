@@ -205,7 +205,7 @@ const submitApplication = async (req, res) => {
       console.log("Attempting to insert application for user_id:", userId);
       const [result] = await connection.execute(
         `INSERT INTO applications (
-          application_number, user_id,
+          application_number, user_id, contact_number,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
           groom_id_number, groom_address,
           groom_confirm, groom_personally, groom_representative,
@@ -219,10 +219,11 @@ const submitApplication = async (req, res) => {
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
           payment_status, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           applicationNumber,
           userId,
+          contactNumber || null,
           groomName || null,
           groomFatherName || null,
           groomDateOfBirth || null,

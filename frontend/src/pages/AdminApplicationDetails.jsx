@@ -1086,6 +1086,39 @@ export default function AdminApplicationDetails() {
                 </div>
               </div>
             )}
+
+            {/* Contact Information Section */}
+            <div className="details-card bg-white">
+              <div className="card-title-row">
+                <div className="icon-box icon-box-slate">
+                  <Mail size={22} />
+                </div>
+                <h2 className="card-title-text">Contact Information</h2>
+              </div>
+              <div className="card-body">
+                {application.portal_email && (
+                  <InfoItem
+                    icon={Mail}
+                    label="Email"
+                    value={application.portal_email}
+                  />
+                )}
+                {application.contact_number && (
+                  <InfoItem
+                    icon={Phone}
+                    label="Contact Number"
+                    value={application.contact_number}
+                  />
+                )}
+                {!application.portal_email && !application.contact_number && (
+                  <div className="py-4 text-center">
+                    <p className="text-slate-400 italic text-sm">
+                      No contact information available.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

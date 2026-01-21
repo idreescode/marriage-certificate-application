@@ -1173,7 +1173,7 @@ const createManualApplication = async (req, res) => {
         try {
           [insertResult] = await connection.execute(
             `INSERT INTO applications (
-          application_number, user_id,
+          application_number, user_id, contact_number,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
           groom_id_number, groom_address,
           groom_confirm, groom_personally, groom_representative,
@@ -1193,17 +1193,17 @@ const createManualApplication = async (req, res) => {
           groom_id_path, bride_id_path, witness1_id_path, witness2_id_path,
           mahr_declaration_path, civil_divorce_doc_path, islamic_divorce_doc_path,
           groom_conversion_cert_path, bride_conversion_cert_path, statutory_declaration_path
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               finalApplicationNumber,
               userId,
+              contactNumber || null,
               groomName || null,
               groomFatherName || null,
               normalizedGroomDob,
               groomPlaceOfBirth || null,
               groomIdNumber || null,
               groomAddress || null,
-              groomEmail || portalEmail || null,
               groomConfirm || false,
               groomPersonally || false,
               groomRepresentative || false,
