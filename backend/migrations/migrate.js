@@ -27,6 +27,7 @@ const migrations = [
   require('./024_create_settings_table'),
   require('./025_change_solemnised_date_to_datetime'),
   require('./026_add_payment_choice_column'),
+  require('./027_add_contact_number_to_applications'),
 ];
 
 // Run migrations
