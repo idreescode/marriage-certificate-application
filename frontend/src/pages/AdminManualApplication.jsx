@@ -534,7 +534,7 @@ export default function AdminManualApplication() {
               solemnisedPlace: app.solemnised_place || "",
               solemnisedAddress: app.solemnised_address || "",
               email: app.portal_email || "",
-              contactNumber: formatPhoneNumber(app.groom_phone || app.bride_phone || ""),
+              contactNumber: app.contact_number || "",
               status: app.status || "completed",
               depositAmount: formatNumber(app.deposit_amount),
               paymentStatus: app.payment_status || "verified",
