@@ -29,6 +29,9 @@ const migrations = [
   require('./026_add_payment_choice_column'),
   require('./027_add_contact_number_to_applications'),
   require('./028_add_total_fee_setting'),
+  require('./029_add_four_witness_id_paths'),
+  require('./030_add_witness_columns_to_applications'),
+  require('./031_remove_unused_columns'),
 ];
 
 // Run migrations

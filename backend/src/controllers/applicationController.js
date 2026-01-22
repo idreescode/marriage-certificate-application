@@ -39,6 +39,72 @@ const submitApplication = async (req, res) => {
     console.log(JSON.stringify(formData, null, 2));
     console.log("=================================");
 
+    // Map WordPress field names to backend field names
+    // Witness fields mapping
+    if (formData.mawitness1Name) formData.witness1MaleName = formData.mawitness1Name;
+    if (formData.mawitness1FatherName) formData.witness1MaleFatherName = formData.mawitness1FatherName;
+    if (formData.mawitness1DateOfBirth) formData.witness1MaleDateOfBirth = formData.mawitness1DateOfBirth;
+    if (formData.mawitness1PlaceOfBirth) formData.witness1MalePlaceOfBirth = formData.mawitness1PlaceOfBirth;
+    if (formData.mawitness1Address) formData.witness1MaleAddress = formData.mawitness1Address;
+
+    if (formData.mawitness2Name) formData.witness2MaleName = formData.mawitness2Name;
+    if (formData.mawitness2FatherName) formData.witness2MaleFatherName = formData.mawitness2FatherName;
+    if (formData.mawitness2DateOfBirth) formData.witness2MaleDateOfBirth = formData.mawitness2DateOfBirth;
+    if (formData.mawitness2PlaceOfBirth) formData.witness2MalePlaceOfBirth = formData.mawitness2PlaceOfBirth;
+    if (formData.mawitness2Address) formData.witness2MaleAddress = formData.mawitness2Address;
+
+    if (formData.fewitness1Name) formData.witness1FemaleName = formData.fewitness1Name;
+    if (formData.fewitness1FatherName) formData.witness1FemaleFatherName = formData.fewitness1FatherName;
+    if (formData.fewitness1DateOfBirth) formData.witness1FemaleDateOfBirth = formData.fewitness1DateOfBirth;
+    if (formData.fewitness1PlaceOfBirth) formData.witness1FemalePlaceOfBirth = formData.fewitness1PlaceOfBirth;
+    if (formData.fewitness1Address) formData.witness1FemaleAddress = formData.fewitness1Address;
+
+    if (formData.fewitness2Name) formData.witness2FemaleName = formData.fewitness2Name;
+    if (formData.fewitness2FatherName) formData.witness2FemaleFatherName = formData.fewitness2FatherName;
+    if (formData.fewitness2DateOfBirth) formData.witness2FemaleDateOfBirth = formData.fewitness2DateOfBirth;
+    if (formData.fewitness2PlaceOfBirth) formData.witness2FemalePlaceOfBirth = formData.fewitness2PlaceOfBirth;
+    if (formData.fewitness2Address) formData.witness2FemaleAddress = formData.fewitness2Address;
+
+    // Handle groomRepresentativePersonally field
+    if (formData.groomRepresentativePersonally) {
+      const value = formData.groomRepresentativePersonally.toLowerCase().trim();
+      if (value === 'personally') {
+        formData.groomPersonally = true;
+        formData.groomRepresentative = false;
+      } else if (value === 'representative') {
+        formData.groomPersonally = false;
+        formData.groomRepresentative = true;
+      }
+    }
+
+    // Handle brideRepresentativePersonally field
+    if (formData.brideRepresentativePersonally) {
+      const value = formData.brideRepresentativePersonally.toLowerCase().trim();
+      if (value === 'personally') {
+        formData.bridePersonally = true;
+        formData.brideRepresentative = false;
+      } else if (value === 'representative') {
+        formData.bridePersonally = false;
+        formData.brideRepresentative = true;
+      } else if (value === 'deferred' || value === 'prompt') {
+        // This is actually mahrType, not representative
+        formData.mahrType = value;
+      }
+    }
+
+    // Handle groomConfirm and brideConfirm (convert "Yes" to true)
+    if (formData.groomConfirm === "Yes" || formData.groomConfirm === "yes") {
+      formData.groomConfirm = true;
+    } else if (formData.groomConfirm === "" || !formData.groomConfirm) {
+      formData.groomConfirm = false;
+    }
+
+    if (formData.brideConfirm === "Yes" || formData.brideConfirm === "yes") {
+      formData.brideConfirm = true;
+    } else if (formData.brideConfirm === "" || !formData.brideConfirm) {
+      formData.brideConfirm = false;
+    }
+
     // Extract data from converted formData object
     // Groom
     const groomName = formData.groomName || null;
@@ -76,19 +142,33 @@ const submitApplication = async (req, res) => {
     const brideRepPlaceOfBirth = formData.brideRepPlaceOfBirth || null;
     const brideRepAddress = formData.brideRepAddress || null;
 
-    // Witness 1
-    const witness1Name = formData.witness1Name || null;
-    const witness1FatherName = formData.witness1FatherName || null;
-    const witness1DateOfBirth = normalizeDate(formData.witness1DateOfBirth);
-    const witness1PlaceOfBirth = formData.witness1PlaceOfBirth || null;
-    const witness1Address = formData.witness1Address || null;
+    // Witness No 1 (MALE)
+    const witness1MaleName = formData.witness1MaleName || null;
+    const witness1MaleFatherName = formData.witness1MaleFatherName || null;
+    const witness1MaleDateOfBirth = normalizeDate(formData.witness1MaleDateOfBirth);
+    const witness1MalePlaceOfBirth = formData.witness1MalePlaceOfBirth || null;
+    const witness1MaleAddress = formData.witness1MaleAddress || null;
 
-    // Witness 2
-    const witness2Name = formData.witness2Name || null;
-    const witness2FatherName = formData.witness2FatherName || null;
-    const witness2DateOfBirth = normalizeDate(formData.witness2DateOfBirth);
-    const witness2PlaceOfBirth = formData.witness2PlaceOfBirth || null;
-    const witness2Address = formData.witness2Address || null;
+    // Witness No 1 (FEMALE)
+    const witness1FemaleName = formData.witness1FemaleName || null;
+    const witness1FemaleFatherName = formData.witness1FemaleFatherName || null;
+    const witness1FemaleDateOfBirth = normalizeDate(formData.witness1FemaleDateOfBirth);
+    const witness1FemalePlaceOfBirth = formData.witness1FemalePlaceOfBirth || null;
+    const witness1FemaleAddress = formData.witness1FemaleAddress || null;
+
+    // Witness No 2 (MALE)
+    const witness2MaleName = formData.witness2MaleName || null;
+    const witness2MaleFatherName = formData.witness2MaleFatherName || null;
+    const witness2MaleDateOfBirth = normalizeDate(formData.witness2MaleDateOfBirth);
+    const witness2MalePlaceOfBirth = formData.witness2MalePlaceOfBirth || null;
+    const witness2MaleAddress = formData.witness2MaleAddress || null;
+
+    // Witness No 2 (FEMALE)
+    const witness2FemaleName = formData.witness2FemaleName || null;
+    const witness2FemaleFatherName = formData.witness2FemaleFatherName || null;
+    const witness2FemaleDateOfBirth = normalizeDate(formData.witness2FemaleDateOfBirth);
+    const witness2FemalePlaceOfBirth = formData.witness2FemalePlaceOfBirth || null;
+    const witness2FemaleAddress = formData.witness2FemaleAddress || null;
 
     // Mahr
     const mahrAmount = formData.mahrAmount || null;
@@ -135,8 +215,10 @@ const submitApplication = async (req, res) => {
       groomRepDateOfBirth: formData.groomRepDateOfBirth,
       brideDateOfBirth: formData.brideDateOfBirth,
       brideRepDateOfBirth: formData.brideRepDateOfBirth,
-      witness1DateOfBirth: formData.witness1DateOfBirth,
-      witness2DateOfBirth: formData.witness2DateOfBirth,
+      witness1MaleDateOfBirth: formData.witness1MaleDateOfBirth,
+      witness1FemaleDateOfBirth: formData.witness1FemaleDateOfBirth,
+      witness2MaleDateOfBirth: formData.witness2MaleDateOfBirth,
+      witness2FemaleDateOfBirth: formData.witness2FemaleDateOfBirth,
       solemnisedDate: formData.solemnisedDate,
     });
     console.log("Normalized dates (MySQL format YYYY-MM-DD):", {
@@ -144,8 +226,10 @@ const submitApplication = async (req, res) => {
       groomRepDateOfBirth,
       brideDateOfBirth,
       brideRepDateOfBirth,
-      witness1DateOfBirth,
-      witness2DateOfBirth,
+      witness1MaleDateOfBirth,
+      witness1FemaleDateOfBirth,
+      witness2MaleDateOfBirth,
+      witness2FemaleDateOfBirth,
       solemnisedDate,
     });
     console.log("====================================================");
@@ -154,8 +238,10 @@ const submitApplication = async (req, res) => {
     console.log("Received form data:", {
       groomName,
       brideName,
-      witness1Name,
-      witness2Name,
+      witness1MaleName,
+      witness1FemaleName,
+      witness2MaleName,
+      witness2FemaleName,
       mahrAmount,
       solemnisedDate,
       email,
@@ -218,8 +304,19 @@ const submitApplication = async (req, res) => {
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
           solemnised_date, solemnised_place, solemnised_address,
-          payment_status, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          payment_status, status,
+          witness1_male_name, witness1_male_father_name, witness1_male_date_of_birth, witness1_male_place_of_birth, witness1_male_address,
+          witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
+          witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
+          witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?
+        )`,
         [
           applicationNumber,
           userId,
@@ -259,6 +356,26 @@ const submitApplication = async (req, res) => {
           solemnisedAddress || null,
           "pending_admin_review", // payment_status default for user-submitted applications
           "admin_review", // status value
+          witness1MaleName || null,
+          witness1MaleFatherName || null,
+          witness1MaleDateOfBirth || null,
+          witness1MalePlaceOfBirth || null,
+          witness1MaleAddress || null,
+          witness1FemaleName || null,
+          witness1FemaleFatherName || null,
+          witness1FemaleDateOfBirth || null,
+          witness1FemalePlaceOfBirth || null,
+          witness1FemaleAddress || null,
+          witness2MaleName || null,
+          witness2MaleFatherName || null,
+          witness2MaleDateOfBirth || null,
+          witness2MalePlaceOfBirth || null,
+          witness2MaleAddress || null,
+          witness2FemaleName || null,
+          witness2FemaleFatherName || null,
+          witness2FemaleDateOfBirth || null,
+          witness2FemalePlaceOfBirth || null,
+          witness2FemaleAddress || null,
         ]
       );
 
@@ -268,18 +385,32 @@ const submitApplication = async (req, res) => {
       // Insert witnesses with extended fields
       const witnessesData = [
         {
-          name: witness1Name,
-          fatherName: witness1FatherName,
-          dob: witness1DateOfBirth,
-          pob: witness1PlaceOfBirth,
-          address: witness1Address,
+          name: witness1MaleName,
+          fatherName: witness1MaleFatherName,
+          dob: witness1MaleDateOfBirth,
+          pob: witness1MalePlaceOfBirth,
+          address: witness1MaleAddress,
         },
         {
-          name: witness2Name,
-          fatherName: witness2FatherName,
-          dob: witness2DateOfBirth,
-          pob: witness2PlaceOfBirth,
-          address: witness2Address,
+          name: witness1FemaleName,
+          fatherName: witness1FemaleFatherName,
+          dob: witness1FemaleDateOfBirth,
+          pob: witness1FemalePlaceOfBirth,
+          address: witness1FemaleAddress,
+        },
+        {
+          name: witness2MaleName,
+          fatherName: witness2MaleFatherName,
+          dob: witness2MaleDateOfBirth,
+          pob: witness2MalePlaceOfBirth,
+          address: witness2MaleAddress,
+        },
+        {
+          name: witness2FemaleName,
+          fatherName: witness2FemaleFatherName,
+          dob: witness2FemaleDateOfBirth,
+          pob: witness2FemalePlaceOfBirth,
+          address: witness2FemaleAddress,
         },
       ];
 

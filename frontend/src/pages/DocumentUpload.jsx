@@ -21,11 +21,12 @@ export default function DocumentUpload() {
   const [files, setFiles] = useState({
     groomId: null,
     brideId: null,
-    addressProof: null,
     groomConversionCert: null,
     brideConversionCert: null,
-    witness1Id: null,
-    witness2Id: null,
+    witness1MaleId: null,
+    witness1FemaleId: null,
+    witness2MaleId: null,
+    witness2FemaleId: null,
     mahrDeclaration: null,
     civilDivorceDoc: null,
     islamicDivorceDoc: null,
@@ -64,8 +65,10 @@ export default function DocumentUpload() {
     const newErrors = {};
     if (!files.groomId) newErrors.groomId = true;
     if (!files.brideId) newErrors.brideId = true;
-    if (!files.witness1Id) newErrors.witness1Id = true;
-    if (!files.witness2Id) newErrors.witness2Id = true;
+    if (!files.witness1MaleId) newErrors.witness1MaleId = true;
+    if (!files.witness1FemaleId) newErrors.witness1FemaleId = true;
+    if (!files.witness2MaleId) newErrors.witness2MaleId = true;
+    if (!files.witness2FemaleId) newErrors.witness2FemaleId = true;
     if (!files.mahrDeclaration) newErrors.mahrDeclaration = true;
 
     if (bridePreviouslyMarried) {
@@ -630,15 +633,27 @@ export default function DocumentUpload() {
             }}
           >
             <UploadCard
-              title="Witness 1 ID"
+              title="Witness No 1 (MALE) ID"
               subtitle="Muslim Male Witness ID"
-              name="witness1Id"
+              name="witness1MaleId"
               required
             />
             <UploadCard
-              title="Witness 2 ID"
+              title="Witness No 1 (FEMALE) ID"
+              subtitle="Muslim Female Witness ID"
+              name="witness1FemaleId"
+              required
+            />
+            <UploadCard
+              title="Witness No 2 (MALE) ID"
               subtitle="Muslim Male Witness ID"
-              name="witness2Id"
+              name="witness2MaleId"
+              required
+            />
+            <UploadCard
+              title="Witness No 2 (FEMALE) ID"
+              subtitle="Muslim Female Witness ID"
+              name="witness2FemaleId"
               required
             />
           </div>

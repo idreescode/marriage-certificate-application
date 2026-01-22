@@ -254,8 +254,10 @@ export default function AdminManualApplication() {
     // Document Files
     groomIdFile: null,
     brideIdFile: null,
-    witness1IdFile: null,
-    witness2IdFile: null,
+    witness1MaleIdFile: null,
+    witness1FemaleIdFile: null,
+    witness2MaleIdFile: null,
+    witness2FemaleIdFile: null,
     mahrDeclarationFile: null,
     civilDivorceDocFile: null,
     islamicDivorceDocFile: null,
@@ -295,17 +297,30 @@ export default function AdminManualApplication() {
     brideRepPlaceOfBirth: "",
     brideRepAddress: "",
     // Witnesses
-    witness1Name: "",
-    witness1FatherName: "",
-    witness1DateOfBirth: "",
-    witness1PlaceOfBirth: "",
-    witness1Address: "",
-    witness2Name: "",
-    witness2FatherName: "",
-    witness2DateOfBirth: "",
-    witness2PlaceOfBirth: "",
-    witness2Address: "",
-    witness2Phone: "",
+    // Witness No 1 (MALE)
+    witness1MaleName: "",
+    witness1MaleFatherName: "",
+    witness1MaleDateOfBirth: "",
+    witness1MalePlaceOfBirth: "",
+    witness1MaleAddress: "",
+    // Witness No 1 (FEMALE)
+    witness1FemaleName: "",
+    witness1FemaleFatherName: "",
+    witness1FemaleDateOfBirth: "",
+    witness1FemalePlaceOfBirth: "",
+    witness1FemaleAddress: "",
+    // Witness No 2 (MALE)
+    witness2MaleName: "",
+    witness2MaleFatherName: "",
+    witness2MaleDateOfBirth: "",
+    witness2MalePlaceOfBirth: "",
+    witness2MaleAddress: "",
+    // Witness No 2 (FEMALE)
+    witness2FemaleName: "",
+    witness2FemaleFatherName: "",
+    witness2FemaleDateOfBirth: "",
+    witness2FemalePlaceOfBirth: "",
+    witness2FemaleAddress: "",
     // Mahr
     mahrAmount: "",
     mahrDeferred: false,
@@ -340,8 +355,10 @@ export default function AdminManualApplication() {
   const [existingDocuments, setExistingDocuments] = useState({
     groomIdPath: null,
     brideIdPath: null,
-    witness1IdPath: null,
-    witness2IdPath: null,
+    witness1MaleIdPath: null,
+    witness1FemaleIdPath: null,
+    witness2MaleIdPath: null,
+    witness2FemaleIdPath: null,
     mahrDeclarationPath: null,
     civilDivorceDocPath: null,
     islamicDivorceDocPath: null,
@@ -466,8 +483,10 @@ export default function AdminManualApplication() {
             setExistingDocuments({
               groomIdPath: app.groom_id_path || null,
               brideIdPath: app.bride_id_path || null,
-              witness1IdPath: app.witness1_id_path || null,
-              witness2IdPath: app.witness2_id_path || null,
+              witness1MaleIdPath: app.witness1_male_id_path || null,
+              witness1FemaleIdPath: app.witness1_female_id_path || null,
+              witness2MaleIdPath: app.witness2_male_id_path || null,
+              witness2FemaleIdPath: app.witness2_female_id_path || null,
               mahrDeclarationPath: app.mahr_declaration_path || null,
               civilDivorceDocPath: app.civil_divorce_doc_path || null,
               islamicDivorceDocPath: app.islamic_divorce_doc_path || null,
@@ -480,8 +499,10 @@ export default function AdminManualApplication() {
               applicationNumber: app.application_number || "",
               groomIdFile: null,
               brideIdFile: null,
-              witness1IdFile: null,
-              witness2IdFile: null,
+              witness1MaleIdFile: null,
+              witness1FemaleIdFile: null,
+              witness2MaleIdFile: null,
+              witness2FemaleIdFile: null,
               mahrDeclarationFile: null,
               civilDivorceDocFile: null,
               islamicDivorceDocFile: null,
@@ -507,7 +528,6 @@ export default function AdminManualApplication() {
               brideDateOfBirth: formatDate(app.bride_date_of_birth),
               bridePlaceOfBirth: app.bride_place_of_birth || "",
               brideAddress: app.bride_address || "",
-              bridePhone: formatPhoneNumber(app.bride_phone || ""),
               brideIdNumber: app.bride_id_number || "",
               brideConfirm: Boolean(app.bride_confirm),
               bridePersonally: Boolean(app.bride_personally),
@@ -517,16 +537,30 @@ export default function AdminManualApplication() {
               brideRepDateOfBirth: formatDate(app.bride_rep_date_of_birth),
               brideRepPlaceOfBirth: app.bride_rep_place_of_birth || "",
               brideRepAddress: app.bride_rep_address || "",
-              witness1Name: sortedWitnesses[0]?.witness_name || sortedWitnesses[0]?.full_name || "",
-              witness1FatherName: sortedWitnesses[0]?.witness_father_name || sortedWitnesses[0]?.father_name || "",
-              witness1DateOfBirth: formatDate(sortedWitnesses[0]?.witness_date_of_birth || sortedWitnesses[0]?.date_of_birth),
-              witness1PlaceOfBirth: sortedWitnesses[0]?.witness_place_of_birth || sortedWitnesses[0]?.place_of_birth || "",
-              witness1Address: sortedWitnesses[0]?.witness_address || sortedWitnesses[0]?.address || "",
-              witness2Name: sortedWitnesses[1]?.witness_name || sortedWitnesses[1]?.full_name || "",
-              witness2FatherName: sortedWitnesses[1]?.witness_father_name || sortedWitnesses[1]?.father_name || "",
-              witness2DateOfBirth: formatDate(sortedWitnesses[1]?.witness_date_of_birth || sortedWitnesses[1]?.date_of_birth),
-              witness2PlaceOfBirth: sortedWitnesses[1]?.witness_place_of_birth || sortedWitnesses[1]?.place_of_birth || "",
-              witness2Address: sortedWitnesses[1]?.witness_address || sortedWitnesses[1]?.address || "",
+              // Witness No 1 (MALE) - sortedWitnesses[0]
+              witness1MaleName: sortedWitnesses[0]?.witness_name || sortedWitnesses[0]?.full_name || "",
+              witness1MaleFatherName: sortedWitnesses[0]?.witness_father_name || sortedWitnesses[0]?.father_name || "",
+              witness1MaleDateOfBirth: formatDate(sortedWitnesses[0]?.witness_date_of_birth || sortedWitnesses[0]?.date_of_birth),
+              witness1MalePlaceOfBirth: sortedWitnesses[0]?.witness_place_of_birth || sortedWitnesses[0]?.place_of_birth || "",
+              witness1MaleAddress: sortedWitnesses[0]?.witness_address || sortedWitnesses[0]?.address || "",
+              // Witness No 1 (FEMALE) - sortedWitnesses[1]
+              witness1FemaleName: sortedWitnesses[1]?.witness_name || sortedWitnesses[1]?.full_name || "",
+              witness1FemaleFatherName: sortedWitnesses[1]?.witness_father_name || sortedWitnesses[1]?.father_name || "",
+              witness1FemaleDateOfBirth: formatDate(sortedWitnesses[1]?.witness_date_of_birth || sortedWitnesses[1]?.date_of_birth),
+              witness1FemalePlaceOfBirth: sortedWitnesses[1]?.witness_place_of_birth || sortedWitnesses[1]?.place_of_birth || "",
+              witness1FemaleAddress: sortedWitnesses[1]?.witness_address || sortedWitnesses[1]?.address || "",
+              // Witness No 2 (MALE) - sortedWitnesses[2]
+              witness2MaleName: sortedWitnesses[2]?.witness_name || sortedWitnesses[2]?.full_name || "",
+              witness2MaleFatherName: sortedWitnesses[2]?.witness_father_name || sortedWitnesses[2]?.father_name || "",
+              witness2MaleDateOfBirth: formatDate(sortedWitnesses[2]?.witness_date_of_birth || sortedWitnesses[2]?.date_of_birth),
+              witness2MalePlaceOfBirth: sortedWitnesses[2]?.witness_place_of_birth || sortedWitnesses[2]?.place_of_birth || "",
+              witness2MaleAddress: sortedWitnesses[2]?.witness_address || sortedWitnesses[2]?.address || "",
+              // Witness No 2 (FEMALE) - sortedWitnesses[3]
+              witness2FemaleName: sortedWitnesses[3]?.witness_name || sortedWitnesses[3]?.full_name || "",
+              witness2FemaleFatherName: sortedWitnesses[3]?.witness_father_name || sortedWitnesses[3]?.father_name || "",
+              witness2FemaleDateOfBirth: formatDate(sortedWitnesses[3]?.witness_date_of_birth || sortedWitnesses[3]?.date_of_birth),
+              witness2FemalePlaceOfBirth: sortedWitnesses[3]?.witness_place_of_birth || sortedWitnesses[3]?.place_of_birth || "",
+              witness2FemaleAddress: sortedWitnesses[3]?.witness_address || sortedWitnesses[3]?.address || "",
               mahrAmount: app.mahr_amount || "",
               mahrDeferred: app.mahr_type === "deferred",
               mahrPrompt: app.mahr_type === "prompt",
@@ -673,8 +707,10 @@ export default function AdminManualApplication() {
           const fileFieldMap = {
             groomIdFile: "groomId",
             brideIdFile: "brideId",
-            witness1IdFile: "witness1Id",
-            witness2IdFile: "witness2Id",
+            witness1MaleIdFile: "witness1MaleId",
+            witness1FemaleIdFile: "witness1FemaleId",
+            witness2MaleIdFile: "witness2MaleId",
+            witness2FemaleIdFile: "witness2FemaleId",
             mahrDeclarationFile: "mahrDeclaration",
             civilDivorceDocFile: "civilDivorceDoc",
             islamicDivorceDocFile: "islamicDivorceDoc",
@@ -736,8 +772,10 @@ export default function AdminManualApplication() {
     const documentPathMap = {
       groomIdFile: "groomIdPath",
       brideIdFile: "brideIdPath",
-      witness1IdFile: "witness1IdPath",
-      witness2IdFile: "witness2IdPath",
+      witness1MaleIdFile: "witness1MaleIdPath",
+      witness1FemaleIdFile: "witness1FemaleIdPath",
+      witness2MaleIdFile: "witness2MaleIdPath",
+      witness2FemaleIdFile: "witness2FemaleIdPath",
       mahrDeclarationFile: "mahrDeclarationPath",
       civilDivorceDocFile: "civilDivorceDocPath",
       islamicDivorceDocFile: "islamicDivorceDocPath",
@@ -1649,19 +1687,19 @@ export default function AdminManualApplication() {
           </FormRow>
         </FormSection>
 
-        {/* WITNESS NO 1 */}
-        <FormSection title="WITNESS NO 1">
+        {/* WITNESS NO 1 (MALE) */}
+        <FormSection title="WITNESS NO 1 (MALE)">
           <FormRow>
             <FormField
-              label="Witness's Full Name"
-              name="witness1Name"
+              label="Witness's Full Name *"
+              name="witness1MaleName"
               required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
-              label="Witness's father's full Name"
-              name="witness1FatherName"
+              label="Witness's father's full Name *"
+              name="witness1MaleFatherName"
               required
               formData={formData}
               handleChange={handleChange}
@@ -1670,14 +1708,14 @@ export default function AdminManualApplication() {
           <FormRow>
             <FormField
               label="Date of Birth"
-              name="witness1DateOfBirth"
+              name="witness1MaleDateOfBirth"
               type="date"
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
-              name="witness1PlaceOfBirth"
+              name="witness1MalePlaceOfBirth"
               formData={formData}
               handleChange={handleChange}
             />
@@ -1685,7 +1723,7 @@ export default function AdminManualApplication() {
           <FormRow>
             <FormField
               label="Address"
-              name="witness1Address"
+              name="witness1MaleAddress"
               type="textarea"
               span={2}
               formData={formData}
@@ -1694,19 +1732,19 @@ export default function AdminManualApplication() {
           </FormRow>
         </FormSection>
 
-        {/* WITNESS NO 2 */}
-        <FormSection title="WITNESS NO 2">
+        {/* WITNESS NO 1 (FEMALE) */}
+        <FormSection title="WITNESS NO 1 (FEMALE)">
           <FormRow>
             <FormField
-              label="Witness's Full Name"
-              name="witness2Name"
+              label="Witness's Full Name *"
+              name="witness1FemaleName"
               required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
-              label="Witness's father's full Name"
-              name="witness2FatherName"
+              label="Witness's father's full Name *"
+              name="witness1FemaleFatherName"
               required
               formData={formData}
               handleChange={handleChange}
@@ -1715,14 +1753,14 @@ export default function AdminManualApplication() {
           <FormRow>
             <FormField
               label="Date of Birth"
-              name="witness2DateOfBirth"
+              name="witness1FemaleDateOfBirth"
               type="date"
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
-              name="witness2PlaceOfBirth"
+              name="witness1FemalePlaceOfBirth"
               formData={formData}
               handleChange={handleChange}
             />
@@ -1730,7 +1768,97 @@ export default function AdminManualApplication() {
           <FormRow>
             <FormField
               label="Address"
-              name="witness2Address"
+              name="witness1FemaleAddress"
+              type="textarea"
+              span={2}
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+        </FormSection>
+
+        {/* WITNESS NO 2 (MALE) */}
+        <FormSection title="WITNESS NO 2 (MALE)">
+          <FormRow>
+            <FormField
+              label="Witness's Full Name *"
+              name="witness2MaleName"
+              required
+              formData={formData}
+              handleChange={handleChange}
+            />
+            <FormField
+              label="Witness's father's full Name *"
+              name="witness2MaleFatherName"
+              required
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+          <FormRow>
+            <FormField
+              label="Date of Birth"
+              name="witness2MaleDateOfBirth"
+              type="date"
+              formData={formData}
+              handleChange={handleChange}
+            />
+            <FormField
+              label="Place of Birth"
+              name="witness2MalePlaceOfBirth"
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+          <FormRow>
+            <FormField
+              label="Address"
+              name="witness2MaleAddress"
+              type="textarea"
+              span={2}
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+        </FormSection>
+
+        {/* WITNESS NO 2 (FEMALE) */}
+        <FormSection title="WITNESS NO 2 (FEMALE)">
+          <FormRow>
+            <FormField
+              label="Witness's Full Name *"
+              name="witness2FemaleName"
+              required
+              formData={formData}
+              handleChange={handleChange}
+            />
+            <FormField
+              label="Witness's father's full Name *"
+              name="witness2FemaleFatherName"
+              required
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+          <FormRow>
+            <FormField
+              label="Date of Birth"
+              name="witness2FemaleDateOfBirth"
+              type="date"
+              formData={formData}
+              handleChange={handleChange}
+            />
+            <FormField
+              label="Place of Birth"
+              name="witness2FemalePlaceOfBirth"
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+          <FormRow>
+            <FormField
+              label="Address"
+              name="witness2FemaleAddress"
               type="textarea"
               span={2}
               formData={formData}
@@ -1919,14 +2047,24 @@ export default function AdminManualApplication() {
               }}
             >
               <UploadCard
-                title="Witness 1 ID"
+                title="Witness No 1 (MALE) ID"
                 subtitle="Muslim Male Witness ID"
-                name="witness1IdFile"
+                name="witness1MaleIdFile"
               />
               <UploadCard
-                title="Witness 2 ID"
+                title="Witness No 1 (FEMALE) ID"
+                subtitle="Muslim Female Witness ID"
+                name="witness1FemaleIdFile"
+              />
+              <UploadCard
+                title="Witness No 2 (MALE) ID"
                 subtitle="Muslim Male Witness ID"
-                name="witness2IdFile"
+                name="witness2MaleIdFile"
+              />
+              <UploadCard
+                title="Witness No 2 (FEMALE) ID"
+                subtitle="Muslim Female Witness ID"
+                name="witness2FemaleIdFile"
               />
             </div>
           </FormSection>

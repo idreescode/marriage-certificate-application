@@ -850,72 +850,213 @@ export default function AdminApplicationDetails() {
               </div>
             )}
 
-            {witnesses.length > 0 ? (
+            {/* Witnesses Section - 4 Witnesses from applications table */}
+            {(application.witness1_male_name || application.witness1_female_name || 
+              application.witness2_male_name || application.witness2_female_name) ? (
               <div className="grid-2-cols">
-                {witnesses.map((witness, i) => {
-                  const variants = [
-                    { bg: "bg-witness-amber", icon: "icon-box-amber" },
-                    { bg: "bg-witness-emerald", icon: "icon-box-emerald" },
-                    { bg: "bg-witness-violet", icon: "icon-box-violet" },
-                    { bg: "bg-witness-orange", icon: "icon-box-orange" },
-                    { bg: "bg-witness-slate", icon: "icon-box-slate" },
-                    { bg: "bg-witness-lime", icon: "icon-box-lime" },
-                  ];
-                  const variant = variants[i % variants.length];
-
-                  return (
-                    <div
-                      key={witness.id}
-                      className={`details-card ${variant.bg}`}
-                    >
-                      <div className="card-title-row">
-                        <div className={`icon-box ${variant.icon}`}>
-                          <User size={22} />
-                        </div>
-                        <h2 className="card-title-text">Witness {i + 1}</h2>
+                {/* Witness No 1 (MALE) */}
+                {application.witness1_male_name && (
+                  <div className="details-card bg-witness-amber">
+                    <div className="card-title-row">
+                      <div className="icon-box icon-box-amber">
+                        <User size={22} />
                       </div>
-                      <div className="card-body">
+                      <h2 className="card-title-text">Witness No 1 (MALE)</h2>
+                    </div>
+                    <div className="card-body">
+                      <InfoItem
+                        icon={User}
+                        label="Full Name"
+                        value={application.witness1_male_name}
+                      />
+                      {application.witness1_male_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Full Name"
-                          value={witness.witness_name}
+                          label="Father's Name"
+                          value={application.witness1_male_father_name}
                         />
-                        {witness.witness_father_name && (
-                          <InfoItem
-                            icon={User}
-                            label="Father Name"
-                            value={witness.witness_father_name}
-                          />
-                        )}
-                        {witness.witness_date_of_birth && (
-                          <InfoItem
-                            icon={Calendar}
-                            label="Date of Birth"
-                            value={new Date(
-                              witness.witness_date_of_birth
-                            ).toLocaleDateString(undefined, {
-                              dateStyle: "long",
-                            })}
-                          />
-                        )}
-                        {witness.witness_place_of_birth && (
-                          <InfoItem
-                            icon={MapPin}
-                            label="Place of Birth"
-                            value={witness.witness_place_of_birth}
-                          />
-                        )}
-                        {witness.witness_address && (
-                          <InfoItem
-                            icon={MapPin}
-                            label="Address"
-                            value={witness.witness_address}
-                          />
-                        )}
-                      </div>
+                      )}
+                      {application.witness1_male_date_of_birth && (
+                        <InfoItem
+                          icon={Calendar}
+                          label="Date of Birth"
+                          value={new Date(
+                            application.witness1_male_date_of_birth
+                          ).toLocaleDateString(undefined, {
+                            dateStyle: "long",
+                          })}
+                        />
+                      )}
+                      {application.witness1_male_place_of_birth && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Place of Birth"
+                          value={application.witness1_male_place_of_birth}
+                        />
+                      )}
+                      {application.witness1_male_address && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Address"
+                          value={application.witness1_male_address}
+                        />
+                      )}
                     </div>
-                  );
-                })}
+                  </div>
+                )}
+
+                {/* Witness No 1 (FEMALE) */}
+                {application.witness1_female_name && (
+                  <div className="details-card bg-witness-emerald">
+                    <div className="card-title-row">
+                      <div className="icon-box icon-box-emerald">
+                        <User size={22} />
+                      </div>
+                      <h2 className="card-title-text">Witness No 1 (FEMALE)</h2>
+                    </div>
+                    <div className="card-body">
+                      <InfoItem
+                        icon={User}
+                        label="Full Name"
+                        value={application.witness1_female_name}
+                      />
+                      {application.witness1_female_father_name && (
+                        <InfoItem
+                          icon={User}
+                          label="Father's Name"
+                          value={application.witness1_female_father_name}
+                        />
+                      )}
+                      {application.witness1_female_date_of_birth && (
+                        <InfoItem
+                          icon={Calendar}
+                          label="Date of Birth"
+                          value={new Date(
+                            application.witness1_female_date_of_birth
+                          ).toLocaleDateString(undefined, {
+                            dateStyle: "long",
+                          })}
+                        />
+                      )}
+                      {application.witness1_female_place_of_birth && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Place of Birth"
+                          value={application.witness1_female_place_of_birth}
+                        />
+                      )}
+                      {application.witness1_female_address && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Address"
+                          value={application.witness1_female_address}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Witness No 2 (MALE) */}
+                {application.witness2_male_name && (
+                  <div className="details-card bg-witness-violet">
+                    <div className="card-title-row">
+                      <div className="icon-box icon-box-violet">
+                        <User size={22} />
+                      </div>
+                      <h2 className="card-title-text">Witness No 2 (MALE)</h2>
+                    </div>
+                    <div className="card-body">
+                      <InfoItem
+                        icon={User}
+                        label="Full Name"
+                        value={application.witness2_male_name}
+                      />
+                      {application.witness2_male_father_name && (
+                        <InfoItem
+                          icon={User}
+                          label="Father's Name"
+                          value={application.witness2_male_father_name}
+                        />
+                      )}
+                      {application.witness2_male_date_of_birth && (
+                        <InfoItem
+                          icon={Calendar}
+                          label="Date of Birth"
+                          value={new Date(
+                            application.witness2_male_date_of_birth
+                          ).toLocaleDateString(undefined, {
+                            dateStyle: "long",
+                          })}
+                        />
+                      )}
+                      {application.witness2_male_place_of_birth && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Place of Birth"
+                          value={application.witness2_male_place_of_birth}
+                        />
+                      )}
+                      {application.witness2_male_address && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Address"
+                          value={application.witness2_male_address}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Witness No 2 (FEMALE) */}
+                {application.witness2_female_name && (
+                  <div className="details-card bg-witness-orange">
+                    <div className="card-title-row">
+                      <div className="icon-box icon-box-orange">
+                        <User size={22} />
+                      </div>
+                      <h2 className="card-title-text">Witness No 2 (FEMALE)</h2>
+                    </div>
+                    <div className="card-body">
+                      <InfoItem
+                        icon={User}
+                        label="Full Name"
+                        value={application.witness2_female_name}
+                      />
+                      {application.witness2_female_father_name && (
+                        <InfoItem
+                          icon={User}
+                          label="Father's Name"
+                          value={application.witness2_female_father_name}
+                        />
+                      )}
+                      {application.witness2_female_date_of_birth && (
+                        <InfoItem
+                          icon={Calendar}
+                          label="Date of Birth"
+                          value={new Date(
+                            application.witness2_female_date_of_birth
+                          ).toLocaleDateString(undefined, {
+                            dateStyle: "long",
+                          })}
+                        />
+                      )}
+                      {application.witness2_female_place_of_birth && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Place of Birth"
+                          value={application.witness2_female_place_of_birth}
+                        />
+                      )}
+                      {application.witness2_female_address && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="Address"
+                          value={application.witness2_female_address}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="details-card bg-white border-dashed text-center py-12">
@@ -1449,9 +1590,10 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* WITNESSES */}
-              {witnesses.map((witness, i) => (
-                <tr key={`witness-${i}`}>
+              {/* WITNESSES - From applications table */}
+              {/* Witness No 1 (MALE) */}
+              {application.witness1_male_name && (
+                <tr>
                   <td
                     style={{
                       border: "1px solid black",
@@ -1461,25 +1603,25 @@ export default function AdminApplicationDetails() {
                       verticalAlign: "middle",
                     }}
                   >
-                    WITNESS No {i + 1}
+                    WITNESS No 1 (MALE)
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {witness.witness_name || "NIL"}
+                    {application.witness1_male_name || "NIL"}
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {witness.witness_father_name || "NIL"}
+                    {application.witness1_male_father_name || "NIL"}
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {witness.witness_date_of_birth
+                    {application.witness1_male_date_of_birth
                       ? new Date(
-                          witness.witness_date_of_birth
+                          application.witness1_male_date_of_birth
                         ).toLocaleDateString("en-GB")
                       : "NIL"}
                     <br />
-                    {witness.witness_place_of_birth || "NIL"}
+                    {application.witness1_male_place_of_birth || "NIL"}
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {witness.witness_address || "NIL"}
+                    {application.witness1_male_address || "NIL"}
                   </td>
                   <td
                     style={{
@@ -1502,7 +1644,172 @@ export default function AdminApplicationDetails() {
                     /
                   </td>
                 </tr>
-              ))}
+              )}
+
+              {/* Witness No 1 (FEMALE) */}
+              {application.witness1_female_name && (
+                <tr>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    WITNESS No 1 (FEMALE)
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_father_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_date_of_birth
+                      ? new Date(
+                          application.witness1_female_date_of_birth
+                        ).toLocaleDateString("en-GB")
+                      : "NIL"}
+                    <br />
+                    {application.witness1_female_place_of_birth || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_address || "NIL"}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                </tr>
+              )}
+
+              {/* Witness No 2 (MALE) */}
+              {application.witness2_male_name && (
+                <tr>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    WITNESS No 2 (MALE)
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_male_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_male_father_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_male_date_of_birth
+                      ? new Date(
+                          application.witness2_male_date_of_birth
+                        ).toLocaleDateString("en-GB")
+                      : "NIL"}
+                    <br />
+                    {application.witness2_male_place_of_birth || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_male_address || "NIL"}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                </tr>
+              )}
+
+              {/* Witness No 2 (FEMALE) */}
+              {application.witness2_female_name && (
+                <tr>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    WITNESS No 2 (FEMALE)
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_female_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_female_father_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_female_date_of_birth
+                      ? new Date(
+                          application.witness2_female_date_of_birth
+                        ).toLocaleDateString("en-GB")
+                      : "NIL"}
+                    <br />
+                    {application.witness2_female_place_of_birth || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness2_female_address || "NIL"}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                </tr>
+              )}
 
               {/* MAHR */}
               <tr>

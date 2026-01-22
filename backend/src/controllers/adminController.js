@@ -955,7 +955,6 @@ const createManualApplication = async (req, res) => {
       groomDateOfBirth,
       groomPlaceOfBirth,
       groomAddress,
-      groomEmail,
       groomIdNumber,
       groomConfirm,
       groomPersonally,
@@ -972,7 +971,6 @@ const createManualApplication = async (req, res) => {
       brideDateOfBirth,
       bridePlaceOfBirth,
       brideAddress,
-      brideEmail,
       brideIdNumber,
       brideConfirm,
       bridePersonally,
@@ -984,16 +982,30 @@ const createManualApplication = async (req, res) => {
       brideRepPlaceOfBirth,
       brideRepAddress,
       // Witnesses
-      witness1Name,
-      witness1FatherName,
-      witness1DateOfBirth,
-      witness1PlaceOfBirth,
-      witness1Address,
-      witness2Name,
-      witness2FatherName,
-      witness2DateOfBirth,
-      witness2PlaceOfBirth,
-      witness2Address,
+      // Witness No 1 (MALE)
+      witness1MaleName,
+      witness1MaleFatherName,
+      witness1MaleDateOfBirth,
+      witness1MalePlaceOfBirth,
+      witness1MaleAddress,
+      // Witness No 1 (FEMALE)
+      witness1FemaleName,
+      witness1FemaleFatherName,
+      witness1FemaleDateOfBirth,
+      witness1FemalePlaceOfBirth,
+      witness1FemaleAddress,
+      // Witness No 2 (MALE)
+      witness2MaleName,
+      witness2MaleFatherName,
+      witness2MaleDateOfBirth,
+      witness2MalePlaceOfBirth,
+      witness2MaleAddress,
+      // Witness No 2 (FEMALE)
+      witness2FemaleName,
+      witness2FemaleFatherName,
+      witness2FemaleDateOfBirth,
+      witness2FemalePlaceOfBirth,
+      witness2FemaleAddress,
       // Mahr
       mahrAmount,
       mahrType,
@@ -1158,8 +1170,10 @@ const createManualApplication = async (req, res) => {
       const normalizedBrideDob = normalizeDate(brideDateOfBirth);
       const normalizedGroomRepDob = normalizeDate(groomRepDateOfBirth);
       const normalizedBrideRepDob = normalizeDate(brideRepDateOfBirth);
-      const normalizedWitness1Dob = normalizeDate(witness1DateOfBirth);
-      const normalizedWitness2Dob = normalizeDate(witness2DateOfBirth);
+      const normalizedWitness1MaleDob = normalizeDate(witness1MaleDateOfBirth);
+      const normalizedWitness1FemaleDob = normalizeDate(witness1FemaleDateOfBirth);
+      const normalizedWitness2MaleDob = normalizeDate(witness2MaleDateOfBirth);
+      const normalizedWitness2FemaleDob = normalizeDate(witness2FemaleDateOfBirth);
       const normalizedSolemnisedDate = normalizeDate(solemnisedDate, true); // includeTime=true for datetime
       const normalizedPreferredDate = normalizeDate(preferredDate);
       const normalizedAppointmentDate = normalizeDate(appointmentDate);
@@ -1168,8 +1182,10 @@ const createManualApplication = async (req, res) => {
       const fileFields = {
         groomId: "groom_id_path",
         brideId: "bride_id_path",
-        witness1Id: "witness1_id_path",
-        witness2Id: "witness2_id_path",
+        witness1MaleId: "witness1_male_id_path",
+        witness1FemaleId: "witness1_female_id_path",
+        witness2MaleId: "witness2_male_id_path",
+        witness2FemaleId: "witness2_female_id_path",
         mahrDeclaration: "mahr_declaration_path",
         civilDivorceDoc: "civil_divorce_doc_path",
         islamicDivorceDoc: "islamic_divorce_doc_path",
@@ -1215,10 +1231,14 @@ const createManualApplication = async (req, res) => {
           deposit_amount, deposit_amount_set_by, payment_status,
           appointment_date, appointment_time, appointment_location,
           status,
-          groom_id_path, bride_id_path, witness1_id_path, witness2_id_path,
+          groom_id_path, bride_id_path, witness1_male_id_path, witness1_female_id_path, witness2_male_id_path, witness2_female_id_path,
           mahr_declaration_path, civil_divorce_doc_path, islamic_divorce_doc_path,
-          groom_conversion_cert_path, bride_conversion_cert_path, statutory_declaration_path
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          groom_conversion_cert_path, bride_conversion_cert_path, statutory_declaration_path,
+          witness1_male_name, witness1_male_father_name, witness1_male_date_of_birth, witness1_male_place_of_birth, witness1_male_address,
+          witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
+          witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
+          witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               finalApplicationNumber,
               userId,
@@ -1267,14 +1287,36 @@ const createManualApplication = async (req, res) => {
               status || "completed",
               documentPaths.groom_id_path || null,
               documentPaths.bride_id_path || null,
-              documentPaths.witness1_id_path || null,
-              documentPaths.witness2_id_path || null,
+              documentPaths.witness1_male_id_path || null,
+              documentPaths.witness1_female_id_path || null,
+              documentPaths.witness2_male_id_path || null,
+              documentPaths.witness2_female_id_path || null,
               documentPaths.mahr_declaration_path || null,
               documentPaths.civil_divorce_doc_path || null,
               documentPaths.islamic_divorce_doc_path || null,
               documentPaths.groom_conversion_cert_path || null,
               documentPaths.bride_conversion_cert_path || null,
               documentPaths.statutory_declaration_path || null,
+              witness1MaleName || null,
+              witness1MaleFatherName || null,
+              normalizedWitness1MaleDob,
+              witness1MalePlaceOfBirth || null,
+              witness1MaleAddress || null,
+              witness1FemaleName || null,
+              witness1FemaleFatherName || null,
+              normalizedWitness1FemaleDob,
+              witness1FemalePlaceOfBirth || null,
+              witness1FemaleAddress || null,
+              witness2MaleName || null,
+              witness2MaleFatherName || null,
+              normalizedWitness2MaleDob,
+              witness2MalePlaceOfBirth || null,
+              witness2MaleAddress || null,
+              witness2FemaleName || null,
+              witness2FemaleFatherName || null,
+              normalizedWitness2FemaleDob,
+              witness2FemalePlaceOfBirth || null,
+              witness2FemaleAddress || null,
             ]
           );
           insertSuccess = true;
@@ -1333,18 +1375,32 @@ const createManualApplication = async (req, res) => {
       // Insert witnesses with extended fields
       const witnessesData = [
         {
-          name: witness1Name,
-          fatherName: witness1FatherName,
-          dob: normalizedWitness1Dob,
-          pob: witness1PlaceOfBirth,
-          address: witness1Address,
+          name: witness1MaleName,
+          fatherName: witness1MaleFatherName,
+          dob: normalizedWitness1MaleDob,
+          pob: witness1MalePlaceOfBirth,
+          address: witness1MaleAddress,
         },
         {
-          name: witness2Name,
-          fatherName: witness2FatherName,
-          dob: normalizedWitness2Dob,
-          pob: witness2PlaceOfBirth,
-          address: witness2Address,
+          name: witness1FemaleName,
+          fatherName: witness1FemaleFatherName,
+          dob: normalizedWitness1FemaleDob,
+          pob: witness1FemalePlaceOfBirth,
+          address: witness1FemaleAddress,
+        },
+        {
+          name: witness2MaleName,
+          fatherName: witness2MaleFatherName,
+          dob: normalizedWitness2MaleDob,
+          pob: witness2MalePlaceOfBirth,
+          address: witness2MaleAddress,
+        },
+        {
+          name: witness2FemaleName,
+          fatherName: witness2FemaleFatherName,
+          dob: normalizedWitness2FemaleDob,
+          pob: witness2FemalePlaceOfBirth,
+          address: witness2FemaleAddress,
         },
       ];
 
@@ -1656,7 +1712,6 @@ const updateApplication = async (req, res) => {
       groomDateOfBirth,
       groomPlaceOfBirth,
       groomAddress,
-      groomEmail,
       groomIdNumber,
       groomConfirm,
       groomPersonally,
@@ -1673,7 +1728,6 @@ const updateApplication = async (req, res) => {
       brideDateOfBirth,
       bridePlaceOfBirth,
       brideAddress,
-      brideEmail,
       brideIdNumber,
       brideConfirm,
       bridePersonally,
@@ -1685,16 +1739,30 @@ const updateApplication = async (req, res) => {
       brideRepPlaceOfBirth,
       brideRepAddress,
       // Witnesses
-      witness1Name,
-      witness1FatherName,
-      witness1DateOfBirth,
-      witness1PlaceOfBirth,
-      witness1Address,
-      witness2Name,
-      witness2FatherName,
-      witness2DateOfBirth,
-      witness2PlaceOfBirth,
-      witness2Address,
+      // Witness No 1 (MALE)
+      witness1MaleName,
+      witness1MaleFatherName,
+      witness1MaleDateOfBirth,
+      witness1MalePlaceOfBirth,
+      witness1MaleAddress,
+      // Witness No 1 (FEMALE)
+      witness1FemaleName,
+      witness1FemaleFatherName,
+      witness1FemaleDateOfBirth,
+      witness1FemalePlaceOfBirth,
+      witness1FemaleAddress,
+      // Witness No 2 (MALE)
+      witness2MaleName,
+      witness2MaleFatherName,
+      witness2MaleDateOfBirth,
+      witness2MalePlaceOfBirth,
+      witness2MaleAddress,
+      // Witness No 2 (FEMALE)
+      witness2FemaleName,
+      witness2FemaleFatherName,
+      witness2FemaleDateOfBirth,
+      witness2FemalePlaceOfBirth,
+      witness2FemaleAddress,
       // Mahr
       mahrAmount,
       mahrType,
@@ -1775,11 +1843,17 @@ const updateApplication = async (req, res) => {
     const normalizedBrideRepDob = brideRepDateOfBirth
       ? normalizeDate(brideRepDateOfBirth)
       : null;
-    const normalizedWitness1Dob = witness1DateOfBirth
-      ? normalizeDate(witness1DateOfBirth)
+    const normalizedWitness1MaleDob = witness1MaleDateOfBirth
+      ? normalizeDate(witness1MaleDateOfBirth)
       : null;
-    const normalizedWitness2Dob = witness2DateOfBirth
-      ? normalizeDate(witness2DateOfBirth)
+    const normalizedWitness1FemaleDob = witness1FemaleDateOfBirth
+      ? normalizeDate(witness1FemaleDateOfBirth)
+      : null;
+    const normalizedWitness2MaleDob = witness2MaleDateOfBirth
+      ? normalizeDate(witness2MaleDateOfBirth)
+      : null;
+    const normalizedWitness2FemaleDob = witness2FemaleDateOfBirth
+      ? normalizeDate(witness2FemaleDateOfBirth)
       : null;
     const normalizedSolemnisedDate = solemnisedDate
       ? normalizeDate(solemnisedDate)
@@ -1795,8 +1869,10 @@ const updateApplication = async (req, res) => {
     const fileFields = {
       groomId: "groom_id_path",
       brideId: "bride_id_path",
-      witness1Id: "witness1_id_path",
-      witness2Id: "witness2_id_path",
+      witness1MaleId: "witness1_male_id_path",
+      witness1FemaleId: "witness1_female_id_path",
+      witness2MaleId: "witness2_male_id_path",
+      witness2FemaleId: "witness2_female_id_path",
       mahrDeclaration: "mahr_declaration_path",
       civilDivorceDoc: "civil_divorce_doc_path",
       islamicDivorceDoc: "islamic_divorce_doc_path",
@@ -1998,6 +2074,95 @@ const updateApplication = async (req, res) => {
       updateValues.push(specialRequests || null);
     }
 
+    // Witness fields
+    // Witness No 1 (MALE)
+    if (witness1MaleName !== undefined) {
+      updateFields.push("witness1_male_name = ?");
+      updateValues.push(witness1MaleName || null);
+    }
+    if (witness1MaleFatherName !== undefined) {
+      updateFields.push("witness1_male_father_name = ?");
+      updateValues.push(witness1MaleFatherName || null);
+    }
+    if (normalizedWitness1MaleDob !== undefined) {
+      updateFields.push("witness1_male_date_of_birth = ?");
+      updateValues.push(normalizedWitness1MaleDob);
+    }
+    if (witness1MalePlaceOfBirth !== undefined) {
+      updateFields.push("witness1_male_place_of_birth = ?");
+      updateValues.push(witness1MalePlaceOfBirth || null);
+    }
+    if (witness1MaleAddress !== undefined) {
+      updateFields.push("witness1_male_address = ?");
+      updateValues.push(witness1MaleAddress || null);
+    }
+
+    // Witness No 1 (FEMALE)
+    if (witness1FemaleName !== undefined) {
+      updateFields.push("witness1_female_name = ?");
+      updateValues.push(witness1FemaleName || null);
+    }
+    if (witness1FemaleFatherName !== undefined) {
+      updateFields.push("witness1_female_father_name = ?");
+      updateValues.push(witness1FemaleFatherName || null);
+    }
+    if (normalizedWitness1FemaleDob !== undefined) {
+      updateFields.push("witness1_female_date_of_birth = ?");
+      updateValues.push(normalizedWitness1FemaleDob);
+    }
+    if (witness1FemalePlaceOfBirth !== undefined) {
+      updateFields.push("witness1_female_place_of_birth = ?");
+      updateValues.push(witness1FemalePlaceOfBirth || null);
+    }
+    if (witness1FemaleAddress !== undefined) {
+      updateFields.push("witness1_female_address = ?");
+      updateValues.push(witness1FemaleAddress || null);
+    }
+
+    // Witness No 2 (MALE)
+    if (witness2MaleName !== undefined) {
+      updateFields.push("witness2_male_name = ?");
+      updateValues.push(witness2MaleName || null);
+    }
+    if (witness2MaleFatherName !== undefined) {
+      updateFields.push("witness2_male_father_name = ?");
+      updateValues.push(witness2MaleFatherName || null);
+    }
+    if (normalizedWitness2MaleDob !== undefined) {
+      updateFields.push("witness2_male_date_of_birth = ?");
+      updateValues.push(normalizedWitness2MaleDob);
+    }
+    if (witness2MalePlaceOfBirth !== undefined) {
+      updateFields.push("witness2_male_place_of_birth = ?");
+      updateValues.push(witness2MalePlaceOfBirth || null);
+    }
+    if (witness2MaleAddress !== undefined) {
+      updateFields.push("witness2_male_address = ?");
+      updateValues.push(witness2MaleAddress || null);
+    }
+
+    // Witness No 2 (FEMALE)
+    if (witness2FemaleName !== undefined) {
+      updateFields.push("witness2_female_name = ?");
+      updateValues.push(witness2FemaleName || null);
+    }
+    if (witness2FemaleFatherName !== undefined) {
+      updateFields.push("witness2_female_father_name = ?");
+      updateValues.push(witness2FemaleFatherName || null);
+    }
+    if (normalizedWitness2FemaleDob !== undefined) {
+      updateFields.push("witness2_female_date_of_birth = ?");
+      updateValues.push(normalizedWitness2FemaleDob);
+    }
+    if (witness2FemalePlaceOfBirth !== undefined) {
+      updateFields.push("witness2_female_place_of_birth = ?");
+      updateValues.push(witness2FemalePlaceOfBirth || null);
+    }
+    if (witness2FemaleAddress !== undefined) {
+      updateFields.push("witness2_female_address = ?");
+      updateValues.push(witness2FemaleAddress || null);
+    }
+
     // Handle file uploads
     for (const [fieldName, dbColumn] of Object.entries(fileFields)) {
       if (files[fieldName] && files[fieldName][0]) {
@@ -2052,27 +2217,28 @@ const updateApplication = async (req, res) => {
     }
 
     // Update witnesses if provided
-    if (witness1Name !== undefined || witness2Name !== undefined) {
-      // Get existing witnesses
+    if (witness1MaleName !== undefined || witness1FemaleName !== undefined || 
+        witness2MaleName !== undefined || witness2FemaleName !== undefined) {
+      // Get existing witnesses sorted by witness_order
       const [existingWitnesses] = await pool.execute(
-        "SELECT * FROM witnesses WHERE application_id = ? ORDER BY id",
+        "SELECT * FROM witnesses WHERE application_id = ? ORDER BY witness_order, id",
         [id]
       );
 
-      // Update or insert witness 1
-      if (witness1Name !== undefined) {
-        if (existingWitnesses[0]) {
+      // Witness No 1 (MALE) - order 1
+      if (witness1MaleName !== undefined) {
+        if (existingWitnesses[0] && existingWitnesses[0].witness_order === 1) {
           await pool.execute(
             `UPDATE witnesses SET 
               witness_name = ?, witness_father_name = ?, witness_date_of_birth = ?, 
               witness_place_of_birth = ?, witness_address = ?
             WHERE id = ?`,
             [
-              witness1Name || null,
-              witness1FatherName || null,
-              normalizedWitness1Dob,
-              witness1PlaceOfBirth || null,
-              witness1Address || null,
+              witness1MaleName || null,
+              witness1MaleFatherName || null,
+              normalizedWitness1MaleDob,
+              witness1MalePlaceOfBirth || null,
+              witness1MaleAddress || null,
               existingWitnesses[0].id,
             ]
           );
@@ -2082,31 +2248,31 @@ const updateApplication = async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               id,
-              witness1Name || null,
-              witness1FatherName || null,
-              normalizedWitness1Dob,
-              witness1PlaceOfBirth || null,
-              witness1Address || null,
+              witness1MaleName || null,
+              witness1MaleFatherName || null,
+              normalizedWitness1MaleDob,
+              witness1MalePlaceOfBirth || null,
+              witness1MaleAddress || null,
               1,
             ]
           );
         }
       }
 
-      // Update or insert witness 2
-      if (witness2Name !== undefined) {
-        if (existingWitnesses[1]) {
+      // Witness No 1 (FEMALE) - order 2
+      if (witness1FemaleName !== undefined) {
+        if (existingWitnesses[1] && existingWitnesses[1].witness_order === 2) {
           await pool.execute(
             `UPDATE witnesses SET 
               witness_name = ?, witness_father_name = ?, witness_date_of_birth = ?, 
               witness_place_of_birth = ?, witness_address = ?
             WHERE id = ?`,
             [
-              witness2Name || null,
-              witness2FatherName || null,
-              normalizedWitness2Dob,
-              witness2PlaceOfBirth || null,
-              witness2Address || null,
+              witness1FemaleName || null,
+              witness1FemaleFatherName || null,
+              normalizedWitness1FemaleDob,
+              witness1FemalePlaceOfBirth || null,
+              witness1FemaleAddress || null,
               existingWitnesses[1].id,
             ]
           );
@@ -2116,12 +2282,80 @@ const updateApplication = async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               id,
-              witness2Name || null,
-              witness2FatherName || null,
-              normalizedWitness2Dob,
-              witness2PlaceOfBirth || null,
-              witness2Address || null,
+              witness1FemaleName || null,
+              witness1FemaleFatherName || null,
+              normalizedWitness1FemaleDob,
+              witness1FemalePlaceOfBirth || null,
+              witness1FemaleAddress || null,
               2,
+            ]
+          );
+        }
+      }
+
+      // Witness No 2 (MALE) - order 3
+      if (witness2MaleName !== undefined) {
+        if (existingWitnesses[2] && existingWitnesses[2].witness_order === 3) {
+          await pool.execute(
+            `UPDATE witnesses SET 
+              witness_name = ?, witness_father_name = ?, witness_date_of_birth = ?, 
+              witness_place_of_birth = ?, witness_address = ?
+            WHERE id = ?`,
+            [
+              witness2MaleName || null,
+              witness2MaleFatherName || null,
+              normalizedWitness2MaleDob,
+              witness2MalePlaceOfBirth || null,
+              witness2MaleAddress || null,
+              existingWitnesses[2].id,
+            ]
+          );
+        } else {
+          await pool.execute(
+            `INSERT INTO witnesses (application_id, witness_name, witness_father_name, witness_date_of_birth, witness_place_of_birth, witness_address, witness_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              id,
+              witness2MaleName || null,
+              witness2MaleFatherName || null,
+              normalizedWitness2MaleDob,
+              witness2MalePlaceOfBirth || null,
+              witness2MaleAddress || null,
+              3,
+            ]
+          );
+        }
+      }
+
+      // Witness No 2 (FEMALE) - order 4
+      if (witness2FemaleName !== undefined) {
+        if (existingWitnesses[3] && existingWitnesses[3].witness_order === 4) {
+          await pool.execute(
+            `UPDATE witnesses SET 
+              witness_name = ?, witness_father_name = ?, witness_date_of_birth = ?, 
+              witness_place_of_birth = ?, witness_address = ?
+            WHERE id = ?`,
+            [
+              witness2FemaleName || null,
+              witness2FemaleFatherName || null,
+              normalizedWitness2FemaleDob,
+              witness2FemalePlaceOfBirth || null,
+              witness2FemaleAddress || null,
+              existingWitnesses[3].id,
+            ]
+          );
+        } else {
+          await pool.execute(
+            `INSERT INTO witnesses (application_id, witness_name, witness_father_name, witness_date_of_birth, witness_place_of_birth, witness_address, witness_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              id,
+              witness2FemaleName || null,
+              witness2FemaleFatherName || null,
+              normalizedWitness2FemaleDob,
+              witness2FemalePlaceOfBirth || null,
+              witness2FemaleAddress || null,
+              4,
             ]
           );
         }

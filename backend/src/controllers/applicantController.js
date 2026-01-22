@@ -288,8 +288,10 @@ const uploadDocuments = async (req, res) => {
     const fileFields = {
       groomId: 'groom_id_path',
       brideId: 'bride_id_path',
-      witness1Id: 'witness1_id_path',
-      witness2Id: 'witness2_id_path',
+      witness1MaleId: 'witness1_male_id_path',
+      witness1FemaleId: 'witness1_female_id_path',
+      witness2MaleId: 'witness2_male_id_path',
+      witness2FemaleId: 'witness2_female_id_path',
       mahrDeclaration: 'mahr_declaration_path',
       civilDivorceDoc: 'civil_divorce_doc_path',
       islamicDivorceDoc: 'islamic_divorce_doc_path',
