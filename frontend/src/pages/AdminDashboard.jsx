@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
-import { getAllApplications } from "../services/api";
+import { getAllApplications, getSettings } from "../services/api";
 import {
   Users,
   CreditCard,
@@ -54,6 +54,12 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setError(null);
+      
+      // Fetch settings to get total_fee
+      const settingsResponse = await getSettings();
+      const totalFeeSetting = settingsResponse.data.data.total_fee?.value;
+      const totalFee = totalFeeSetting ? parseFloat(totalFeeSetting) : 0;
+      
       // Request all applications without pagination for dashboard stats
       const response = await getAllApplications({ limit: 10000, page: 1 });
 
@@ -77,50 +83,42 @@ export default function AdminDashboard() {
       ).length;
       const completed = apps.filter((a) => a.status === "completed").length;
 
-      // Calculate total revenue (all time)
-      const revenue = apps.reduce((acc, curr) => {
-        if (
-          (curr.status === "payment_verified" ||
-            curr.status === "appointment_scheduled" ||
-            curr.status === "completed") &&
-          curr.deposit_amount
-        ) {
-          return acc + Number(curr.deposit_amount);
-        }
-        return acc;
-      }, 0);
+      // Calculate total fee (all time) - Only count completed applications
+      // Total Fee = total_fee (from settings) × completed applications count
+      const completedApplications = apps.filter((app) => app.status === "completed").length;
+      const revenue = totalFee > 0 ? totalFee * completedApplications : 0;
 
-      // Calculate revenue for current month and last month
+      // Calculate total fee for current month and last month
       const today = new Date();
       const currentMonth = today.getMonth();
       const currentYear = today.getFullYear();
       const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-      let currentMonthRevenue = 0;
-      let lastMonthRevenue = 0;
+      let currentMonthApplications = 0;
+      let lastMonthApplications = 0;
 
       apps.forEach((app) => {
-        if (
-          (app.status === "payment_verified" ||
-            app.status === "appointment_scheduled" ||
-            app.status === "completed") &&
-          app.deposit_amount
-        ) {
+        // Only count completed applications for total fee calculation
+        if (app.status === "completed") {
           const appDate = new Date(app.created_at);
           const appMonth = appDate.getMonth();
           const appYear = appDate.getFullYear();
 
-          // Check if payment was made in current month
+          // Check if application was completed in current month
           if (appMonth === currentMonth && appYear === currentYear) {
-            currentMonthRevenue += Number(app.deposit_amount);
+            currentMonthApplications += 1;
           }
-          // Check if payment was made in last month
+          // Check if application was completed in last month
           else if (appMonth === lastMonth && appYear === lastMonthYear) {
-            lastMonthRevenue += Number(app.deposit_amount);
+            lastMonthApplications += 1;
           }
         }
       });
+
+      // Calculate total fee for current and last month
+      const currentMonthRevenue = totalFee > 0 ? totalFee * currentMonthApplications : 0;
+      const lastMonthRevenue = totalFee > 0 ? totalFee * lastMonthApplications : 0;
 
       // Calculate percentage change
       let revenueChange = 0;
