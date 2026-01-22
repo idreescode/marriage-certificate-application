@@ -146,7 +146,6 @@ export default function AdminDashboard() {
         "Nov",
         "Dec",
       ];
-      const today = new Date();
       const last6Months = [];
 
       for (let i = 5; i >= 0; i--) {
