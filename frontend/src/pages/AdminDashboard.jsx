@@ -7,6 +7,7 @@ import {
   CreditCard,
   Calendar,
   TrendingUp,
+  TrendingDown,
   Clock,
   AlertCircle,
   FileText,
@@ -34,6 +35,7 @@ export default function AdminDashboard() {
     scheduled: 0,
     completed: 0,
     totalRevenue: 0,
+    revenueChange: 0,
   });
   const [chartData, setChartData] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -75,6 +77,7 @@ export default function AdminDashboard() {
       ).length;
       const completed = apps.filter((a) => a.status === "completed").length;
 
+      // Calculate total revenue (all time)
       const revenue = apps.reduce((acc, curr) => {
         if (
           (curr.status === "payment_verified" ||
@@ -86,6 +89,47 @@ export default function AdminDashboard() {
         }
         return acc;
       }, 0);
+
+      // Calculate revenue for current month and last month
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+      let currentMonthRevenue = 0;
+      let lastMonthRevenue = 0;
+
+      apps.forEach((app) => {
+        if (
+          (app.status === "payment_verified" ||
+            app.status === "appointment_scheduled" ||
+            app.status === "completed") &&
+          app.deposit_amount
+        ) {
+          const appDate = new Date(app.created_at);
+          const appMonth = appDate.getMonth();
+          const appYear = appDate.getFullYear();
+
+          // Check if payment was made in current month
+          if (appMonth === currentMonth && appYear === currentYear) {
+            currentMonthRevenue += Number(app.deposit_amount);
+          }
+          // Check if payment was made in last month
+          else if (appMonth === lastMonth && appYear === lastMonthYear) {
+            lastMonthRevenue += Number(app.deposit_amount);
+          }
+        }
+      });
+
+      // Calculate percentage change
+      let revenueChange = 0;
+      if (lastMonthRevenue > 0) {
+        revenueChange = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+      } else if (currentMonthRevenue > 0) {
+        // If last month had no revenue but current month has, it's 100% increase
+        revenueChange = 100;
+      }
 
       // Process Chart Data (Last 6 Months)
       const months = [
@@ -138,6 +182,7 @@ export default function AdminDashboard() {
         scheduled: scheduled,
         completed: completed,
         totalRevenue: revenue,
+        revenueChange: revenueChange,
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -451,7 +496,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   marginTop: "0.75rem",
-                  color: "#059669",
+                  color: stats.revenueChange >= 0 ? "#059669" : "#dc2626",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.25rem",
@@ -460,7 +505,21 @@ export default function AdminDashboard() {
                   margin: 0,
                 }}
               >
-                <TrendingUp size={16} /> +12% from last month
+                {stats.revenueChange !== 0 ? (
+                  <>
+                    {stats.revenueChange >= 0 ? (
+                      <TrendingUp size={16} />
+                    ) : (
+                      <TrendingDown size={16} />
+                    )}
+                    {stats.revenueChange >= 0 ? "+" : ""}
+                    {stats.revenueChange.toFixed(1)}% from last month
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp size={16} /> No change from last month
+                  </>
+                )}
               </p>
             </div>
           </div>
