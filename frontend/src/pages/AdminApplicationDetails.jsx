@@ -617,19 +617,19 @@ export default function AdminApplicationDetails() {
                 <div className="card-body">
                   <InfoItem
                     icon={User}
-                    label="Full Name"
+                    label="FULL NAME"
                     value={application.groom_full_name}
                   />
                   {application.groom_father_name && (
                     <InfoItem
                       icon={User}
-                      label="Father's Name"
+                      label="FATHER'S NAME"
                       value={application.groom_father_name}
                     />
                   )}
                   <InfoItem
                     icon={Calendar}
-                    label="Date of Birth"
+                    label="DATE OF BIRTH"
                     value={new Date(
                       application.groom_date_of_birth
                     ).toLocaleDateString(undefined, { dateStyle: "long" })}
@@ -637,36 +637,36 @@ export default function AdminApplicationDetails() {
                   {application.groom_place_of_birth && (
                     <InfoItem
                       icon={MapPin}
-                      label="Place of Birth"
+                      label="PLACE OF BIRTH"
                       value={application.groom_place_of_birth}
                     />
                   )}
                   <InfoItem
                     icon={MapPin}
-                    label="Address"
+                    label="ADDRESS"
                     value={application.groom_address}
                   />
                   {application.groom_id_number && (
                     <InfoItem
                       icon={FileText}
-                      label="ID Number"
+                      label="ID NUMBER"
                       value={application.groom_id_number}
                     />
                   )}
                   <InfoItem
                     icon={CheckCircle}
-                    label="I confirm that I have the power, fitness and capacity to marry in Islamic law and fulfil my duties in an Islamic marriage"
-                    value={(application.groom_confirm === 1 || application.groom_confirm === true) ? "Yes" : "No"}
+                    label="I CONFIRM THAT I HAVE THE POWER, FITNESS AND CAPACITY TO MARRY IN ISLAMIC LAW AND FULFIL MY DUTIES IN AN ISLAMIC MARRIAGE"
+                    value={(application.groom_confirm === 1 || application.groom_confirm === true) ? "YES" : "NO"}
                   />
                   <InfoItem
                     icon={User}
-                    label="Personally/Representative"
+                    label="PERSONALLY/REPRESENTATIVE"
                     value={
                       (application.groom_personally === 1 || application.groom_personally === true)
-                        ? "Personally"
+                        ? "PERSONALLY"
                         : (application.groom_representative === 1 || application.groom_representative === true)
-                        ? "Representative"
-                        : "Not Specified"
+                        ? "REPRESENTATIVE"
+                        : "NOT SPECIFIED"
                     }
                   />
                 </div>
@@ -683,19 +683,19 @@ export default function AdminApplicationDetails() {
                 <div className="card-body">
                   <InfoItem
                     icon={User}
-                    label="Full Name"
+                    label="FULL NAME"
                     value={application.bride_full_name}
                   />
                   {application.bride_father_name && (
                     <InfoItem
                       icon={User}
-                      label="Father's Name"
+                      label="FATHER'S NAME"
                       value={application.bride_father_name}
                     />
                   )}
                   <InfoItem
                     icon={Calendar}
-                    label="Date of Birth"
+                    label="DATE OF BIRTH"
                     value={new Date(
                       application.bride_date_of_birth
                     ).toLocaleDateString(undefined, { dateStyle: "long" })}
@@ -703,36 +703,36 @@ export default function AdminApplicationDetails() {
                   {application.bride_place_of_birth && (
                     <InfoItem
                       icon={MapPin}
-                      label="Place of Birth"
+                      label="PLACE OF BIRTH"
                       value={application.bride_place_of_birth}
                     />
                   )}
                   <InfoItem
                     icon={MapPin}
-                    label="Address"
+                    label="ADDRESS"
                     value={application.bride_address}
                   />
                   {application.bride_id_number && (
                     <InfoItem
                       icon={FileText}
-                      label="ID Number"
+                      label="ID NUMBER"
                       value={application.bride_id_number}
                     />
                   )}
                   <InfoItem
                     icon={CheckCircle}
-                    label="I confirm that I have the power, fitness and capacity to marry in Islamic law and fulfil my duties in an Islamic marriage"
-                    value={(application.bride_confirm === 1 || application.bride_confirm === true) ? "Yes" : "No"}
+                    label="I CONFIRM THAT I HAVE THE POWER, FITNESS AND CAPACITY TO MARRY IN ISLAMIC LAW AND FULFIL MY DUTIES IN AN ISLAMIC MARRIAGE"
+                    value={(application.bride_confirm === 1 || application.bride_confirm === true) ? "YES" : "NO"}
                   />
                   <InfoItem
                     icon={User}
-                    label="Personally/Representative"
+                    label="PERSONALLY/REPRESENTATIVE"
                     value={
                       (application.bride_personally === 1 || application.bride_personally === true)
-                        ? "Personally"
+                        ? "PERSONALLY"
                         : (application.bride_representative === 1 || application.bride_representative === true)
-                        ? "Representative"
-                        : "Not Specified"
+                        ? "REPRESENTATIVE"
+                        : "NOT SPECIFIED"
                     }
                   />
                 </div>
@@ -750,26 +750,26 @@ export default function AdminApplicationDetails() {
                         <User size={22} />
                       </div>
                       <h2 className="card-title-text">
-                        Groom's Representative
+                        GROOM'S REPRESENTATIVE
                       </h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
                         icon={User}
-                        label="Full Name"
+                        label="FULL NAME"
                         value={application.groom_rep_name}
                       />
                       {application.groom_rep_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Father's Name"
+                          label="FATHER'S NAME"
                           value={application.groom_rep_father_name}
                         />
                       )}
                       {application.groom_rep_date_of_birth && (
                         <InfoItem
                           icon={Calendar}
-                          label="Date of Birth"
+                          label="DATE OF BIRTH"
                           value={new Date(
                             application.groom_rep_date_of_birth
                           ).toLocaleDateString(undefined, {
@@ -780,14 +780,14 @@ export default function AdminApplicationDetails() {
                       {application.groom_rep_place_of_birth && (
                         <InfoItem
                           icon={MapPin}
-                          label="Place of Birth"
+                          label="PLACE OF BIRTH"
                           value={application.groom_rep_place_of_birth}
                         />
                       )}
                       {application.groom_rep_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Address"
+                          label="ADDRESS"
                           value={application.groom_rep_address}
                         />
                       )}
@@ -803,26 +803,26 @@ export default function AdminApplicationDetails() {
                         <User size={22} />
                       </div>
                       <h2 className="card-title-text">
-                        Bride's Representative
+                        BRIDE'S REPRESENTATIVE
                       </h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
                         icon={User}
-                        label="Full Name"
+                        label="FULL NAME"
                         value={application.bride_rep_name}
                       />
                       {application.bride_rep_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Father's Name"
+                          label="FATHER'S NAME"
                           value={application.bride_rep_father_name}
                         />
                       )}
                       {application.bride_rep_date_of_birth && (
                         <InfoItem
                           icon={Calendar}
-                          label="Date of Birth"
+                          label="DATE OF BIRTH"
                           value={new Date(
                             application.bride_rep_date_of_birth
                           ).toLocaleDateString(undefined, {
@@ -833,14 +833,14 @@ export default function AdminApplicationDetails() {
                       {application.bride_rep_place_of_birth && (
                         <InfoItem
                           icon={MapPin}
-                          label="Place of Birth"
+                          label="PLACE OF BIRTH"
                           value={application.bride_rep_place_of_birth}
                         />
                       )}
                       {application.bride_rep_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Address"
+                          label="ADDRESS"
                           value={application.bride_rep_address}
                         />
                       )}
@@ -866,20 +866,20 @@ export default function AdminApplicationDetails() {
                     <div className="card-body">
                       <InfoItem
                         icon={User}
-                        label="Full Name"
+                        label="FULL NAME"
                         value={application.witness1_male_name}
                       />
                       {application.witness1_male_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Father's Name"
+                          label="FATHER'S NAME"
                           value={application.witness1_male_father_name}
                         />
                       )}
                       {application.witness1_male_date_of_birth && (
                         <InfoItem
                           icon={Calendar}
-                          label="Date of Birth"
+                          label="DATE OF BIRTH"
                           value={new Date(
                             application.witness1_male_date_of_birth
                           ).toLocaleDateString(undefined, {
@@ -890,14 +890,14 @@ export default function AdminApplicationDetails() {
                       {application.witness1_male_place_of_birth && (
                         <InfoItem
                           icon={MapPin}
-                          label="Place of Birth"
+                          label="PLACE OF BIRTH"
                           value={application.witness1_male_place_of_birth}
                         />
                       )}
                       {application.witness1_male_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Address"
+                          label="ADDRESS"
                           value={application.witness1_male_address}
                         />
                       )}
@@ -917,20 +917,20 @@ export default function AdminApplicationDetails() {
                     <div className="card-body">
                       <InfoItem
                         icon={User}
-                        label="Full Name"
+                        label="FULL NAME"
                         value={application.witness1_female_name}
                       />
                       {application.witness1_female_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Father's Name"
+                          label="FATHER'S NAME"
                           value={application.witness1_female_father_name}
                         />
                       )}
                       {application.witness1_female_date_of_birth && (
                         <InfoItem
                           icon={Calendar}
-                          label="Date of Birth"
+                          label="DATE OF BIRTH"
                           value={new Date(
                             application.witness1_female_date_of_birth
                           ).toLocaleDateString(undefined, {
@@ -941,14 +941,14 @@ export default function AdminApplicationDetails() {
                       {application.witness1_female_place_of_birth && (
                         <InfoItem
                           icon={MapPin}
-                          label="Place of Birth"
+                          label="PLACE OF BIRTH"
                           value={application.witness1_female_place_of_birth}
                         />
                       )}
                       {application.witness1_female_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Address"
+                          label="ADDRESS"
                           value={application.witness1_female_address}
                         />
                       )}
@@ -968,20 +968,20 @@ export default function AdminApplicationDetails() {
                     <div className="card-body">
                       <InfoItem
                         icon={User}
-                        label="Full Name"
+                        label="FULL NAME"
                         value={application.witness2_male_name}
                       />
                       {application.witness2_male_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Father's Name"
+                          label="FATHER'S NAME"
                           value={application.witness2_male_father_name}
                         />
                       )}
                       {application.witness2_male_date_of_birth && (
                         <InfoItem
                           icon={Calendar}
-                          label="Date of Birth"
+                          label="DATE OF BIRTH"
                           value={new Date(
                             application.witness2_male_date_of_birth
                           ).toLocaleDateString(undefined, {
@@ -992,14 +992,14 @@ export default function AdminApplicationDetails() {
                       {application.witness2_male_place_of_birth && (
                         <InfoItem
                           icon={MapPin}
-                          label="Place of Birth"
+                          label="PLACE OF BIRTH"
                           value={application.witness2_male_place_of_birth}
                         />
                       )}
                       {application.witness2_male_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Address"
+                          label="ADDRESS"
                           value={application.witness2_male_address}
                         />
                       )}
@@ -1019,20 +1019,20 @@ export default function AdminApplicationDetails() {
                     <div className="card-body">
                       <InfoItem
                         icon={User}
-                        label="Full Name"
+                        label="FULL NAME"
                         value={application.witness2_female_name}
                       />
                       {application.witness2_female_father_name && (
                         <InfoItem
                           icon={User}
-                          label="Father's Name"
+                          label="FATHER'S NAME"
                           value={application.witness2_female_father_name}
                         />
                       )}
                       {application.witness2_female_date_of_birth && (
                         <InfoItem
                           icon={Calendar}
-                          label="Date of Birth"
+                          label="DATE OF BIRTH"
                           value={new Date(
                             application.witness2_female_date_of_birth
                           ).toLocaleDateString(undefined, {
@@ -1043,14 +1043,14 @@ export default function AdminApplicationDetails() {
                       {application.witness2_female_place_of_birth && (
                         <InfoItem
                           icon={MapPin}
-                          label="Place of Birth"
+                          label="PLACE OF BIRTH"
                           value={application.witness2_female_place_of_birth}
                         />
                       )}
                       {application.witness2_female_address && (
                         <InfoItem
                           icon={MapPin}
-                          label="Address"
+                          label="ADDRESS"
                           value={application.witness2_female_address}
                         />
                       )}
@@ -1079,14 +1079,14 @@ export default function AdminApplicationDetails() {
                   {application.mahr_amount && (
                     <InfoItem
                       icon={CreditCard}
-                      label="Mahr Amount"
+                      label="MAHR AMOUNT"
                       value={application.mahr_amount}
                     />
                   )}
                   {application.mahr_type && (
                     <InfoItem
                       icon={FileText}
-                      label="Mahr Type"
+                      label="MAHR TYPE"
                       value={
                         application.mahr_type === "prompt"
                           ? "Prompt (Immediate)"
@@ -1109,13 +1109,13 @@ export default function AdminApplicationDetails() {
                   <div className="icon-box icon-box-purple">
                     <Calendar size={22} />
                   </div>
-                  <h2 className="card-title-text">Solemnisation Details</h2>
+                  <h2 className="card-title-text">SOLEMNISATION DETAILS</h2>
                 </div>
                 <div className="card-body">
                   {application.solemnised_date && (
                     <InfoItem
                       icon={Calendar}
-                      label="Date of Solemnisation"
+                      label="DATE OF SOLEMNISATION"
                       value={new Date(
                         application.solemnised_date
                       ).toLocaleString(undefined, { 
@@ -1127,14 +1127,14 @@ export default function AdminApplicationDetails() {
                   {application.solemnised_place && (
                     <InfoItem
                       icon={MapPin}
-                      label="Place of Solemnisation"
+                      label="PLACE OF SOLEMNISATION"
                       value={application.solemnised_place}
                     />
                   )}
                   {application.solemnised_address && (
                     <InfoItem
                       icon={MapPin}
-                      label="Address"
+                      label="ADDRESS"
                       value={application.solemnised_address}
                     />
                   )}
@@ -1149,13 +1149,13 @@ export default function AdminApplicationDetails() {
                   <div className="icon-box icon-box-slate">
                     <FileText size={22} />
                   </div>
-                  <h2 className="card-title-text">Additional Information</h2>
+                  <h2 className="card-title-text">ADDITIONAL INFORMATION</h2>
                 </div>
                 <div className="card-body">
                   {application.preferred_date && (
                     <InfoItem
                       icon={Calendar}
-                      label="Preferred Date"
+                      label="PREFERRED DATE"
                       value={new Date(
                         application.preferred_date
                       ).toLocaleDateString(undefined, { dateStyle: "long" })}
@@ -1164,7 +1164,7 @@ export default function AdminApplicationDetails() {
                   {application.special_requests && (
                     <InfoItem
                       icon={FileText}
-                      label="Special Requests"
+                      label="SPECIAL REQUESTS"
                       value={application.special_requests}
                     />
                   )}
@@ -1184,14 +1184,14 @@ export default function AdminApplicationDetails() {
                 <div className="icon-box icon-box-purple">
                   <Calendar size={22} />
                 </div>
-                <h2 className="card-title-text">Appointment</h2>
+                <h2 className="card-title-text">APPOINTMENT</h2>
               </div>
               <div className="card-body">
                 {application.appointment_date ? (
                   <>
                     <InfoItem
                       icon={Calendar}
-                      label="Date"
+                      label="DATE"
                       value={new Date(
                         application.appointment_date
                       ).toLocaleDateString(undefined, { dateStyle: "long" })}
@@ -1203,7 +1203,7 @@ export default function AdminApplicationDetails() {
                     />
                     <InfoItem
                       icon={MapPin}
-                      label="Location"
+                      label="LOCATION"
                       value={application.appointment_location}
                     />
                   </>
@@ -1232,7 +1232,7 @@ export default function AdminApplicationDetails() {
                 <div className="icon-box icon-box-green">
                   <CreditCard size={22} />
                 </div>
-                <h2 className="card-title-text">Payment Status</h2>
+                <h2 className="card-title-text">PAYMENT STATUS</h2>
               </div>
               <div className="card-body">
                 <InfoItem
@@ -1265,7 +1265,7 @@ export default function AdminApplicationDetails() {
                   <div className="icon-box icon-box-green">
                     <CreditCard size={22} />
                   </div>
-                  <h2 className="card-title-text">Payment Receipt</h2>
+                  <h2 className="card-title-text">PAYMENT RECEIPT</h2>
                 </div>
                 <div className="card-body p-4">
                   <DocumentCard
@@ -1282,20 +1282,20 @@ export default function AdminApplicationDetails() {
                 <div className="icon-box icon-box-slate">
                   <Mail size={22} />
                 </div>
-                <h2 className="card-title-text">Contact Information</h2>
+                <h2 className="card-title-text">CONTACT INFORMATION</h2>
               </div>
               <div className="card-body">
                 {application.portal_email && (
                   <InfoItem
                     icon={Mail}
-                    label="Email"
+                    label="EMAIL"
                     value={application.portal_email}
                   />
                 )}
                 {application.contact_number && (
                   <InfoItem
                     icon={Phone}
-                    label="Contact Number"
+                    label="CONTACT NUMBER"
                     value={application.contact_number}
                   />
                 )}
@@ -1339,7 +1339,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  Full Name
+                  FULL NAME
                 </th>
                 <th
                   style={{
@@ -1349,7 +1349,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  Father's Name
+                  FATHER'S NAME
                 </th>
                 <th
                   style={{
@@ -1359,7 +1359,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  Date & Place Of Birth
+                  DATE & PLACE OF BIRTH
                 </th>
                 <th
                   style={{
@@ -1369,7 +1369,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  Address
+                  ADDRESS
                 </th>
                 <th
                   style={{
@@ -1379,7 +1379,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  Marital Status
+                  MARITAL STATUS
                 </th>
                 <th
                   style={{
@@ -1389,7 +1389,7 @@ export default function AdminApplicationDetails() {
                     fontWeight: "bold",
                   }}
                 >
-                  By Representative or Personally
+                  BY REPRESENTATIVE OR PERSONALLY
                 </th>
               </tr>
             </thead>
@@ -1822,7 +1822,7 @@ export default function AdminApplicationDetails() {
                     verticalAlign: "middle",
                   }}
                 >
-                  Mahr
+                  MAHR
                 </td>
                 <td
                   style={{ border: "1px solid black", padding: "12px" }}
@@ -1841,16 +1841,16 @@ export default function AdminApplicationDetails() {
                     verticalAlign: "middle",
                   }}
                 >
-                  Deferred / Prompt
+                  DEFERRED / PROMPT
                 </td>
                 <td
                   style={{ border: "1px solid black", padding: "12px" }}
                   colSpan="6"
                 >
                   {application.mahr_type === "deferred"
-                    ? "Deferred"
+                    ? "DEFERRED"
                     : application.mahr_type === "prompt"
-                    ? "Prompt"
+                    ? "PROMPT"
                     : "NIL"}
                 </td>
               </tr>

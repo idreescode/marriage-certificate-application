@@ -102,7 +102,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       bride_rep_signature: applicationData.bride_rep_name ? '' : '',
       
       // Mahr
-      mahr_amount: applicationData.mahr_amount ? `£${applicationData.mahr_amount}` : '',
+      mahr_amount: applicationData.mahr_amount ? `${applicationData.mahr_amount}` : '',
       mahr_type_text: applicationData.mahr_type === 'deferred' ? 'Deferred' : (applicationData.mahr_type === 'prompt' ? 'Prompt' : ''),
       
       // Solemnization

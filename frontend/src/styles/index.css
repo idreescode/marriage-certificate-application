@@ -425,6 +425,7 @@ p {
   font-weight: 500;
   color: var(--slate-700);
   margin-bottom: var(--space-2);
+  text-transform: uppercase;
 }
 
 .form-input,
@@ -674,6 +675,7 @@ td {
   font-weight: 400;
   color: var(--jam-label-text);
   margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
 .jam-input {
@@ -2481,12 +2483,26 @@ td {
   margin-bottom: 1.25rem !important;
 }
 
+/* Make all table headers uppercase for print and list views */
+.print-certificate-table th,
+table thead th {
+  text-transform: uppercase !important;
+}
+
+/* Make all form labels uppercase */
+label,
+.form-label,
+.jam-label {
+  text-transform: uppercase;
+}
+
 .card-title-text {
   font-size: 1.25rem !important;
   font-weight: 800 !important;
   color: #1e293b !important;
   margin: 0 !important;
   letter-spacing: -0.02em !important;
+  text-transform: uppercase !important;
 }
 
 .info-item-row {

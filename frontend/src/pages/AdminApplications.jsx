@@ -482,16 +482,16 @@ export default function AdminApplications() {
           <table>
             <thead>
               <tr>
-                <th>Ref #</th>
-                <th>Groom</th>
-                <th>Bride</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Status</th>
-                <th>Solemnised Date</th>
-                <th>Solemnised Place</th>
-                <th>Solemnised Address</th>
-                <th style={{ width: "220px" }}>Actions</th>
+                <th>REF #</th>
+                <th>GROOM</th>
+                <th>BRIDE</th>
+                <th>EMAIL</th>
+                <th>CONTACT</th>
+                <th>STATUS</th>
+                <th>SOLEMNISED DATE</th>
+                <th>SOLEMNISED PLACE</th>
+                <th>SOLEMNISED ADDRESS</th>
+                <th style={{ width: "220px" }}>ACTIONS</th>
               </tr>
             </thead>
             <tbody>

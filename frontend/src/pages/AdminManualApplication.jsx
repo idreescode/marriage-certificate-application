@@ -158,6 +158,7 @@ const FormField = ({
           fontSize: "clamp(16px, 3vw, 25px)",
           fontWeight: 400,
           color: "#2E2E2E",
+          textTransform: "uppercase",
         }}
       >
         {label} {required && <span style={{ color: "#FF0000" }}>*</span>}
@@ -1347,6 +1348,7 @@ export default function AdminManualApplication() {
                   fontSize: "0.875rem",
                   color: "#334155",
                   lineHeight: "1.5",
+                  textTransform: "uppercase",
                 }}
               >
                 I can confirm that I have the power, fitness and capacity to
@@ -1362,6 +1364,7 @@ export default function AdminManualApplication() {
                 fontWeight: 600,
                 marginBottom: "0.75rem",
                 color: "#2E2E2E",
+                textTransform: "uppercase",
               }}
             >
               Personally/Representative
@@ -1393,6 +1396,7 @@ export default function AdminManualApplication() {
                     fontFamily: "Montserrat, sans-serif",
                     fontSize: "clamp(16px, 3vw, 25px)",
                     color: "#2E2E2E",
+                    textTransform: "uppercase",
                   }}
                 >
                   Personally
@@ -1426,6 +1430,7 @@ export default function AdminManualApplication() {
                     fontFamily: "Montserrat, sans-serif",
                     fontSize: "clamp(16px, 3vw, 25px)",
                     color: "#2E2E2E",
+                    textTransform: "uppercase",
                   }}
                 >
                   Representative
@@ -1509,6 +1514,7 @@ export default function AdminManualApplication() {
                   fontSize: "0.875rem",
                   color: "#334155",
                   lineHeight: "1.5",
+                  textTransform: "uppercase",
                 }}
               >
                 I can confirm that I have the power, fitness and capacity to
@@ -1524,6 +1530,7 @@ export default function AdminManualApplication() {
                 fontWeight: 600,
                 marginBottom: "0.75rem",
                 color: "#2E2E2E",
+                textTransform: "uppercase",
               }}
             >
               Personally/Representative
@@ -1555,6 +1562,7 @@ export default function AdminManualApplication() {
                     fontFamily: "Montserrat, sans-serif",
                     fontSize: "clamp(16px, 3vw, 25px)",
                     color: "#2E2E2E",
+                    textTransform: "uppercase",
                   }}
                 >
                   Personally
@@ -1588,6 +1596,7 @@ export default function AdminManualApplication() {
                     fontFamily: "Montserrat, sans-serif",
                     fontSize: "clamp(16px, 3vw, 25px)",
                     color: "#2E2E2E",
+                    textTransform: "uppercase",
                   }}
                 >
                   Representative
