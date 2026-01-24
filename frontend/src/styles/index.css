@@ -2699,21 +2699,23 @@ label,
    Simple Form Layout - Label & Value Only
    =================================== */
 @media print {
-  /* Reset page margins - smaller margins to fit more content */
+  /* A4 Page Setup - Standard A4 dimensions: 210mm x 297mm */
   @page {
-    margin: 0.8cm 1cm;
-    size: A4 portrait;
+    size: A4;
+    margin: 10mm;
   }
 
-  body {
+  html, body {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 0;
     background: white !important;
     color: black !important;
     font-size: 9pt;
     line-height: 1.2;
     font-family: 'Arial', 'Helvetica', sans-serif !important;
     position: relative;
-    min-height: auto !important;
-    height: auto !important;
   }
 
   /* Improve text rendering for print */
@@ -2759,12 +2761,10 @@ label,
   }
 
   .max-w-6xl {
-    max-width: 100% !important;
+    max-width: 794px !important; /* A4 width: 210mm = 794px at 96dpi */
+    width: 794px !important;
+    margin: 0 auto !important;
     padding: 0 !important;
-  }
-
-  /* Print Header Container */
-  .max-w-6xl {
     position: relative;
   }
 
@@ -2819,19 +2819,27 @@ label,
     display: none !important;
   }
 
-  /* Show print-only certificate table */
+  /* Show print-only certificate table - A4 sizing */
   .print-certificate-table {
     display: block !important;
     margin-top: 0 !important;
+    width: 794px !important; /* A4 width: 210mm = 794px at 96dpi */
+    max-width: 794px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    page-break-inside: avoid !important;
+    transform: none !important;
   }
 
-  /* Table styling - compact */
+  /* Table styling - A4 width */
   .print-certificate-table table {
-    width: 100% !important;
+    width: 794px !important;
+    max-width: 794px !important;
     border-collapse: collapse !important;
     border: 2px solid #000 !important;
     font-size: 8pt !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
+    page-break-inside: avoid !important;
   }
 
   .print-certificate-table th {
@@ -2854,35 +2862,6 @@ label,
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     word-break: break-word !important;
-    max-width: 0 !important;
-  }
-
-  /* Bottom section - compact */
-  .print-certificate-table > div {
-    margin-top: 1rem !important;
-    font-size: 7pt !important;
-  }
-
-  .print-certificate-table p {
-    margin: 0.2rem 0 !important;
-    line-height: 1.3 !important;
-  }
-
-
-  /* Hide empty sections and sidebars */
-  .no-print-sidebar,
-  .text-center.py-12,
-  .py-4.text-center {
-    display: none !important;
-  }
-
-  /* Page break control - keep everything on one page */
-  .print-certificate-table {
-    page-break-inside: avoid !important;
-  }
-
-  .print-certificate-table table {
-    page-break-inside: avoid !important;
   }
 
   .print-certificate-table tr {
@@ -2890,10 +2869,24 @@ label,
     page-break-after: auto !important;
   }
 
-  /* Scale down to fit on one page if needed */
-  .print-certificate-table {
-    transform: scale(0.95);
-    transform-origin: top center;
+  /* Bottom section - compact */
+  .print-certificate-table > div {
+    margin-top: 1rem !important;
+    font-size: 7pt !important;
+    width: 794px !important;
+    max-width: 794px !important;
+  }
+
+  .print-certificate-table p {
+    margin: 0.2rem 0 !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Hide empty sections and sidebars */
+  .no-print-sidebar,
+  .text-center.py-12,
+  .py-4.text-center {
+    display: none !important;
   }
 
   /* Prevent page breaks */

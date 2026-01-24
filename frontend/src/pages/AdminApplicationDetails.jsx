@@ -1312,10 +1312,11 @@ export default function AdminApplicationDetails() {
         </div>
 
         {/* Print-Only Certificate Table */}
-        <div className="print-certificate-table" style={{ display: "none" }}>
+        <div className="print-certificate-table" style={{ display: "none", width: "794px", maxWidth: "100%", margin: "0 auto" }}>
           <table
             style={{
               width: "100%",
+              maxWidth: "794px",
               borderCollapse: "collapse",
               border: "2px solid black",
             }}
