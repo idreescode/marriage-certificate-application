@@ -83,42 +83,39 @@ export default function AdminDashboard() {
       ).length;
       const completed = apps.filter((a) => a.status === "completed").length;
 
-      // Calculate total fee (all time) - Only count completed applications
-      // Total Fee = total_fee (from settings) × completed applications count
-      const completedApplications = apps.filter((app) => app.status === "completed").length;
-      const revenue = totalFee > 0 ? totalFee * completedApplications : 0;
+      // Calculate deposit fee (all time) - Sum deposit_amount from completed applications
+      // Deposit Fee = Sum of all deposit_amount where status = "completed"
+      const revenue = apps
+        .filter((app) => app.status === "completed" && app.deposit_amount)
+        .reduce((sum, app) => sum + Number(app.deposit_amount), 0);
 
-      // Calculate total fee for current month and last month
+      // Calculate deposit fee for current month and last month
       const today = new Date();
       const currentMonth = today.getMonth();
       const currentYear = today.getFullYear();
       const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-      let currentMonthApplications = 0;
-      let lastMonthApplications = 0;
+      let currentMonthRevenue = 0;
+      let lastMonthRevenue = 0;
 
       apps.forEach((app) => {
-        // Only count completed applications for total fee calculation
-        if (app.status === "completed") {
+        // Only sum deposit_amount from completed applications
+        if (app.status === "completed" && app.deposit_amount) {
           const appDate = new Date(app.created_at);
           const appMonth = appDate.getMonth();
           const appYear = appDate.getFullYear();
 
           // Check if application was completed in current month
           if (appMonth === currentMonth && appYear === currentYear) {
-            currentMonthApplications += 1;
+            currentMonthRevenue += Number(app.deposit_amount);
           }
           // Check if application was completed in last month
           else if (appMonth === lastMonth && appYear === lastMonthYear) {
-            lastMonthApplications += 1;
+            lastMonthRevenue += Number(app.deposit_amount);
           }
         }
       });
-
-      // Calculate total fee for current and last month
-      const currentMonthRevenue = totalFee > 0 ? totalFee * currentMonthApplications : 0;
-      const lastMonthRevenue = totalFee > 0 ? totalFee * lastMonthApplications : 0;
 
       // Calculate percentage change
       let revenueChange = 0;
