@@ -39,17 +39,36 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     const formatDateFull = (dateString, includeTime = false) => {
       if (!dateString) return '';
       const date = new Date(dateString);
+      
       if (includeTime) {
-        return date.toLocaleString('en-GB', { 
+        // Check if time is actually set (not just midnight default)
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+        const hasTime = hours !== 0 || minutes !== 0 || seconds !== 0;
+        
+        // Format date part
+        const datePart = date.toLocaleDateString('en-GB', { 
           weekday: 'long',
           year: 'numeric', 
           month: 'long', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
+          day: 'numeric'
         });
+        
+        // Format time part only if time is set
+        if (hasTime) {
+          const timePart = date.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          return `${datePart} at ${timePart}`;
+        } else {
+          // If time is midnight (00:00:00), don't show time
+          return datePart;
+        }
       }
+      
       return date.toLocaleDateString('en-GB', { 
         weekday: 'long',
         year: 'numeric', 

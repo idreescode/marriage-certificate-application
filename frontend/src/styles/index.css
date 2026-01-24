@@ -2551,6 +2551,7 @@ label,
   color: #0f172a !important;
   line-height: 1.25 !important;
   margin: 0 !important;
+  text-transform: capitalize !important;
 }
 
 .info-subvalue {
@@ -2558,6 +2559,7 @@ label,
   color: #64748b !important;
   margin-top: 0.35rem !important;
   font-weight: 500 !important;
+  text-transform: capitalize !important;
 }
 
 /* Document Action Row Redesign */
@@ -2862,6 +2864,7 @@ label,
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     word-break: break-word !important;
+    text-transform: capitalize !important;
   }
 
   .print-certificate-table tr {
