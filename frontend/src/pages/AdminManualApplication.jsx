@@ -1696,20 +1696,18 @@ export default function AdminManualApplication() {
           </FormRow>
         </FormSection>
 
-        {/* WITNESS NO 1 (MALE) */}
-        <FormSection title="WITNESS NO 1 (MALE)">
+        {/* WITNESS 1 */}
+        <FormSection title="WITNESS 1">
           <FormRow>
             <FormField
-              label="Witness's Full Name *"
+              label="Witness's Full Name"
               name="witness1MaleName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
-              label="Witness's father's full Name *"
+              label="Witness's father's full Name"
               name="witness1MaleFatherName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1741,20 +1739,18 @@ export default function AdminManualApplication() {
           </FormRow>
         </FormSection>
 
-        {/* WITNESS NO 1 (FEMALE) */}
-        <FormSection title="WITNESS NO 1 (FEMALE)">
+        {/* WITNESS 2 */}
+        <FormSection title="WITNESS 2">
           <FormRow>
             <FormField
-              label="Witness's Full Name *"
+              label="Witness's Full Name"
               name="witness1FemaleName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
-              label="Witness's father's full Name *"
+              label="Witness's father's full Name"
               name="witness1FemaleFatherName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1786,8 +1782,8 @@ export default function AdminManualApplication() {
           </FormRow>
         </FormSection>
 
-        {/* WITNESS NO 2 (MALE) */}
-        <FormSection title="WITNESS NO 2 (MALE)">
+        {/* WITNESS 3 */}
+        <FormSection title="WITNESS 3">
           <FormRow>
             <FormField
               label="Witness's Full Name *"
@@ -1831,8 +1827,8 @@ export default function AdminManualApplication() {
           </FormRow>
         </FormSection>
 
-        {/* WITNESS NO 2 (FEMALE) */}
-        <FormSection title="WITNESS NO 2 (FEMALE)">
+        {/* WITNESS 4 */}
+        <FormSection title="WITNESS 4">
           <FormRow>
             <FormField
               label="Witness's Full Name *"
@@ -2056,23 +2052,23 @@ export default function AdminManualApplication() {
               }}
             >
               <UploadCard
-                title="Witness No 1 (MALE) ID"
-                subtitle="Muslim Male Witness ID"
+                title="Witness 1 ID"
+                subtitle="Witness 1 ID"
                 name="witness1MaleIdFile"
               />
               <UploadCard
-                title="Witness No 1 (FEMALE) ID"
-                subtitle="Muslim Female Witness ID"
+                title="Witness 2 ID"
+                subtitle="Witness 2 ID"
                 name="witness1FemaleIdFile"
               />
               <UploadCard
-                title="Witness No 2 (MALE) ID"
-                subtitle="Muslim Male Witness ID"
+                title="Witness 3 ID"
+                subtitle="Witness 3 ID"
                 name="witness2MaleIdFile"
               />
               <UploadCard
-                title="Witness No 2 (FEMALE) ID"
-                subtitle="Muslim Female Witness ID"
+                title="Witness 4 ID"
+                subtitle="Witness 4 ID"
                 name="witness2FemaleIdFile"
               />
             </div>

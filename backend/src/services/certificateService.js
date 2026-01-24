@@ -38,14 +38,37 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
 
     const formatDateFull = (dateString, includeTime = false) => {
       if (!dateString) return '';
-      const date = new Date(dateString);
+      
+      // Handle MySQL DATETIME format: "YYYY-MM-DD HH:MM:SS" or "YYYY-MM-DDTHH:MM:SS"
+      let date;
+      if (typeof dateString === 'string' && dateString.includes(' ')) {
+        // MySQL DATETIME format: "2026-01-24 05:00:00"
+        // Convert to ISO format for proper parsing
+        date = new Date(dateString.replace(' ', 'T'));
+      } else if (typeof dateString === 'string' && dateString.includes('T')) {
+        // ISO format already
+        date = new Date(dateString);
+      } else {
+        date = new Date(dateString);
+      }
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn(`Invalid date format: ${dateString}`);
+        return '';
+      }
       
       if (includeTime) {
         // Check if time is actually set (not just midnight default)
+        // For DATETIME fields, always check the original string for time component
+        const hasTimeInString = typeof dateString === 'string' && 
+          (dateString.includes(' ') || dateString.includes('T')) &&
+          /:\d{2}/.test(dateString); // Check if time pattern exists
+        
         const hours = date.getHours();
         const minutes = date.getMinutes();
         const seconds = date.getSeconds();
-        const hasTime = hours !== 0 || minutes !== 0 || seconds !== 0;
+        const hasTime = hasTimeInString && (hours !== 0 || minutes !== 0 || seconds !== 0);
         
         // Format date part
         const datePart = date.toLocaleDateString('en-GB', { 
@@ -64,7 +87,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
           });
           return `${datePart} at ${timePart}`;
         } else {
-          // If time is midnight (00:00:00), don't show time
+          // If time is midnight (00:00:00) or no time component, don't show time
           return datePart;
         }
       }
@@ -158,8 +181,67 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
         return dob || pob;
       })(),
       witness2_address: (witnesses && witnesses[1] && witnesses[1].witness_address) ? witnesses[1].witness_address : '',
-      witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? '' : ''
+      witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? '' : '',
+      
+      // Witness 3
+      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name) ? witnesses[2].witness_name : '',
+      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name) ? witnesses[2].witness_father_name : '',
+      witness3_date_place_of_birth: (() => {
+        if (!witnesses || !witnesses[2]) return '';
+        const dob = formatDate(witnesses[2].witness_date_of_birth);
+        const pob = witnesses[2].witness_place_of_birth || '';
+        if (!dob && !pob) return '';
+        if (dob && pob) return `${dob}<br/>${pob}`;
+        return dob || pob;
+      })(),
+      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address) ? witnesses[2].witness_address : '',
+      witness3_signature: (witnesses && witnesses[2] && witnesses[2].witness_name) ? '' : '',
+      
+      // Witness 4
+      witness4_name: (witnesses && witnesses[3] && witnesses[3].witness_name) ? witnesses[3].witness_name : '',
+      witness4_father_name: (witnesses && witnesses[3] && witnesses[3].witness_father_name) ? witnesses[3].witness_father_name : '',
+      witness4_date_place_of_birth: (() => {
+        if (!witnesses || !witnesses[3]) return '';
+        const dob = formatDate(witnesses[3].witness_date_of_birth);
+        const pob = witnesses[3].witness_place_of_birth || '';
+        if (!dob && !pob) return '';
+        if (dob && pob) return `${dob}<br/>${pob}`;
+        return dob || pob;
+      })(),
+      witness4_address: (witnesses && witnesses[3] && witnesses[3].witness_address) ? witnesses[3].witness_address : '',
+      witness4_signature: (witnesses && witnesses[3] && witnesses[3].witness_name) ? '' : ''
     };
+
+    // Generate witness rows 3 and 4 conditionally
+    const witness3Row = (witnesses && witnesses[2] && witnesses[2].witness_name) 
+      ? `<tr>
+    <td class="bold">WITNESS NO</td>
+    <td class="height-lg">${replacements.witness3_name}</td>
+    <td>${replacements.witness3_father_name}</td>
+    <td>${replacements.witness3_date_place_of_birth}</td>
+    <td>${replacements.witness3_address}</td>
+    <td class="center">/</td>
+    <td class="center">/</td>
+    <td>${replacements.witness3_signature}</td>
+  </tr>`
+      : '';
+
+    const witness4Row = (witnesses && witnesses[3] && witnesses[3].witness_name) 
+      ? `<tr>
+    <td class="bold">WITNESS NO</td>
+    <td class="height-lg">${replacements.witness4_name}</td>
+    <td>${replacements.witness4_father_name}</td>
+    <td>${replacements.witness4_date_place_of_birth}</td>
+    <td>${replacements.witness4_address}</td>
+    <td class="center">/</td>
+    <td class="center">/</td>
+    <td>${replacements.witness4_signature}</td>
+  </tr>`
+      : '';
+
+    // Replace witness row placeholders first
+    html = html.replace(/{{witness3_row}}/g, witness3Row);
+    html = html.replace(/{{witness4_row}}/g, witness4Row);
 
     // Replace simple placeholders
     Object.keys(replacements).forEach(key => {
