@@ -50,7 +50,15 @@ export default function AdminApplicationDetails() {
     try {
       const response = await getApplicationById(id);
       if (response.data.success) {
-        setApplication(response.data.data.application);
+        const appData = response.data.data.application;
+        // Debug: Check if solemnised_time is in the response
+        console.log("Application data:", {
+          id: appData.id,
+          solemnised_date: appData.solemnised_date,
+          solemnised_time: appData.solemnised_time,
+          has_solemnised_time: 'solemnised_time' in appData
+        });
+        setApplication(appData);
         setWitnesses(response.data.data.witnesses);
       }
     } catch (error) {
@@ -512,6 +520,7 @@ export default function AdminApplicationDetails() {
                 )}
                 {/* Solemnised Information */}
                 {(application.solemnised_date ||
+                  application.solemnised_time ||
                   application.solemnised_place ||
                   application.solemnised_address) && (
                   <div
@@ -524,12 +533,28 @@ export default function AdminApplicationDetails() {
                     {application.solemnised_date && (
                       <span className="flex items-center gap-1.5">
                         <Calendar size={16} /> Solemnised Date:{" "}
-                        {new Date(
-                          application.solemnised_date
-                        ).toLocaleString(undefined, { 
-                          dateStyle: "long",
-                          timeStyle: "short"
+                        {new Date(application.solemnised_date).toLocaleDateString(undefined, { 
+                          dateStyle: "long"
                         })}
+                        {application.solemnised_time && (
+                          <> at {(() => {
+                            const [hours, minutes] = application.solemnised_time.substring(0, 5).split(':');
+                            const hour12 = parseInt(hours) % 12 || 12;
+                            const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                            return `${hour12}:${minutes} ${ampm}`;
+                          })()}</>
+                        )}
+                      </span>
+                    )}
+                    {application.solemnised_time && (
+                      <span className="flex items-center gap-1.5">
+                        <Clock size={16} /> Solemnised Time:{" "}
+                        {(() => {
+                          const [hours, minutes] = application.solemnised_time.substring(0, 5).split(':');
+                          const hour12 = parseInt(hours) % 12 || 12;
+                          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                          return `${hour12}:${minutes} ${ampm}`;
+                        })()}
                       </span>
                     )}
                     {application.solemnised_place && (
@@ -1116,12 +1141,33 @@ export default function AdminApplicationDetails() {
                     <InfoItem
                       icon={Calendar}
                       label="DATE OF SOLEMNISATION"
-                      value={new Date(
-                        application.solemnised_date
-                      ).toLocaleString(undefined, { 
-                        dateStyle: "long",
-                        timeStyle: "short"
-                      })}
+                      value={
+                        (() => {
+                          const dateStr = new Date(application.solemnised_date).toLocaleDateString(undefined, { 
+                            dateStyle: "long"
+                          });
+                          if (application.solemnised_time) {
+                            // Format time in 12-hour format with AM/PM
+                            const [hours, minutes] = application.solemnised_time.substring(0, 5).split(':');
+                            const hour12 = parseInt(hours) % 12 || 12;
+                            const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                            return `${dateStr} at ${hour12}:${minutes} ${ampm}`;
+                          }
+                          return dateStr;
+                        })()
+                      }
+                    />
+                  )}
+                  {application.solemnised_time && (
+                    <InfoItem
+                      icon={Clock}
+                      label="TIME OF SOLEMNISATION"
+                      value={(() => {
+                        const [hours, minutes] = application.solemnised_time.substring(0, 5).split(':');
+                        const hour12 = parseInt(hours) % 12 || 12;
+                        const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                        return `${hour12}:${minutes} ${ampm}`;
+                      })()}
                     />
                   )}
                   {application.solemnised_place && (
@@ -1940,12 +1986,11 @@ export default function AdminApplicationDetails() {
               <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>
                 Date:{" "}
                 {application.solemnised_date
-                  ? new Date(application.solemnised_date).toLocaleString(
+                  ? new Date(application.solemnised_date).toLocaleDateString(
                       "en-GB", {
-                        dateStyle: "long",
-                        timeStyle: "short"
+                        dateStyle: "long"
                       }
-                    )
+                    ) + (application.solemnised_time ? ` at ${application.solemnised_time.substring(0, 5)}` : "")
                   : "NIL"}
               </p>
               <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>

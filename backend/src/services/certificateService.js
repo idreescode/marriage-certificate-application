@@ -147,9 +147,18 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       mahr_amount: applicationData.mahr_amount ? `${applicationData.mahr_amount}` : '',
       mahr_type_text: applicationData.mahr_type === 'deferred' ? 'Deferred' : (applicationData.mahr_type === 'prompt' ? 'Prompt' : ''),
       
-      // Solemnization
+      // Solemnization - combine date and time from separate columns
       solemnised_date_formatted: applicationData.solemnised_date 
-        ? formatDateFull(applicationData.solemnised_date, true) 
+        ? (() => {
+            const datePart = formatDateFull(applicationData.solemnised_date, false);
+            if (applicationData.solemnised_time) {
+              const [hours, minutes] = applicationData.solemnised_time.substring(0, 5).split(':');
+              const hour12 = parseInt(hours) % 12 || 12;
+              const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+              return `${datePart} at ${hour12}:${minutes} ${ampm}`;
+            }
+            return datePart;
+          })()
         : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date, true) : ''),
       solemnised_place: applicationData.solemnised_place || applicationData.appointment_location || '',
       solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed

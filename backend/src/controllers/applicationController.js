@@ -5,6 +5,7 @@ const {
   generateSequentialRegistrationNumber,
   generatePassword,
   normalizeDate,
+  normalizeTime,
 } = require("../utils/helpers");
 const {
   sendApplicationConfirmation,
@@ -174,8 +175,15 @@ const submitApplication = async (req, res) => {
     const mahrAmount = formData.mahrAmount || null;
     const mahrType = formData.mahrType || null;
 
-    // Solemnised
-    const solemnisedDate = normalizeDate(formData.solemnisedDate, true); // includeTime=true for datetime
+    // Solemnised - expect separate date and time fields
+    // WordPress forms should be updated to send solemnisedDate and solemnisedTime separately
+    const normalizedSolemnisedDate = formData.solemnisedDate 
+      ? normalizeDate(formData.solemnisedDate) 
+      : null;
+    const normalizedSolemnisedTime = formData.solemnisedTime 
+      ? normalizeTime(formData.solemnisedTime) 
+      : null;
+    
     const solemnisedPlace = formData.solemnisedPlace || null;
     const solemnisedAddress = formData.solemnisedAddress || null;
 
@@ -220,6 +228,7 @@ const submitApplication = async (req, res) => {
       witness2MaleDateOfBirth: formData.witness2MaleDateOfBirth,
       witness2FemaleDateOfBirth: formData.witness2FemaleDateOfBirth,
       solemnisedDate: formData.solemnisedDate,
+      solemnisedTime: formData.solemnisedTime,
     });
     console.log("Normalized dates (MySQL format YYYY-MM-DD):", {
       groomDateOfBirth,
@@ -230,7 +239,8 @@ const submitApplication = async (req, res) => {
       witness1FemaleDateOfBirth,
       witness2MaleDateOfBirth,
       witness2FemaleDateOfBirth,
-      solemnisedDate,
+      solemnisedDate: normalizedSolemnisedDate,
+      solemnisedTime: normalizedSolemnisedTime,
     });
     console.log("====================================================");
 
@@ -243,14 +253,21 @@ const submitApplication = async (req, res) => {
       witness2MaleName,
       witness2FemaleName,
       mahrAmount,
-      solemnisedDate,
+      solemnisedDate: normalizedSolemnisedDate,
+      solemnisedTime: normalizedSolemnisedTime,
       email,
       contactNumber,
     });
 
     // GET CONNECTION FOR TRANSACTION
-    const connection = await pool.getConnection();
-    await connection.beginTransaction();
+    let connection;
+    try {
+      connection = await pool.getConnection();
+      await connection.beginTransaction();
+    } catch (connectionError) {
+      console.error("Error acquiring connection or starting transaction:", connectionError);
+      throw connectionError;
+    }
 
     try {
       // Generate sequential registration number starting from 1000
@@ -303,7 +320,7 @@ const submitApplication = async (req, res) => {
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
-          solemnised_date, solemnised_place, solemnised_address,
+          solemnised_date, solemnised_time, solemnised_place, solemnised_address,
           payment_status, status,
           witness1_male_name, witness1_male_father_name, witness1_male_date_of_birth, witness1_male_place_of_birth, witness1_male_address,
           witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
@@ -315,7 +332,7 @@ const submitApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?, ?, ?, ?
+          ?, ?, ?, ?, ?, ?, ?, ?, ?
         )`,
         [
           applicationNumber,
@@ -351,7 +368,8 @@ const submitApplication = async (req, res) => {
           brideRepAddress || null,
           mahrAmount || null,
           mahrType || null,
-          solemnisedDate || null,
+          normalizedSolemnisedDate,
+          normalizedSolemnisedTime,
           solemnisedPlace || null,
           solemnisedAddress || null,
           "pending_admin_review", // payment_status default for user-submitted applications
@@ -492,12 +510,21 @@ const submitApplication = async (req, res) => {
       });
     } catch (transactionError) {
       // Rollback transaction - this will undo user creation if application insertion failed
-      await connection.rollback();
-      console.error("Transaction Rolled Back due to:", transactionError);
-      console.error("User creation has been rolled back - no user was created");
+      if (connection) {
+        try {
+          await connection.rollback();
+          console.error("Transaction Rolled Back due to:", transactionError);
+          console.error("User creation has been rolled back - no user was created");
+        } catch (rollbackError) {
+          console.error("Error during rollback:", rollbackError);
+        }
+      }
       throw transactionError;
     } finally {
-      connection.release();
+      // Always release the connection, even if there was an error
+      if (connection) {
+        connection.release();
+      }
     }
   } catch (error) {
     console.error("Error submitting application:", error);

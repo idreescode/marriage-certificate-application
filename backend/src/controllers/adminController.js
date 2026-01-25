@@ -6,6 +6,7 @@ const {
   generateApplicationNumber,
   generateSequentialRegistrationNumber,
   normalizeDate,
+  normalizeTime,
 } = require("../utils/helpers");
 const {
   sendDepositAmountEmail,
@@ -1011,6 +1012,7 @@ const createManualApplication = async (req, res) => {
       mahrType,
       // Solemnisation
       solemnisedDate,
+      solemnisedTime,
       solemnisedPlace,
       solemnisedAddress,
       // Contact & Status
@@ -1174,7 +1176,8 @@ const createManualApplication = async (req, res) => {
       const normalizedWitness1FemaleDob = normalizeDate(witness1FemaleDateOfBirth);
       const normalizedWitness2MaleDob = normalizeDate(witness2MaleDateOfBirth);
       const normalizedWitness2FemaleDob = normalizeDate(witness2FemaleDateOfBirth);
-      const normalizedSolemnisedDate = normalizeDate(solemnisedDate, true); // includeTime=true for datetime
+      const normalizedSolemnisedDate = normalizeDate(solemnisedDate); // Date only, no time
+      const normalizedSolemnisedTime = normalizeTime(solemnisedTime); // Time only
       const normalizedPreferredDate = normalizeDate(preferredDate);
       const normalizedAppointmentDate = normalizeDate(appointmentDate);
 
@@ -1226,7 +1229,7 @@ const createManualApplication = async (req, res) => {
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount, mahr_type,
-          solemnised_date, solemnised_place, solemnised_address,
+          solemnised_date, solemnised_time, solemnised_place, solemnised_address,
           preferred_date, special_requests,
           deposit_amount, deposit_amount_set_by, payment_status,
           appointment_date, appointment_time, appointment_location,
@@ -1238,7 +1241,7 @@ const createManualApplication = async (req, res) => {
           witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
           witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
           witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               finalApplicationNumber,
               userId,
@@ -1274,6 +1277,7 @@ const createManualApplication = async (req, res) => {
               mahrAmount || null,
               mahrType || null,
               normalizedSolemnisedDate,
+              normalizedSolemnisedTime,
               solemnisedPlace || null,
               solemnisedAddress || null,
               normalizedPreferredDate,
@@ -1768,6 +1772,7 @@ const updateApplication = async (req, res) => {
       mahrType,
       // Solemnisation
       solemnisedDate,
+      solemnisedTime,
       solemnisedPlace,
       solemnisedAddress,
       // Contact & Status
@@ -1856,7 +1861,10 @@ const updateApplication = async (req, res) => {
       ? normalizeDate(witness2FemaleDateOfBirth)
       : null;
     const normalizedSolemnisedDate = solemnisedDate
-      ? normalizeDate(solemnisedDate)
+      ? normalizeDate(solemnisedDate) // Date only, no time
+      : null;
+    const normalizedSolemnisedTime = solemnisedTime
+      ? normalizeTime(solemnisedTime) // Time only
       : null;
     const normalizedPreferredDate = preferredDate
       ? normalizeDate(preferredDate)
@@ -2025,6 +2033,10 @@ const updateApplication = async (req, res) => {
     if (normalizedSolemnisedDate !== undefined) {
       updateFields.push("solemnised_date = ?");
       updateValues.push(normalizedSolemnisedDate);
+    }
+    if (normalizedSolemnisedTime !== undefined) {
+      updateFields.push("solemnised_time = ?");
+      updateValues.push(normalizedSolemnisedTime);
     }
     if (solemnisedPlace !== undefined) {
       updateFields.push("solemnised_place = ?");

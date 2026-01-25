@@ -32,6 +32,7 @@ const migrations = [
   require('./029_add_four_witness_id_paths'),
   require('./030_add_witness_columns_to_applications'),
   require('./031_remove_unused_columns'),
+  require('./032_split_solemnised_datetime'),
 ];
 
 // Run migrations

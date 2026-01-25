@@ -141,6 +141,7 @@ export default function AdminApplications() {
       groomAddress: app.groom_address,
       brideAddress: app.bride_address,
       solemnisedDate: app.solemnised_date,
+      solemnisedTime: app.solemnised_time,
       solemnisedPlace: app.solemnised_place,
       solemnisedAddress: app.solemnised_address,
     });
@@ -489,6 +490,7 @@ export default function AdminApplications() {
                 <th>CONTACT</th>
                 <th>STATUS</th>
                 <th>SOLEMNISED DATE</th>
+                <th>SOLEMNISED TIME</th>
                 <th>SOLEMNISED PLACE</th>
                 <th>SOLEMNISED ADDRESS</th>
                 <th style={{ width: "220px" }}>ACTIONS</th>
@@ -613,10 +615,19 @@ export default function AdminApplications() {
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
                     {app.solemnised_date
-                      ? new Date(app.solemnised_date).toLocaleString(undefined, {
-                          dateStyle: "short",
-                          timeStyle: "short"
+                      ? new Date(app.solemnised_date).toLocaleDateString(undefined, {
+                          dateStyle: "short"
                         })
+                      : "-"}
+                  </td>
+                  <td style={{ color: "var(--slate-500)" }}>
+                    {app.solemnised_time
+                      ? (() => {
+                          const [hours, minutes] = app.solemnised_time.substring(0, 5).split(':');
+                          const hour12 = parseInt(hours) % 12 || 12;
+                          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                          return `${hour12}:${minutes} ${ampm}`;
+                        })()
                       : "-"}
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
@@ -1015,10 +1026,12 @@ export default function AdminApplications() {
                   }}
                 >
                   <strong>Solemnised Date:</strong>{" "}
-                  {new Date(approveAppData.solemnisedDate).toLocaleString(undefined, {
-                    dateStyle: "long",
-                    timeStyle: "short"
+                  {new Date(approveAppData.solemnisedDate).toLocaleDateString(undefined, {
+                    dateStyle: "long"
                   })}
+                  {approveAppData?.solemnisedTime && (
+                    <> at {approveAppData.solemnisedTime.substring(0, 5)}</>
+                  )}
                 </p>
               )}
               {approveAppData?.solemnisedPlace && (

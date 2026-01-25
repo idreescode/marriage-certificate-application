@@ -213,6 +213,35 @@ const normalizeDate = (dateString, includeTime = false) => {
   return null;
 };
 
+// Normalize time to MySQL TIME format (HH:MM:SS)
+const normalizeTime = (timeString) => {
+  // Return null for falsy values
+  if (!timeString || typeof timeString !== 'string') {
+    return null;
+  }
+
+  // Trim whitespace
+  const trimmed = timeString.trim();
+  
+  // Return null for empty strings
+  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined') {
+    return null;
+  }
+
+  // Already in MySQL TIME format: HH:MM:SS or HH:MM
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
+    // If only HH:MM, add :00 for seconds
+    if (trimmed.length === 5) {
+      return `${trimmed}:00`;
+    }
+    return trimmed;
+  }
+
+  // Invalid time format
+  console.warn(`⚠️  Invalid time format received: "${trimmed}". Returning null.`);
+  return null;
+};
+
 // Format date for display
 const formatDate = (date) => {
   if (!date) return '';
@@ -251,6 +280,7 @@ module.exports = {
   generateSequentialRegistrationNumber,
   generatePassword,
   normalizeDate,
+  normalizeTime,
   formatDate,
   formatCurrency,
   getStatusColor

@@ -470,7 +470,10 @@ const sendAdminNewApplicationEmail = async (applicationData) => {
     bride_rep_address: application.bride_rep_address || 'N/A',
     mahr_amount: application.mahr_amount || 'N/A',
     mahr_type: application.mahr_type || 'N/A',
-    solemnised_date: formatDateForEmail(application.solemnised_date, true),
+    solemnised_date: application.solemnised_date 
+      ? formatDateForEmail(application.solemnised_date, false) + 
+        (application.solemnised_time ? ` at ${application.solemnised_time.substring(0, 5)}` : '')
+      : 'N/A',
     solemnised_place: application.solemnised_place || 'N/A',
     solemnised_address: application.solemnised_address || 'N/A',
     witness1_name: witnesses[0]?.witness_name || 'N/A',

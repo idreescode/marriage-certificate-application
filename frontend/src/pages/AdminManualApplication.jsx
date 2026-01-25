@@ -328,6 +328,7 @@ export default function AdminManualApplication() {
     mahrPrompt: false,
     // Solemnisation
     solemnisedDate: "",
+    solemnisedTime: "",
     solemnisedPlace: "",
     solemnisedAddress: "",
     // Contact & Status
@@ -453,11 +454,38 @@ export default function AdminManualApplication() {
               if (typeof time === 'string' && time.match(/^\d{2}:\d{2}$/)) {
                 return time;
               }
+              // Handle MySQL TIME format: HH:MM:SS
+              if (typeof time === 'string' && time.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                return time.substring(0, 5); // Extract HH:MM
+              }
               // If it's a Date object or timestamp, extract time
               try {
                 const d = new Date(`2000-01-01T${time}`);
                 if (isNaN(d.getTime())) return "";
                 return d.toTimeString().slice(0, 5);
+              } catch (e) {
+                return "";
+              }
+            };
+
+            // Extract time from datetime string (YYYY-MM-DD HH:MM:SS or YYYY-MM-DDTHH:MM)
+            const formatTimeFromDateTime = (datetime) => {
+              if (!datetime) return "";
+              try {
+                // Handle MySQL DATETIME format: YYYY-MM-DD HH:MM:SS
+                if (typeof datetime === 'string' && /^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}$/.test(datetime)) {
+                  return datetime.split(' ')[1].substring(0, 5); // Extract HH:MM
+                }
+                // Handle datetime-local format: YYYY-MM-DDTHH:MM
+                if (typeof datetime === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(datetime)) {
+                  return datetime.split('T')[1].substring(0, 5); // Extract HH:MM
+                }
+                // If it's a Date object, extract time
+                const d = new Date(datetime);
+                if (isNaN(d.getTime())) return "";
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                return `${hours}:${minutes}`;
               } catch (e) {
                 return "";
               }
@@ -565,7 +593,8 @@ export default function AdminManualApplication() {
               mahrAmount: app.mahr_amount || "",
               mahrDeferred: app.mahr_type === "deferred",
               mahrPrompt: app.mahr_type === "prompt",
-              solemnisedDate: formatDate(app.solemnised_date, true),
+              solemnisedDate: formatDate(app.solemnised_date, false), // Date only from DATE column
+              solemnisedTime: formatTime(app.solemnised_time), // Time only from TIME column
               solemnisedPlace: app.solemnised_place || "",
               solemnisedAddress: app.solemnised_address || "",
               email: app.portal_email || "",
@@ -727,6 +756,7 @@ export default function AdminManualApplication() {
         formData[key] !== "" &&
         !key.endsWith("File")
       ) {
+        // Send date and time separately - backend will handle them as separate columns
         submitFormData.append(key, formData[key]);
       }
     });
@@ -1963,16 +1993,26 @@ export default function AdminManualApplication() {
           </div>
         </FormSection>
 
-        {/* NIKAH DATE AND PLACE Section */}
-        <FormSection title="NIKAH DATE AND PLACE">
+        {/* NIKAH DATE AND TIME Section */}
+        <FormSection title="NIKAH DATE AND TIME">
           <FormRow>
             <FormField
-              label="Date & Time"
+              label="Date *"
               name="solemnisedDate"
-              type="datetime-local"
+              type="date"
+              required={true}
               formData={formData}
               handleChange={handleChange}
             />
+            <FormField
+              label="Time"
+              name="solemnisedTime"
+              type="time"
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </FormRow>
+          <FormRow>
             <FormField
               label="Place"
               name="solemnisedPlace"

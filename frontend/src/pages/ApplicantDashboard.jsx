@@ -420,7 +420,12 @@ export default function ApplicantDashboard() {
                   color="white"
                   bg="rgba(255,255,255,0.15)"
                   variant={app.solemnised_date ? 'indigo' : 'orange'}
-                  subtitle={app.solemnised_date ? new Date(app.solemnised_date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Not set yet'}
+                  subtitle={app.solemnised_time ? (() => {
+                    const [hours, minutes] = app.solemnised_time.substring(0, 5).split(':');
+                    const hour12 = parseInt(hours) % 12 || 12;
+                    const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                    return `${hour12}:${minutes} ${ampm}`;
+                  })() : (app.solemnised_date ? 'Time not set' : 'Not set yet')}
                />
             </div>
 
