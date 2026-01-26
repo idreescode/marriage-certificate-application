@@ -469,7 +469,6 @@ const sendAdminNewApplicationEmail = async (applicationData) => {
     bride_rep_place_of_birth: application.bride_rep_place_of_birth || 'N/A',
     bride_rep_address: application.bride_rep_address || 'N/A',
     mahr_amount: application.mahr_amount || 'N/A',
-    mahr_type: application.mahr_type || 'N/A',
     solemnised_date: application.solemnised_date 
       ? formatDateForEmail(application.solemnised_date, false) + 
         (application.solemnised_time ? ` at ${application.solemnised_time.substring(0, 5)}` : '')

@@ -226,7 +226,6 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       // Mahr
       mahr_amount: applicationData.mahr_amount != null && applicationData.mahr_amount !== ''
         ? toUpperCase(String(applicationData.mahr_amount)) : '—',
-      mahr_type_text: applicationData.mahr_type === 'deferred' ? 'DEFERRED' : (applicationData.mahr_type === 'prompt' ? 'PROMPT' : '—'),
       
       // Solemnization - separate date and time
       solemnised_date_only: (() => {

@@ -1009,7 +1009,6 @@ const createManualApplication = async (req, res) => {
       witness2FemaleAddress,
       // Mahr
       mahrAmount,
-      mahrType,
       // Solemnisation
       solemnisedDate,
       solemnisedTime,
@@ -1257,7 +1256,6 @@ const createManualApplication = async (req, res) => {
             mahrAmount && mahrAmount !== '' && mahrAmount !== 'null' 
               ? (typeof mahrAmount === 'string' ? (isNaN(parseFloat(mahrAmount)) ? null : parseFloat(mahrAmount)) : (isNaN(Number(mahrAmount)) ? null : Number(mahrAmount)))
               : null,
-            mahrType || null,
             normalizedSolemnisedDate || null,
             normalizedSolemnisedTime || null,
             finalSolemnisedPlace || null,
@@ -1321,8 +1319,8 @@ const createManualApplication = async (req, res) => {
           });
           
           // Validate count matches
-          if (sanitizedValues.length !== 80) {
-            throw new Error(`Value count mismatch: Expected 80 values, got ${sanitizedValues.length}`);
+          if (sanitizedValues.length !== 79) {
+            throw new Error(`Value count mismatch: Expected 79 values, got ${sanitizedValues.length}`);
           }
           
           [insertResult] = await connection.execute(
@@ -1338,7 +1336,7 @@ const createManualApplication = async (req, res) => {
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
-          mahr_amount, mahr_type,
+          mahr_amount,
           solemnised_date, solemnised_time, solemnised_place, solemnised_address,
           preferred_date, special_requests,
           deposit_amount, deposit_amount_set_by, payment_status,
@@ -1351,7 +1349,7 @@ const createManualApplication = async (req, res) => {
           witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
           witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
           witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             sanitizedValues
           );
           insertSuccess = true;
@@ -1737,7 +1735,6 @@ const updateApplication = async (req, res) => {
       witness2FemaleAddress,
       // Mahr
       mahrAmount,
-      mahrType,
       // Solemnisation
       solemnisedDate,
       solemnisedTime,
@@ -1991,10 +1988,6 @@ const updateApplication = async (req, res) => {
     if (mahrAmount !== undefined) {
       updateFields.push("mahr_amount = ?");
       updateValues.push(mahrAmount || null);
-    }
-    if (mahrType !== undefined) {
-      updateFields.push("mahr_type = ?");
-      updateValues.push(mahrType || null);
     }
 
     // Solemnisation

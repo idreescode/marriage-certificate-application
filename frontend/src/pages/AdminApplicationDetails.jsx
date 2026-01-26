@@ -1092,7 +1092,7 @@ export default function AdminApplicationDetails() {
             )}
 
             {/* Mahr Details Section */}
-            {(application.mahr_amount || application.mahr_type) && (
+            {application.mahr_amount && (
               <div className="details-card bg-payment-card">
                 <div className="card-title-row">
                   <div className="icon-box icon-box-green">
@@ -1101,26 +1101,11 @@ export default function AdminApplicationDetails() {
                   <h2 className="card-title-text">Mahr (Dower) Details</h2>
                 </div>
                 <div className="card-body">
-                  {application.mahr_amount && (
-                    <InfoItem
-                      icon={CreditCard}
-                      label="MAHR AMOUNT"
-                      value={application.mahr_amount}
-                    />
-                  )}
-                  {application.mahr_type && (
-                    <InfoItem
-                      icon={FileText}
-                      label="MAHR TYPE"
-                      value={
-                        application.mahr_type === "prompt"
-                          ? "Prompt (Immediate)"
-                          : application.mahr_type === "deferred"
-                          ? "Deferred"
-                          : "Not Specified"
-                      }
-                    />
-                  )}
+                  <InfoItem
+                    icon={CreditCard}
+                    label="MAHR AMOUNT"
+                    value={application.mahr_amount}
+                  />
                 </div>
               </div>
             )}
@@ -1876,29 +1861,6 @@ export default function AdminApplicationDetails() {
                   colSpan="6"
                 >
                   {application.mahr_amount || "NIL"}
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    border: "1px solid black",
-                    padding: "10px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    verticalAlign: "middle",
-                  }}
-                >
-                  DEFERRED / PROMPT
-                </td>
-                <td
-                  style={{ border: "1px solid black", padding: "12px" }}
-                  colSpan="6"
-                >
-                  {application.mahr_type === "deferred"
-                    ? "DEFERRED"
-                    : application.mahr_type === "prompt"
-                    ? "PROMPT"
-                    : "NIL"}
                 </td>
               </tr>
             </tbody>

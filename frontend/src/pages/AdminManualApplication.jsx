@@ -324,8 +324,6 @@ export default function AdminManualApplication() {
     witness2FemaleAddress: "",
     // Mahr
     mahrAmount: "",
-    mahrDeferred: false,
-    mahrPrompt: false,
     // Solemnisation
     solemnisedDate: "",
     solemnisedTime: "",
@@ -591,8 +589,6 @@ export default function AdminManualApplication() {
               witness2FemalePlaceOfBirth: sortedWitnesses[3]?.witness_place_of_birth || sortedWitnesses[3]?.place_of_birth || "",
               witness2FemaleAddress: sortedWitnesses[3]?.witness_address || sortedWitnesses[3]?.address || "",
               mahrAmount: app.mahr_amount || "",
-              mahrDeferred: app.mahr_type === "deferred",
-              mahrPrompt: app.mahr_type === "prompt",
               solemnisedDate: formatDate(app.solemnised_date, false), // Date only from DATE column
               solemnisedTime: formatTime(app.solemnised_time), // Time only from TIME column
               solemnisedPlace: app.solemnised_place || "",
@@ -684,20 +680,6 @@ export default function AdminManualApplication() {
     }));
   };
 
-  const handleMahrTypeChange = (type) => {
-    setFormData((prev) => {
-      // Toggle the clicked one, uncheck the other
-      const newDeferred = type === "deferred" ? !prev.mahrDeferred : false;
-      const newPrompt = type === "prompt" ? !prev.mahrPrompt : false;
-
-      return {
-        ...prev,
-        mahrDeferred: newDeferred,
-        mahrPrompt: newPrompt,
-        mahrType: newDeferred ? "deferred" : newPrompt ? "prompt" : "",
-      };
-    });
-  };
 
   const handlePersonallyChange = (field, value) => {
     if (field === "groom") {
@@ -718,11 +700,6 @@ export default function AdminManualApplication() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // Convert mahr checkboxes to mahrType
-    let mahrType = "";
-    if (formData.mahrDeferred) mahrType = "deferred";
-    else if (formData.mahrPrompt) mahrType = "prompt";
 
     // Create FormData for file uploads
     const submitFormData = new FormData();
@@ -760,9 +737,6 @@ export default function AdminManualApplication() {
         submitFormData.append(key, formData[key]);
       }
     });
-
-    // Add computed fields
-    submitFormData.append("mahrType", mahrType);
 
     try {
       let response;
@@ -1908,84 +1882,6 @@ export default function AdminManualApplication() {
               handleChange={handleChange}
             />
           </FormRow>
-          <div style={{ marginTop: "1rem" }}>
-            <label
-              style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: "clamp(16px, 3vw, 25px)",
-                fontWeight: 400,
-                color: "#2E2E2E",
-                marginBottom: "10px",
-                display: "block",
-              }}
-            >
-              Deferred/Prompt
-            </label>
-            <div style={{ display: "flex", gap: "1.5rem" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={formData.mahrDeferred}
-                  onChange={() => handleMahrTypeChange("deferred")}
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    border: "2.7px solid #CA6C41",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    accentColor: "#CA6C41",
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "Montserrat, sans-serif",
-                    fontSize: "clamp(16px, 3vw, 25px)",
-                    color: "#2E2E2E",
-                  }}
-                >
-                  Deferred
-                </span>
-              </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={formData.mahrPrompt}
-                  onChange={() => handleMahrTypeChange("prompt")}
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    border: "2.7px solid #CA6C41",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    accentColor: "#CA6C41",
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "Montserrat, sans-serif",
-                    fontSize: "clamp(16px, 3vw, 25px)",
-                    color: "#2E2E2E",
-                  }}
-                >
-                  Prompt
-                </span>
-              </label>
-            </div>
-          </div>
         </FormSection>
 
         {/* NIKAH DATE AND TIME Section */}

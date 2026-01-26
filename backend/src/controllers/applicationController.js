@@ -87,9 +87,6 @@ const submitApplication = async (req, res) => {
       } else if (value === 'representative') {
         formData.bridePersonally = false;
         formData.brideRepresentative = true;
-      } else if (value === 'deferred' || value === 'prompt') {
-        // This is actually mahrType, not representative
-        formData.mahrType = value;
       }
     }
 
@@ -181,7 +178,6 @@ const submitApplication = async (req, res) => {
 
     // Mahr
     const mahrAmount = formData.mahrAmount || null;
-    const mahrType = formData.mahrType || null;
 
     // Solemnised - expect separate date and time fields
     // WordPress forms should be updated to send solemnisedDate and solemnisedTime separately
@@ -352,7 +348,6 @@ const submitApplication = async (req, res) => {
         brideRepPlaceOfBirth || null,
         brideRepAddress || null,
         mahrAmount || null,
-        mahrType || null,
         normalizedSolemnisedDate || null,
         normalizedSolemnisedTime || null,
         solemnisedPlace || null,
@@ -397,7 +392,7 @@ const submitApplication = async (req, res) => {
       
       // Debug: Log the count and values
       console.log("Insert values count:", sanitizedValues.length);
-      console.log("Expected columns: 61");
+      console.log("Expected columns: 60");
       console.log("First 10 values:", sanitizedValues.slice(0, 10));
       
       // Count placeholders in SQL
@@ -427,7 +422,7 @@ const submitApplication = async (req, res) => {
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
-          mahr_amount, mahr_type,
+          mahr_amount,
           solemnised_date, solemnised_time, solemnised_place, solemnised_address,
           payment_status, status,
           witness1_male_name, witness1_male_father_name, witness1_male_date_of_birth, witness1_male_place_of_birth, witness1_male_address,
@@ -440,8 +435,7 @@ const submitApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?
+          ?, ?, ?, ?, ?, ?, ?, ?, ?
         )`,
         sanitizedValues
       );

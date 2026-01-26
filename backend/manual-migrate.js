@@ -44,8 +44,7 @@ async function runMigrations() {
       'bride_rep_place_of_birth VARCHAR(255) AFTER bride_rep_date_of_birth',
       'bride_rep_address TEXT AFTER bride_rep_place_of_birth',
       'mahr_amount VARCHAR(100) AFTER special_requests',
-      'mahr_type ENUM(\'deferred\', \'prompt\') AFTER mahr_amount',
-      'solemnised_date DATE AFTER mahr_type',
+      'solemnised_date DATE AFTER mahr_amount',
       'solemnised_place VARCHAR(255) AFTER solemnised_date',
       'solemnised_address TEXT AFTER solemnised_place'
     ];

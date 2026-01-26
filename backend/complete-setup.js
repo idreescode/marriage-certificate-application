@@ -77,7 +77,6 @@ async function setupComplete() {
         bride_rep_address TEXT,
         
         mahr_amount VARCHAR(100),
-        mahr_type ENUM('deferred', 'prompt'),
         
         solemnised_date DATE,
         solemnised_place VARCHAR(255),
