@@ -442,6 +442,9 @@ const submitApplication = async (req, res) => {
       console.log("SQL placeholder count:", placeholderCount);
       
       if (sanitizedValues.length !== placeholderCount) {
+        // Rollback transaction before throwing error
+        await connection.rollback();
+        connection.release();
         throw new Error(`Mismatch: ${sanitizedValues.length} values but ${placeholderCount} placeholders`);
       }
       
