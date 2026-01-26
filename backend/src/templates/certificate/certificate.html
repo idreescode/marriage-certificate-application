@@ -8,7 +8,34 @@
 /* ===== PDF PAGE SETUP ===== */
 @page{
   size: A4 landscape;
-  margin: 10mm;
+  margin: 5mm;
+  page-break-after: avoid;
+}
+
+/* Prevent page breaks - ensure single page */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  page-break-after: avoid;
+  page-break-before: avoid;
+}
+
+.certificate-container {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  page-break-after: avoid;
+  page-break-before: avoid;
+}
+
+.main-details-table {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.main-details-table tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 * {
@@ -19,8 +46,8 @@ body{
   margin: 0;
   padding: 0;
   font-family: "Times New Roman", serif;
-  font-size: 11px;
-  overflow-x: hidden;
+  font-size: 10px;
+  overflow: hidden;
   text-transform: uppercase;
 }
 
@@ -34,6 +61,11 @@ body{
   max-width: 1123px;
   margin: 0 auto;
   padding: 0;
+  height: 756px; /* A4 landscape minus margins - fixed height */
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: 3px;
+  overflow: hidden;
 }
 
 /* ===== TABLE RESET ===== */
@@ -46,14 +78,15 @@ table{
 
 td, th{
   border: 1px solid #000 !important;
-  padding: 3px 4px;
+  padding: 5px 6px;
   vertical-align: middle;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  font-size: 10px;
+  font-size: 9px;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.4;
 }
+
 
 .no-border{ 
   border: none !important; 
@@ -70,6 +103,11 @@ td, th{
 .small{ 
   font-size: 9px; 
   line-height: 1.3; 
+}
+
+.cell-tight{ 
+  font-size: 7.5px; 
+  line-height: 1.2; 
 }
 
 /* ===== HEADER ===== */
@@ -106,38 +144,45 @@ td, th{
 
 /* ===== ROW HEIGHTS ===== */
 .height-lg{ 
-  height: 28px; 
-  min-height: 28px;
+  height: 50px; 
+  min-height: 50px;
   text-transform: uppercase; 
 }
 
 .height-xl{ 
-  height: 32px; 
-  min-height: 32px;
+  height: 52px; 
+  min-height: 52px;
   text-transform: uppercase; 
 }
 
 .height-md{
-  height: 24px;
-  min-height: 24px;
+  height: 36px;
+  min-height: 36px;
+}
+
+/* Standard row height for main table */
+.main-details-table tr:not(.height-md):not(.height-lg):not(.height-xl) {
+  height: 48px;
+  min-height: 48px;
 }
 
 /* ===== COLUMN WIDTHS (MAIN TABLE) ===== */
-.col-role{ width: 14%; }
-.col-name{ width: 14%; }
-.col-father{ width: 12%; }
-.col-dob{ width: 12%; }
-.col-address{ width: 16%; }
-.col-marital{ width: 7%; }
-.col-rep{ width: 8%; }
-.col-sign{ width: 15%; }
+.col-role{ width: 10%; }
+.col-name{ width: 11%; }
+.col-father{ width: 9%; }
+.col-dob{ width: 11%; }
+.col-address{ width: 18%; }
+.col-marital{ width: 8%; }
+.col-inperson{ width: 10%; }
+.col-sign{ width: 18%; }
 
 /* ===== MARRIAGE DETAILS BOX ===== */
 .marriage-details-box{
   border: 2px solid #000;
-  padding: 5px;
+  padding: 4px;
   margin: 0;
   background-color: #fff;
+  height: 100%;
 }
 
 .marriage-details-box table{
@@ -150,7 +195,8 @@ td, th{
   padding: 2px 3px;
   text-align: left;
   vertical-align: top;
-  font-size: 9px;
+  font-size: 8px;
+  line-height: 1.3;
 }
 
 .marriage-details-box .label{
@@ -168,17 +214,60 @@ td, th{
   word-break: keep-all;
 }
 
+/* ===== SIGNATURE LINES ===== */
+.signature-line{
+  display: block;
+  min-height: 20px;
+  border-bottom: 1px solid #333;
+  font-family: "Segoe Script", "Brush Script MT", cursive;
+  font-size: 9px;
+  font-style: italic;
+  padding-bottom: 1px;
+  margin-top: 3px;
+}
+
+.signature-cell{
+  display: block;
+  min-height: 15px;
+  border-bottom: 1px solid #333;
+  margin-top: 2px;
+}
+
 /* ===== FOOTER ===== */
 .footer{
-  font-size: 11px;
+  font-size: 9px;
   font-weight: bold;
   text-align: center;
+  line-height: 1.3;
+  text-transform: none;
   padding: 4px;
 }
 
 /* ===== SPACING ===== */
 .spacer{
   height: 10px;
+}
+
+/* ===== CHECKBOXES ===== */
+.checkbox{
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1px solid #000;
+  margin-right: 6px;
+  vertical-align: middle;
+  font-size: 8px;
+  line-height: 11px;
+  text-align: center;
+  font-family: "Times New Roman", serif;
+  background-color: #fff;
+  position: relative;
+  font-weight: bold;
+  color: #000;
+}
+
+.checkbox.checked{
+  background-color: #fff;
 }
 </style>
 </head>
@@ -187,7 +276,7 @@ td, th{
 <div class="certificate-container">
 
 <!-- ===== HEADER ===== -->
-<table style="table-layout: fixed; margin-bottom: 5px;">
+<table style="table-layout: fixed; margin-bottom: 3px;">
   <colgroup>
     <col style="width: 120px;">
     <col style="width: auto;">
@@ -207,7 +296,7 @@ td, th{
 </table>
 
 <!-- ===== MAIN DETAILS TABLE ===== -->
-<table>
+<table class="main-details-table" style="margin-bottom: 3px;">
   <colgroup>
     <col class="col-role">
     <col class="col-name">
@@ -215,7 +304,7 @@ td, th{
     <col class="col-dob">
     <col class="col-address">
     <col class="col-marital">
-    <col class="col-rep">
+    <col class="col-inperson">
     <col class="col-sign">
   </colgroup>
 
@@ -226,106 +315,106 @@ td, th{
     <td>DATE &amp; PLACE OF BIRTH</td>
     <td>PRESENT ADDRESS</td>
     <td>MARITAL STATUS</td>
-    <td>BY REPRESENTATIVE / PERSONALLY</td>
+    <td>PERSONALLY/REPRESENTATIVE</td>
     <td>SIGNATURE</td>
   </tr>
 
-  <tr class="height-lg">
-    <td class="bold center">BRIDE GROOM</td>
-    <td class="center">{{groom_full_name}}</td>
-    <td class="center">{{groom_father_name}}</td>
-    <td class="center">{{groom_date_place_of_birth}}</td>
-    <td class="center">{{groom_address}}</td>
-    <td class="center">&nbsp;</td>
-    <td class="center">{{groom_personally_text}}</td>
-    <td class="center">&nbsp;</td>
+  <tr>
+    <td class="bold cell-tight">GROOM</td>
+    <td class="height-lg cell-tight">{{groom_full_name}}</td>
+    <td class="cell-tight">{{groom_father_name}}</td>
+    <td class="cell-tight">{{groom_date_place_of_birth}}</td>
+    <td class="cell-tight">{{groom_address}}</td>
+    <td class="center cell-tight">{{groom_marital_status}}</td>
+    <td class="center">{{groom_in_person_tick}}</td>
+    <td>{{groom_signature}}</td>
   </tr>
 
-  <tr class="height-lg">
-    <td class="bold center">BRIDE</td>
-    <td class="center">{{bride_full_name}}</td>
-    <td class="center">{{bride_father_name}}</td>
-    <td class="center">{{bride_date_place_of_birth}}</td>
-    <td class="center">{{bride_address}}</td>
-    <td class="center">&nbsp;</td>
-    <td class="center">{{bride_personally_text}}</td>
-    <td class="center">&nbsp;</td>
+  <tr>
+    <td class="bold cell-tight">BRIDE</td>
+    <td class="height-lg cell-tight">{{bride_full_name}}</td>
+    <td class="cell-tight">{{bride_father_name}}</td>
+    <td class="cell-tight">{{bride_date_place_of_birth}}</td>
+    <td class="cell-tight">{{bride_address}}</td>
+    <td class="center cell-tight">{{bride_marital_status}}</td>
+    <td class="center">{{bride_in_person_tick}}</td>
+    <td>{{bride_signature}}</td>
   </tr>
 
-  <tr class="height-xl">
-    <td class="bold center">REPRESENTATIVE / GUARDIAN OF BRIDE GROOM</td>
-    <td class="center">{{groom_rep_name}}</td>
-    <td class="center">{{groom_rep_father_name}}</td>
-    <td class="center">/</td>
-    <td class="center">{{groom_rep_address}}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td class="center">{{groom_rep_signature}}</td>
+  <tr>
+    <td class="bold cell-tight">REPRESENTATIVE / GUARDIAN OF GROOM</td>
+    <td class="height-xl cell-tight">{{groom_rep_name}}</td>
+    <td class="cell-tight">{{groom_rep_father_name}}</td>
+    <td class="cell-tight">{{groom_rep_date_place_of_birth}}</td>
+    <td class="cell-tight">{{groom_rep_address}}</td>
+    <td class="center">—</td>
+    <td class="center">—</td>
+    <td>{{groom_rep_signature}}</td>
   </tr>
 
-  <tr class="height-xl">
-    <td class="bold center">REPRESENTATIVE / GUARDIAN OF BRIDE</td>
-    <td class="center">{{bride_rep_name}}</td>
-    <td class="center">{{bride_rep_father_name}}</td>
-    <td class="center">/</td>
-    <td class="center">{{bride_rep_address}}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td class="center">{{bride_rep_signature}}</td>
+  <tr>
+    <td class="bold cell-tight">REPRESENTATIVE / GUARDIAN OF BRIDE</td>
+    <td class="height-xl cell-tight">{{bride_rep_name}}</td>
+    <td class="cell-tight">{{bride_rep_father_name}}</td>
+    <td class="cell-tight">{{bride_rep_date_place_of_birth}}</td>
+    <td class="cell-tight">{{bride_rep_address}}</td>
+    <td class="center">—</td>
+    <td class="center">—</td>
+    <td>{{bride_rep_signature}}</td>
   </tr>
 
-  <tr class="height-lg">
-    <td class="bold center">WITNESS NO 1</td>
-    <td class="center">{{witness1_name}}</td>
-    <td class="center">{{witness1_father_name}}</td>
-    <td class="center">{{witness1_date_place_of_birth}}</td>
-    <td class="center">{{witness1_address}}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td class="center">{{witness1_signature}}</td>
+  <tr>
+    <td class="bold center cell-tight">WITNESS 1</td>
+    <td class="height-lg cell-tight">{{witness1_name}}</td>
+    <td class="cell-tight">{{witness1_father_name}}</td>
+    <td class="cell-tight">{{witness1_date_place_of_birth}}</td>
+    <td class="cell-tight">{{witness1_address}}</td>
+    <td class="center">—</td>
+    <td class="center">—</td>
+    <td>{{witness1_signature}}</td>
   </tr>
 
-  <tr class="height-lg">
-    <td class="bold center">WITNESS NO 2</td>
-    <td class="center">{{witness2_name}}</td>
-    <td class="center">{{witness2_father_name}}</td>
-    <td class="center">{{witness2_date_place_of_birth}}</td>
-    <td class="center">{{witness2_address}}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td class="center">{{witness2_signature}}</td>
+  <tr>
+    <td class="bold center cell-tight">WITNESS 2</td>
+    <td class="height-lg cell-tight">{{witness2_name}}</td>
+    <td class="cell-tight">{{witness2_father_name}}</td>
+    <td class="cell-tight">{{witness2_date_place_of_birth}}</td>
+    <td class="cell-tight">{{witness2_address}}</td>
+    <td class="center">—</td>
+    <td class="center">—</td>
+    <td>{{witness2_signature}}</td>
   </tr>
 
-  <tr class="height-lg">
-    <td class="bold center">WITNESS NO 3</td>
-    <td class="center">{{witness3_name}}</td>
-    <td class="center">{{witness3_father_name}}</td>
-    <td class="center">{{witness3_date_place_of_birth}}</td>
-    <td class="center">{{witness3_address}}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td class="center">{{witness3_signature}}</td>
+  <tr>
+    <td class="bold center cell-tight">WITNESS 3</td>
+    <td class="height-lg cell-tight">{{witness3_name}}</td>
+    <td class="cell-tight">{{witness3_father_name}}</td>
+    <td class="cell-tight">{{witness3_date_place_of_birth}}</td>
+    <td class="cell-tight">{{witness3_address}}</td>
+    <td class="center">—</td>
+    <td class="center">—</td>
+    <td>{{witness3_signature}}</td>
   </tr>
 
-  <tr class="height-lg">
-    <td class="bold center">WITNESS NO 4</td>
-    <td class="center">{{witness4_name}}</td>
-    <td class="center">{{witness4_father_name}}</td>
-    <td class="center">{{witness4_date_place_of_birth}}</td>
-    <td class="center">{{witness4_address}}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td class="center">{{witness4_signature}}</td>
+  <tr>
+    <td class="bold center cell-tight">WITNESS 4</td>
+    <td class="height-lg cell-tight">{{witness4_name}}</td>
+    <td class="cell-tight">{{witness4_father_name}}</td>
+    <td class="cell-tight">{{witness4_date_place_of_birth}}</td>
+    <td class="cell-tight">{{witness4_address}}</td>
+    <td class="center">—</td>
+    <td class="center">—</td>
+    <td>{{witness4_signature}}</td>
   </tr>
 </table>
 
 <!-- ===== BOTTOM SECTION ===== -->
-<table>
-  <tr>
-    <td width="45%" style="vertical-align: top; padding: 5px; font-size: 9px;">
+<table style="margin-bottom: 0; height: 140px;">
+  <tr style="height: 100%;">
+    <td width="45%" style="vertical-align: top; padding: 5px; font-size: 8px;">
       <b>MAHR:</b> {{mahr_amount}}<br>
       <b>DEFERRED / PROMPT:</b> {{mahr_type_text}}<br><br>
-      <p class="small" style="margin: 0; padding: 0; line-height: 1.2;">
+      <p class="small" style="margin: 0; padding: 0; line-height: 1.3;">
         This marriage certificate is issued in accordance with Islamic laws and
         may not be accepted by authorities in the U.K. and other non-Muslim countries.
         To be married in accordance with British Marriage Laws, both parties are advised
@@ -333,10 +422,10 @@ td, th{
       </p>
     </td>
 
-    <td width="30%" class="center" style="vertical-align: middle; padding: 5px; font-size: 9px;">
+    <td width="30%" class="center" style="vertical-align: middle; padding: 5px; font-size: 8px;">
       <b>SIGNATURE AND SEAL OF PRESIDING AUTHORITY SOLEMNIZING MARRIAGE</b>
       <br><br>
-      ______________________
+      <span class="signature-line">{{presiding_signature}}</span>
     </td>
 
     <td width="25%" style="vertical-align: top; padding: 5px;">
@@ -375,7 +464,7 @@ td, th{
 </table>
 
 <!-- ===== FOOTER ===== -->
-<table>
+<table style="margin-top: 0;">
   <tr>
     <td class="footer no-border">
       ISSUED BY: JAMIYAT TABLIGH-UL-ISLAM, CENTRAL MOSQUE, 9 DARFIELD STREET,
