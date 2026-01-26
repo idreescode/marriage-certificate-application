@@ -244,27 +244,59 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
         if (applicationData.solemnised_time) {
           try {
             // Handle MySQL TIME format (HH:MM:SS or HH:MM)
-            const timeStr = String(applicationData.solemnised_time).trim();
-            // Match HH:MM:SS or HH:MM format
-            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+            // MySQL TIME can be returned as string "HH:MM:SS" or as a Date object
+            let timeStr;
+            if (applicationData.solemnised_time instanceof Date) {
+              // If it's a Date object, extract time components
+              const hours = applicationData.solemnised_time.getHours();
+              const minutes = String(applicationData.solemnised_time.getMinutes()).padStart(2, '0');
+              const hour12 = hours % 12 || 12;
+              const ampm = hours >= 12 ? 'PM' : 'AM';
+              return `${hour12}:${minutes} ${ampm}`;
+            } else {
+              timeStr = String(applicationData.solemnised_time).trim();
+            }
+            
+            // Debug logging
+            console.log('🔍 solemnised_time raw value:', applicationData.solemnised_time);
+            console.log('🔍 solemnised_time string:', timeStr);
+            
+            // Match HH:MM:SS or HH:MM format (MySQL TIME format)
+            // Also handle formats like "12:00:00.000000" (with microseconds)
+            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/);
             if (timeMatch) {
               const hours = parseInt(timeMatch[1], 10);
               const minutes = timeMatch[2];
               if (!isNaN(hours) && hours >= 0 && hours < 24) {
                 const hour12 = hours % 12 || 12;
                 const ampm = hours >= 12 ? 'PM' : 'AM';
-                return `${hour12}:${minutes} ${ampm}`;
+                const formatted = `${hour12}:${minutes} ${ampm}`;
+                console.log('✅ solemnised_time formatted:', formatted);
+                return formatted;
               }
+            } else {
+              console.warn('⚠️ solemnised_time did not match expected format:', timeStr);
             }
           } catch (e) {
-            console.warn('Error formatting solemnised_time:', e, applicationData.solemnised_time);
+            console.warn('❌ Error formatting solemnised_time:', e, applicationData.solemnised_time);
           }
+        } else {
+          console.log('⚠️ solemnised_time is null or undefined');
         }
         // Fallback to appointment_time if available
         if (applicationData.appointment_time) {
           try {
-            const timeStr = String(applicationData.appointment_time).trim();
-            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+            let timeStr;
+            if (applicationData.appointment_time instanceof Date) {
+              const hours = applicationData.appointment_time.getHours();
+              const minutes = String(applicationData.appointment_time.getMinutes()).padStart(2, '0');
+              const hour12 = hours % 12 || 12;
+              const ampm = hours >= 12 ? 'PM' : 'AM';
+              return `${hour12}:${minutes} ${ampm}`;
+            } else {
+              timeStr = String(applicationData.appointment_time).trim();
+            }
+            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/);
             if (timeMatch) {
               const hours = parseInt(timeMatch[1], 10);
               const minutes = timeMatch[2];

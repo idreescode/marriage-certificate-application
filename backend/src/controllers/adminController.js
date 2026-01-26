@@ -957,6 +957,7 @@ const createManualApplication = async (req, res) => {
       groomPlaceOfBirth,
       groomAddress,
       groomIdNumber,
+      groomMaritalStatus,
       groomConfirm,
       groomPersonally,
       groomRepresentative,
@@ -973,6 +974,7 @@ const createManualApplication = async (req, res) => {
       bridePlaceOfBirth,
       brideAddress,
       brideIdNumber,
+      brideMaritalStatus,
       brideConfirm,
       bridePersonally,
       brideRepresentative,
@@ -1699,6 +1701,7 @@ const updateApplication = async (req, res) => {
       bridePlaceOfBirth,
       brideAddress,
       brideIdNumber,
+      brideMaritalStatus,
       brideConfirm,
       bridePersonally,
       brideRepresentative,
@@ -1889,6 +1892,10 @@ const updateApplication = async (req, res) => {
       updateFields.push("groom_id_number = ?");
       updateValues.push(groomIdNumber);
     }
+    if (groomMaritalStatus !== undefined) {
+      updateFields.push("groom_marital_status = ?");
+      updateValues.push(groomMaritalStatus ? String(groomMaritalStatus).toLowerCase().trim() : null);
+    }
     if (groomConfirm !== undefined) {
       updateFields.push("groom_confirm = ?");
       updateValues.push(groomConfirm);
@@ -1948,6 +1955,10 @@ const updateApplication = async (req, res) => {
     if (brideIdNumber !== undefined) {
       updateFields.push("bride_id_number = ?");
       updateValues.push(brideIdNumber);
+    }
+    if (brideMaritalStatus !== undefined) {
+      updateFields.push("bride_marital_status = ?");
+      updateValues.push(brideMaritalStatus ? String(brideMaritalStatus).toLowerCase().trim() : null);
     }
     if (brideConfirm !== undefined) {
       updateFields.push("bride_confirm = ?");
