@@ -237,6 +237,27 @@ const normalizeTime = (timeString) => {
     return trimmed;
   }
 
+  // Handle 12-hour format with AM/PM: "12:00 PM", "1:30 AM", "11:45 PM", etc.
+  const time12HourMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (time12HourMatch) {
+    let hours = parseInt(time12HourMatch[1], 10);
+    const minutes = time12HourMatch[2];
+    const ampm = time12HourMatch[3].toUpperCase();
+    
+    // Convert to 24-hour format
+    if (ampm === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (ampm === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    
+    // Validate hours and minutes
+    if (hours >= 0 && hours < 24 && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
+      const hours24 = String(hours).padStart(2, '0');
+      return `${hours24}:${minutes}:00`;
+    }
+  }
+
   // Invalid time format
   console.warn(`⚠️  Invalid time format received: "${trimmed}". Returning null.`);
   return null;

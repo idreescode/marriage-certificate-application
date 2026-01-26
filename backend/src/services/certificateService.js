@@ -375,9 +375,11 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     
     try {
       // Set viewport for A4 Landscape size
+      // A4 Landscape: 297mm x 210mm
+      // With 5mm margins: usable area = 287mm x 200mm ≈ 1083px x 755px at 96 DPI
       await page.setViewport({
-        width: 1123,  // 297mm in pixels at 96 DPI (A4 height becomes width in landscape)
-        height: 794,  // 210mm in pixels at 96 DPI (A4 width becomes height in landscape)
+        width: 1083,  // A4 landscape width (297mm) minus margins (10mm) = 287mm ≈ 1083px
+        height: 755,  // A4 landscape height (210mm) minus margins (10mm) = 200mm ≈ 755px
         deviceScaleFactor: 1
       });
       
