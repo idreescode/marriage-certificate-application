@@ -105,7 +105,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     const toUpperCase = (text) => text ? String(text).toUpperCase() : '';
 
     // Signature line HTML for table cells (clear, realistic placeholder)
-    const sigCell = '<span class="signature-cell">&nbsp;</span>';
+    const sigCell = '<span class="signature-cell"></span>';
     const sigPresiding = '&nbsp;';
 
     // Marital status: return checkboxes HTML
@@ -125,7 +125,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       });
       
       return `
-        <div style="text-align: left; padding: 2px 0; font-size: 7px;">
+        <div style="text-align: left; padding: 2px 0; font-size: 8px;">
           <div style="margin: 2px 0; line-height: 1.3;">
             <span class="checkbox ${singleChecked ? 'checked' : ''}">${singleChecked ? '✓' : ''}</span> SINGLE
           </div>
@@ -146,11 +146,11 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       const representativeChecked = (personally === false || personally === 0 || !personally);
       
       return `
-        <div style="text-align: left; padding: 0; font-size: 7px;">
-          <div style="margin: 1px 0; line-height: 1.2;">
+        <div style="text-align: left; padding: 0; font-size: 8px;">
+          <div style="margin: 1px 0; line-height: 1.3;">
             <span class="checkbox ${personallyChecked ? 'checked' : ''}">${personallyChecked ? '✓' : ''}</span> PERSONALLY
           </div>
-          <div style="margin: 1px 0; line-height: 1.2;">
+          <div style="margin: 1px 0; line-height: 1.3;">
             <span class="checkbox ${representativeChecked ? 'checked' : ''}">${representativeChecked ? '✓' : ''}</span> REPRESENTATIVE
           </div>
         </div>
