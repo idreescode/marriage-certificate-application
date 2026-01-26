@@ -1303,14 +1303,12 @@ export default function AdminManualApplication() {
               label="Date of Birth"
               name="groomDateOfBirth"
               type="date"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
               name="groomPlaceOfBirth"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1522,14 +1520,12 @@ export default function AdminManualApplication() {
               label="Date of Birth"
               name="brideDateOfBirth"
               type="date"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
               name="bridePlaceOfBirth"
-              required
               formData={formData}
               handleChange={handleChange}
             />

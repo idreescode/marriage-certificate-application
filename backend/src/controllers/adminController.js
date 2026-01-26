@@ -1037,33 +1037,6 @@ const createManualApplication = async (req, res) => {
       });
     }
 
-    if (!groomDateOfBirth) {
-      return res.status(400).json({
-        success: false,
-        message: "Groom date of birth is required",
-      });
-    }
-
-    if (!groomPlaceOfBirth) {
-      return res.status(400).json({
-        success: false,
-        message: "Groom place of birth is required",
-      });
-    }
-
-    if (!brideDateOfBirth) {
-      return res.status(400).json({
-        success: false,
-        message: "Bride date of birth is required",
-      });
-    }
-
-    if (!bridePlaceOfBirth) {
-      return res.status(400).json({
-        success: false,
-        message: "Bride place of birth is required",
-      });
-    }
 
     // Email validation (only if email is provided)
     if (email && email.trim()) {
@@ -1701,6 +1674,7 @@ const updateApplication = async (req, res) => {
       groomPlaceOfBirth,
       groomAddress,
       groomIdNumber,
+      groomMaritalStatus,
       groomConfirm,
       groomPersonally,
       groomRepresentative,
