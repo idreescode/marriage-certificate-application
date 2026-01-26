@@ -25,9 +25,44 @@ const submitApplication = async (req, res) => {
 
     // Convert array format to object format
     // Frontend sends: { data: [{ name: "groomName", value: "..." }, ...] }
+    // WordPress sends: { "form_data[0][name]": "groomName", "form_data[0][value]": "...", ... }
     // We need: { groomName: "...", ... }
     let formData = {};
-    if (req.body.data && Array.isArray(req.body.data)) {
+    
+    // Check if WordPress format (flat keys like form_data[0][name])
+    const hasWordPressFormat = Object.keys(req.body).some(key => 
+      typeof key === 'string' && key.startsWith('form_data[') && key.includes('][name]')
+    );
+    
+    if (hasWordPressFormat) {
+      // WordPress format: flat keys in req.body like "form_data[0][name]", "form_data[0][value]"
+      const indices = new Set();
+      
+      // Collect all indices from form_data keys
+      Object.keys(req.body).forEach(key => {
+        const match = key.match(/form_data\[(\d+)\]\[(name|value)\]/);
+        if (match) {
+          indices.add(parseInt(match[1]));
+        }
+      });
+      
+      // Build formData object from form_data[index][name] and form_data[index][value]
+      indices.forEach(index => {
+        const nameKey = `form_data[${index}][name]`;
+        const valueKey = `form_data[${index}][value]`;
+        const fieldName = req.body[nameKey];
+        const fieldValue = req.body[valueKey];
+        
+        if (fieldName) {
+          // Handle duplicate fields - keep the last non-empty value
+          if (fieldValue && String(fieldValue).trim() !== '') {
+            formData[fieldName] = fieldValue;
+          } else if (!formData[fieldName]) {
+            formData[fieldName] = fieldValue || null;
+          }
+        }
+      });
+    } else if (req.body.data && Array.isArray(req.body.data)) {
       req.body.data.forEach((item) => {
         formData[item.name] = item.value || null;
       });
@@ -181,11 +216,12 @@ const submitApplication = async (req, res) => {
 
     // Solemnised - expect separate date and time fields
     // WordPress forms should be updated to send solemnisedDate and solemnisedTime separately
+    // Handle WordPress time field name: mf-time
     const normalizedSolemnisedDate = formData.solemnisedDate 
       ? normalizeDate(formData.solemnisedDate) 
       : null;
-    const normalizedSolemnisedTime = formData.solemnisedTime 
-      ? normalizeTime(formData.solemnisedTime) 
+    const normalizedSolemnisedTime = (formData.solemnisedTime || formData['mf-time']) 
+      ? normalizeTime(formData.solemnisedTime || formData['mf-time']) 
       : null;
     
     // Frontend now sends only solemnisedAddress, use it for both place and address
