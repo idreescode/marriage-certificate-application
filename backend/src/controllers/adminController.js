@@ -1321,8 +1321,12 @@ const createManualApplication = async (req, res) => {
           });
           
           // Validate count matches
-          if (sanitizedValues.length !== 79) {
-            throw new Error(`Value count mismatch: Expected 79 values, got ${sanitizedValues.length}`);
+          // Count: 3 (app info) + 10 (groom) + 5 (groom rep) + 10 (bride) + 5 (bride rep) + 1 (mahr) + 4 (solemnised) + 2 (preferred/special) + 7 (deposit/payment/appointment/status) + 12 (documents) + 20 (witnesses) = 79
+          const expectedCount = 79;
+          if (sanitizedValues.length !== expectedCount) {
+            console.error(`Value count mismatch: Expected ${expectedCount} values, got ${sanitizedValues.length}`);
+            console.error('Values:', sanitizedValues);
+            throw new Error(`Value count mismatch: Expected ${expectedCount} values, got ${sanitizedValues.length}`);
           }
           
           [insertResult] = await connection.execute(
@@ -1351,7 +1355,16 @@ const createManualApplication = async (req, res) => {
           witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
           witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
           witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )`,
             sanitizedValues
           );
           insertSuccess = true;
@@ -1577,7 +1590,8 @@ const createManualApplication = async (req, res) => {
           try {
             // Fetch application data for email
             const [appData] = await pool.execute(
-              `SELECT id, application_number, groom_full_name, bride_full_name 
+              `SELECT id, application_number, groom_full_name, bride_full_name, 
+                      groom_marital_status, bride_marital_status
                FROM applications WHERE id = ?`,
               [applicationId]
             );
@@ -1588,6 +1602,8 @@ const createManualApplication = async (req, res) => {
                 application_number: appData[0].application_number,
                 groom_full_name: appData[0].groom_full_name,
                 bride_full_name: appData[0].bride_full_name,
+                groom_marital_status: appData[0].groom_marital_status,
+                bride_marital_status: appData[0].bride_marital_status,
                 portal_email: portalEmail.trim(),
                 portalPassword: isNewUser ? portalPassword : "", // Empty string for existing users (they use their existing password)
                 isManualApplication: true, // Flag to indicate this is a manual application

@@ -89,6 +89,8 @@ const sendApplicationConfirmation = async (applicationData) => {
     application_number,
     groom_full_name,
     bride_full_name,
+    groom_marital_status,
+    bride_marital_status,
     portal_email,
     portalPassword,
     id,
@@ -123,12 +125,20 @@ const sendApplicationConfirmation = async (applicationData) => {
   // Different email content based on application type
   let templateData;
 
+  // Format marital status for display
+  const formatMaritalStatus = (status) => {
+    if (!status) return "N/A";
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
   if (isManualApplication) {
     // Admin manually created - Application is already complete
     templateData = {
       application_number,
       groom_full_name: groom_full_name || "N/A",
       bride_full_name: bride_full_name || "N/A",
+      groom_marital_status: formatMaritalStatus(groom_marital_status),
+      bride_marital_status: formatMaritalStatus(bride_marital_status),
       portal_email,
       portalPassword: portalPassword || "",
       frontend_url: process.env.FRONTEND_URL || "",
@@ -151,6 +161,8 @@ const sendApplicationConfirmation = async (applicationData) => {
       application_number,
       groom_full_name: groom_full_name || "N/A",
       bride_full_name: bride_full_name || "N/A",
+      groom_marital_status: formatMaritalStatus(groom_marital_status),
+      bride_marital_status: formatMaritalStatus(bride_marital_status),
       portal_email,
       portalPassword: portalPassword || "",
       frontend_url: process.env.FRONTEND_URL || "",

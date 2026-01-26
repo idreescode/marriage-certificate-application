@@ -553,6 +553,8 @@ const submitApplication = async (req, res) => {
         application_number: applicationNumber,
         groom_full_name: groomName,
         bride_full_name: brideName,
+        groom_marital_status: groomMaritalStatus,
+        bride_marital_status: brideMaritalStatus,
         portal_email: portalEmail,
         portalPassword: portalPassword,
         isManualApplication: false, // Regular user submission

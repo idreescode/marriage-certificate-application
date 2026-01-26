@@ -536,14 +536,6 @@ export default function AdminApplicationDetails() {
                         {new Date(application.solemnised_date).toLocaleDateString(undefined, { 
                           dateStyle: "long"
                         })}
-                        {application.solemnised_time && (
-                          <> at {(() => {
-                            const [hours, minutes] = application.solemnised_time.substring(0, 5).split(':');
-                            const hour12 = parseInt(hours) % 12 || 12;
-                            const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-                            return `${hour12}:${minutes} ${ampm}`;
-                          })()}</>
-                        )}
                       </span>
                     )}
                     {application.solemnised_time && (
@@ -671,6 +663,13 @@ export default function AdminApplicationDetails() {
                     label="ADDRESS"
                     value={application.groom_address}
                   />
+                  {application.groom_marital_status && (
+                    <InfoItem
+                      icon={User}
+                      label="MARITAL STATUS"
+                      value={application.groom_marital_status.charAt(0).toUpperCase() + application.groom_marital_status.slice(1)}
+                    />
+                  )}
                   {application.groom_id_number && (
                     <InfoItem
                       icon={FileText}
@@ -737,6 +736,13 @@ export default function AdminApplicationDetails() {
                     label="ADDRESS"
                     value={application.bride_address}
                   />
+                  {application.bride_marital_status && (
+                    <InfoItem
+                      icon={User}
+                      label="MARITAL STATUS"
+                      value={application.bride_marital_status.charAt(0).toUpperCase() + application.bride_marital_status.slice(1)}
+                    />
+                  )}
                   {application.bride_id_number && (
                     <InfoItem
                       icon={FileText}
@@ -1126,21 +1132,9 @@ export default function AdminApplicationDetails() {
                     <InfoItem
                       icon={Calendar}
                       label="DATE OF SOLEMNISATION"
-                      value={
-                        (() => {
-                          const dateStr = new Date(application.solemnised_date).toLocaleDateString(undefined, { 
-                            dateStyle: "long"
-                          });
-                          if (application.solemnised_time) {
-                            // Format time in 12-hour format with AM/PM
-                            const [hours, minutes] = application.solemnised_time.substring(0, 5).split(':');
-                            const hour12 = parseInt(hours) % 12 || 12;
-                            const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-                            return `${dateStr} at ${hour12}:${minutes} ${ampm}`;
-                          }
-                          return dateStr;
-                        })()
-                      }
+                      value={new Date(application.solemnised_date).toLocaleDateString(undefined, { 
+                        dateStyle: "long"
+                      })}
                     />
                   )}
                   {application.solemnised_time && (
@@ -1952,7 +1946,7 @@ export default function AdminApplicationDetails() {
                       "en-GB", {
                         dateStyle: "long"
                       }
-                    ) + (application.solemnised_time ? ` at ${application.solemnised_time.substring(0, 5)}` : "")
+                    )
                   : "NIL"}
               </p>
               <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>

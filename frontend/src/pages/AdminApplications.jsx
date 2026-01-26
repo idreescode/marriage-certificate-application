@@ -1029,9 +1029,25 @@ export default function AdminApplications() {
                   {new Date(approveAppData.solemnisedDate).toLocaleDateString(undefined, {
                     dateStyle: "long"
                   })}
-                  {approveAppData?.solemnisedTime && (
-                    <> at {approveAppData.solemnisedTime.substring(0, 5)}</>
-                  )}
+                </p>
+              )}
+              {approveAppData?.solemnisedTime && (
+                <p
+                  style={{
+                    color: "#15803d",
+                    fontSize: "0.875rem",
+                    lineHeight: "1.6",
+                    margin: 0,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <strong>Solemnised Time:</strong>{" "}
+                  {(() => {
+                    const [hours, minutes] = approveAppData.solemnisedTime.substring(0, 5).split(':');
+                    const hour12 = parseInt(hours) % 12 || 12;
+                    const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                    return `${hour12}:${minutes} ${ampm}`;
+                  })()}
                 </p>
               )}
               {approveAppData?.solemnisedPlace && (
