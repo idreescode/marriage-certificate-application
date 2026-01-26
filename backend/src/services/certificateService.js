@@ -312,10 +312,9 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
         }
         return '—';
       })(),
-      solemnised_place: (applicationData.solemnised_place || applicationData.appointment_location)
-        ? toUpperCase(applicationData.solemnised_place || applicationData.appointment_location) : '—',
       solemnised_by_name: applicationData.solemnised_by ? toUpperCase(applicationData.solemnised_by) : '—',
-      solemnised_address: applicationData.solemnised_address ? toUpperCase(applicationData.solemnised_address) : '—',
+      solemnised_address: (applicationData.solemnised_address || applicationData.solemnised_place || applicationData.appointment_location)
+        ? toUpperCase(applicationData.solemnised_address || applicationData.solemnised_place || applicationData.appointment_location) : '—',
       presiding_signature: sigPresiding,
       // Witness 1
       witness1_name: (witnesses && witnesses[0] && witnesses[0].witness_name) ? toUpperCase(witnesses[0].witness_name) : '—',

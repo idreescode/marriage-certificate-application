@@ -491,7 +491,6 @@ export default function AdminApplications() {
                 <th>STATUS</th>
                 <th>SOLEMNISED DATE</th>
                 <th>SOLEMNISED TIME</th>
-                <th>SOLEMNISED PLACE</th>
                 <th>SOLEMNISED ADDRESS</th>
                 <th style={{ width: "220px" }}>ACTIONS</th>
               </tr>
@@ -629,9 +628,6 @@ export default function AdminApplications() {
                           return `${hour12}:${minutes} ${ampm}`;
                         })()
                       : "-"}
-                  </td>
-                  <td style={{ color: "var(--slate-500)" }}>
-                    {app.solemnised_place || "-"}
                   </td>
                   <td style={{ color: "var(--slate-500)" }}>
                     {app.solemnised_address || "-"}
@@ -1048,20 +1044,6 @@ export default function AdminApplications() {
                     const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
                     return `${hour12}:${minutes} ${ampm}`;
                   })()}
-                </p>
-              )}
-              {approveAppData?.solemnisedPlace && (
-                <p
-                  style={{
-                    color: "#15803d",
-                    fontSize: "0.875rem",
-                    lineHeight: "1.6",
-                    margin: 0,
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <strong>Solemnised Place:</strong>{" "}
-                  {approveAppData.solemnisedPlace}
                 </p>
               )}
               {approveAppData?.solemnisedAddress && (

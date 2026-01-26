@@ -485,8 +485,7 @@ const sendAdminNewApplicationEmail = async (applicationData) => {
       ? formatDateForEmail(application.solemnised_date, false) + 
         (application.solemnised_time ? ` at ${application.solemnised_time.substring(0, 5)}` : '')
       : 'N/A',
-    solemnised_place: application.solemnised_place || 'N/A',
-    solemnised_address: application.solemnised_address || 'N/A',
+    solemnised_address: (application.solemnised_address || application.solemnised_place) || 'N/A',
     witness1_name: witnesses[0]?.witness_name || 'N/A',
     witness1_father_name: witnesses[0]?.witness_father_name || 'N/A',
     witness1_date_of_birth: formatDateForEmail(witnesses[0]?.witness_date_of_birth),

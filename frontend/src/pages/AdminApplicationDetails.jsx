@@ -521,7 +521,6 @@ export default function AdminApplicationDetails() {
                 {/* Solemnised Information */}
                 {(application.solemnised_date ||
                   application.solemnised_time ||
-                  application.solemnised_place ||
                   application.solemnised_address) && (
                   <div
                     style={{
@@ -547,12 +546,6 @@ export default function AdminApplicationDetails() {
                           const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
                           return `${hour12}:${minutes} ${ampm}`;
                         })()}
-                      </span>
-                    )}
-                    {application.solemnised_place && (
-                      <span className="flex items-center gap-1.5">
-                        <MapPin size={16} /> Solemnised Place:{" "}
-                        {application.solemnised_place}
                       </span>
                     )}
                     {application.solemnised_address && (
@@ -1118,7 +1111,6 @@ export default function AdminApplicationDetails() {
 
             {/* Solemnisation Details Section */}
             {(application.solemnised_date ||
-              application.solemnised_place ||
               application.solemnised_address) && (
               <div className="details-card bg-appointment-card">
                 <div className="card-title-row">
@@ -1149,17 +1141,10 @@ export default function AdminApplicationDetails() {
                       })()}
                     />
                   )}
-                  {application.solemnised_place && (
-                    <InfoItem
-                      icon={MapPin}
-                      label="PLACE OF SOLEMNISATION"
-                      value={application.solemnised_place}
-                    />
-                  )}
                   {application.solemnised_address && (
                     <InfoItem
                       icon={MapPin}
-                      label="ADDRESS"
+                      label="SOLEMNISED ADDRESS"
                       value={application.solemnised_address}
                     />
                   )}
@@ -1950,7 +1935,7 @@ export default function AdminApplicationDetails() {
                   : "NIL"}
               </p>
               <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>
-                Place: {application.solemnised_place || "NIL"}
+                Address: {application.solemnised_address || "NIL"}
               </p>
               <p
                 style={{
