@@ -7,7 +7,7 @@
 <style>
 /* ===== PDF PAGE SETUP ===== */
 @page{
-  size: A4;
+  size: A4 landscape;
   margin: 10mm;
 }
 
@@ -22,8 +22,8 @@ body{
 
 /* ===== CONTAINER ===== */
 .certificate-container{
-  width: 794px;
-  margin: 0 auto; /* A4 width (210mm) */
+  width: 1123px;
+  margin: 0 auto; /* A4 landscape width (297mm) */
 }
 
 /* ===== TABLE RESET ===== */
@@ -80,8 +80,8 @@ td, th{
 }
 
 /* ===== ROW HEIGHTS ===== */
-.height-lg{ height:35px; min-height:35px; }
-.height-xl{ height:45px; min-height:45px; }
+.height-lg{ height:35px; min-height:35px;text-transform: uppercase; }
+.height-xl{ height:45px; min-height:45px;text-transform: uppercase; }
 
 /* ===== COLUMN WIDTHS (MAIN TABLE) ===== */
 .col-role{ width:15%; }

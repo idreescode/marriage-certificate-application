@@ -101,51 +101,54 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     };
 
 
+    // Helper function to ensure text is uppercase
+    const toUpperCase = (text) => text ? String(text).toUpperCase() : '';
+
     // Prepare replacements
     const replacements = {
-      application_number: applicationData.application_number || 'N/A',
-      
+      application_number: toUpperCase(applicationData.application_number || 'N/A'),
+
       // Groom
-      groom_full_name: applicationData.groom_full_name || '',
-      groom_father_name: applicationData.groom_father_name || '',
+      groom_full_name: toUpperCase(applicationData.groom_full_name || ''),
+      groom_father_name: toUpperCase(applicationData.groom_father_name || ''),
       groom_date_place_of_birth: (() => {
         const dob = formatDate(applicationData.groom_date_of_birth);
-        const pob = applicationData.groom_place_of_birth || '';
+        const pob = toUpperCase(applicationData.groom_place_of_birth || '');
         if (!dob && !pob) return '';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      groom_address: applicationData.groom_address || '',
-      groom_personally_text: applicationData.groom_personally ? 'Personally' : (applicationData.groom_representative ? 'Representative' : ''),
+      groom_address: toUpperCase(applicationData.groom_address || ''),
+      groom_personally_text: applicationData.groom_personally ? 'PERSONALLY' : (applicationData.groom_representative ? 'REPRESENTATIVE' : ''),
       
       // Bride
-      bride_full_name: applicationData.bride_full_name || '',
-      bride_father_name: applicationData.bride_father_name || '',
+      bride_full_name: toUpperCase(applicationData.bride_full_name || ''),
+      bride_father_name: toUpperCase(applicationData.bride_father_name || ''),
       bride_date_place_of_birth: (() => {
         const dob = formatDate(applicationData.bride_date_of_birth);
-        const pob = applicationData.bride_place_of_birth || '';
+        const pob = toUpperCase(applicationData.bride_place_of_birth || '');
         if (!dob && !pob) return '';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      bride_address: applicationData.bride_address || '',
-      bride_personally_text: applicationData.bride_personally ? 'Personally' : (applicationData.bride_representative ? 'Representative' : ''),
+      bride_address: toUpperCase(applicationData.bride_address || ''),
+      bride_personally_text: applicationData.bride_personally ? 'PERSONALLY' : (applicationData.bride_representative ? 'REPRESENTATIVE' : ''),
       
       // Groom Representative
-      groom_rep_name: applicationData.groom_rep_name || '',
-      groom_rep_father_name: applicationData.groom_rep_father_name || '',
-      groom_rep_address: applicationData.groom_rep_address || '',
+      groom_rep_name: toUpperCase(applicationData.groom_rep_name || ''),
+      groom_rep_father_name: toUpperCase(applicationData.groom_rep_father_name || ''),
+      groom_rep_address: toUpperCase(applicationData.groom_rep_address || ''),
       groom_rep_signature: applicationData.groom_rep_name ? '' : '',
-      
+
       // Bride Representative
-      bride_rep_name: applicationData.bride_rep_name || '',
-      bride_rep_father_name: applicationData.bride_rep_father_name || '',
-      bride_rep_address: applicationData.bride_rep_address || '',
+      bride_rep_name: toUpperCase(applicationData.bride_rep_name || ''),
+      bride_rep_father_name: toUpperCase(applicationData.bride_rep_father_name || ''),
+      bride_rep_address: toUpperCase(applicationData.bride_rep_address || ''),
       bride_rep_signature: applicationData.bride_rep_name ? '' : '',
       
       // Mahr
-      mahr_amount: applicationData.mahr_amount ? `${applicationData.mahr_amount}` : '',
-      mahr_type_text: applicationData.mahr_type === 'deferred' ? 'Deferred' : (applicationData.mahr_type === 'prompt' ? 'Prompt' : ''),
+      mahr_amount: toUpperCase(applicationData.mahr_amount ? `${applicationData.mahr_amount}` : ''),
+      mahr_type_text: applicationData.mahr_type === 'deferred' ? 'DEFERRED' : (applicationData.mahr_type === 'prompt' ? 'PROMPT' : ''),
       
       // Solemnization - combine date and time from separate columns
       solemnised_date_formatted: applicationData.solemnised_date 
@@ -160,64 +163,64 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
             return datePart;
           })()
         : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date, true) : ''),
-      solemnised_place: applicationData.solemnised_place || applicationData.appointment_location || '',
+      solemnised_place: toUpperCase(applicationData.solemnised_place || applicationData.appointment_location || ''),
       solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed
-      solemnised_address: applicationData.solemnised_address || '',
+      solemnised_address: toUpperCase(applicationData.solemnised_address || ''),
       
       // Witness 1
-      witness1_name: (witnesses && witnesses[0] && witnesses[0].witness_name) ? witnesses[0].witness_name : '',
-      witness1_father_name: (witnesses && witnesses[0] && witnesses[0].witness_father_name) ? witnesses[0].witness_father_name : '',
+      witness1_name: (witnesses && witnesses[0] && witnesses[0].witness_name) ? toUpperCase(witnesses[0].witness_name) : '',
+      witness1_father_name: (witnesses && witnesses[0] && witnesses[0].witness_father_name) ? toUpperCase(witnesses[0].witness_father_name) : '',
       witness1_date_place_of_birth: (() => {
         if (!witnesses || !witnesses[0]) return '';
         const dob = formatDate(witnesses[0].witness_date_of_birth);
-        const pob = witnesses[0].witness_place_of_birth || '';
+        const pob = toUpperCase(witnesses[0].witness_place_of_birth || '');
         if (!dob && !pob) return '';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness1_address: (witnesses && witnesses[0] && witnesses[0].witness_address) ? witnesses[0].witness_address : '',
+      witness1_address: (witnesses && witnesses[0] && witnesses[0].witness_address) ? toUpperCase(witnesses[0].witness_address) : '',
       witness1_signature: (witnesses && witnesses[0] && witnesses[0].witness_name) ? '' : '',
       
       // Witness 2
-      witness2_name: (witnesses && witnesses[1] && witnesses[1].witness_name) ? witnesses[1].witness_name : '',
-      witness2_father_name: (witnesses && witnesses[1] && witnesses[1].witness_father_name) ? witnesses[1].witness_father_name : '',
+      witness2_name: (witnesses && witnesses[1] && witnesses[1].witness_name) ? toUpperCase(witnesses[1].witness_name) : '',
+      witness2_father_name: (witnesses && witnesses[1] && witnesses[1].witness_father_name) ? toUpperCase(witnesses[1].witness_father_name) : '',
       witness2_date_place_of_birth: (() => {
         if (!witnesses || !witnesses[1]) return '';
         const dob = formatDate(witnesses[1].witness_date_of_birth);
-        const pob = witnesses[1].witness_place_of_birth || '';
+        const pob = toUpperCase(witnesses[1].witness_place_of_birth || '');
         if (!dob && !pob) return '';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness2_address: (witnesses && witnesses[1] && witnesses[1].witness_address) ? witnesses[1].witness_address : '',
+      witness2_address: (witnesses && witnesses[1] && witnesses[1].witness_address) ? toUpperCase(witnesses[1].witness_address) : '',
       witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? '' : '',
       
       // Witness 3
-      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name) ? witnesses[2].witness_name : '',
-      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name) ? witnesses[2].witness_father_name : '',
+      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name) ? toUpperCase(witnesses[2].witness_name) : '',
+      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name) ? toUpperCase(witnesses[2].witness_father_name) : '',
       witness3_date_place_of_birth: (() => {
         if (!witnesses || !witnesses[2]) return '';
         const dob = formatDate(witnesses[2].witness_date_of_birth);
-        const pob = witnesses[2].witness_place_of_birth || '';
+        const pob = toUpperCase(witnesses[2].witness_place_of_birth || '');
         if (!dob && !pob) return '';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address) ? witnesses[2].witness_address : '',
+      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address) ? toUpperCase(witnesses[2].witness_address) : '',
       witness3_signature: (witnesses && witnesses[2] && witnesses[2].witness_name) ? '' : '',
       
       // Witness 4
-      witness4_name: (witnesses && witnesses[3] && witnesses[3].witness_name) ? witnesses[3].witness_name : '',
-      witness4_father_name: (witnesses && witnesses[3] && witnesses[3].witness_father_name) ? witnesses[3].witness_father_name : '',
+      witness4_name: (witnesses && witnesses[3] && witnesses[3].witness_name) ? toUpperCase(witnesses[3].witness_name) : '',
+      witness4_father_name: (witnesses && witnesses[3] && witnesses[3].witness_father_name) ? toUpperCase(witnesses[3].witness_father_name) : '',
       witness4_date_place_of_birth: (() => {
         if (!witnesses || !witnesses[3]) return '';
         const dob = formatDate(witnesses[3].witness_date_of_birth);
-        const pob = witnesses[3].witness_place_of_birth || '';
+        const pob = toUpperCase(witnesses[3].witness_place_of_birth || '');
         if (!dob && !pob) return '';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness4_address: (witnesses && witnesses[3] && witnesses[3].witness_address) ? witnesses[3].witness_address : '',
+      witness4_address: (witnesses && witnesses[3] && witnesses[3].witness_address) ? toUpperCase(witnesses[3].witness_address) : '',
       witness4_signature: (witnesses && witnesses[3] && witnesses[3].witness_name) ? '' : ''
     };
 
@@ -278,10 +281,10 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     const page = await browser.newPage();
     
     try {
-      // Set viewport for A4 Portrait size
+      // Set viewport for A4 Landscape size
       await page.setViewport({
-        width: 794,   // 210mm in pixels at 96 DPI (A4 width)
-        height: 1123, // 297mm in pixels at 96 DPI (A4 height)
+        width: 1123,  // 297mm in pixels at 96 DPI (A4 height becomes width in landscape)
+        height: 794,  // 210mm in pixels at 96 DPI (A4 width becomes height in landscape)
         deviceScaleFactor: 1
       });
       
@@ -295,11 +298,11 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       // Using Promise-based delay instead of deprecated waitForTimeout
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Generate PDF in A4 Portrait orientation
+      // Generate PDF in A4 Landscape orientation
       await page.pdf({
         path: filePath,
         format: 'A4',
-        landscape: false,  // Portrait orientation
+        landscape: true,  // Landscape orientation
         printBackground: true,
         preferCSSPageSize: true,
         margin: {
