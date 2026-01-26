@@ -114,6 +114,10 @@ const submitApplication = async (req, res) => {
     const groomPlaceOfBirth = formData.groomPlaceOfBirth || null;
     const groomIdNumber = formData.groomIdNumber || null;
     const groomAddress = formData.groomAddress || null;
+    // Normalize marital status to lowercase
+    const groomMaritalStatus = formData.groomMaritalStatus 
+      ? String(formData.groomMaritalStatus).toLowerCase().trim() 
+      : null;
     const groomConfirm = formData.groomConfirm || false;
     const groomPersonally = formData.groomPersonally || false;
     const groomRepresentative = formData.groomRepresentative || false;
@@ -132,6 +136,10 @@ const submitApplication = async (req, res) => {
     const bridePlaceOfBirth = formData.bridePlaceOfBirth || null;
     const brideIdNumber = formData.brideIdNumber || null;
     const brideAddress = formData.brideAddress || null;
+    // Normalize marital status to lowercase
+    const brideMaritalStatus = formData.brideMaritalStatus 
+      ? String(formData.brideMaritalStatus).toLowerCase().trim() 
+      : null;
     const brideConfirm = formData.brideConfirm || false;
     const bridePersonally = formData.bridePersonally || false;
     const brideRepresentative = formData.brideRepresentative || false;
@@ -319,6 +327,7 @@ const submitApplication = async (req, res) => {
         groomPlaceOfBirth || null,
         groomIdNumber || null,
         groomAddress || null,
+        groomMaritalStatus || null,
         Boolean(groomConfirm),
         Boolean(groomPersonally),
         Boolean(groomRepresentative),
@@ -333,6 +342,7 @@ const submitApplication = async (req, res) => {
         bridePlaceOfBirth || null,
         brideIdNumber || null,
         brideAddress || null,
+        brideMaritalStatus || null,
         Boolean(brideConfirm),
         Boolean(bridePersonally),
         Boolean(brideRepresentative),
@@ -387,7 +397,7 @@ const submitApplication = async (req, res) => {
       
       // Debug: Log the count and values
       console.log("Insert values count:", sanitizedValues.length);
-      console.log("Expected columns: 59");
+      console.log("Expected columns: 61");
       console.log("First 10 values:", sanitizedValues.slice(0, 10));
       
       // Count placeholders in SQL
@@ -408,12 +418,12 @@ const submitApplication = async (req, res) => {
         `INSERT INTO applications (
           application_number, user_id, contact_number,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
-          groom_id_number, groom_address,
+          groom_id_number, groom_address, groom_marital_status,
           groom_confirm, groom_personally, groom_representative,
           groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
           groom_rep_place_of_birth, groom_rep_address,
           bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
-          bride_id_number, bride_address,
+          bride_id_number, bride_address, bride_marital_status,
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
@@ -430,7 +440,8 @@ const submitApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?, ?, ?, ?, ?
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?
         )`,
         sanitizedValues
       );

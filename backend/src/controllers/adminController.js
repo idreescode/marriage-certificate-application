@@ -1227,6 +1227,7 @@ const createManualApplication = async (req, res) => {
             groomPlaceOfBirth || null,
             groomIdNumber || null,
             groomAddress || null,
+            groomMaritalStatus ? String(groomMaritalStatus).toLowerCase().trim() : null,
             // Convert FormData string booleans properly
             groomConfirm === 'true' || groomConfirm === true || groomConfirm === '1' || groomConfirm === 1,
             groomPersonally === 'true' || groomPersonally === true || groomPersonally === '1' || groomPersonally === 1,
@@ -1242,6 +1243,7 @@ const createManualApplication = async (req, res) => {
             bridePlaceOfBirth || null,
             brideIdNumber || null,
             brideAddress || null,
+            brideMaritalStatus ? String(brideMaritalStatus).toLowerCase().trim() : null,
             // Convert FormData string booleans properly
             brideConfirm === 'true' || brideConfirm === true || brideConfirm === '1' || brideConfirm === 1,
             bridePersonally === 'true' || bridePersonally === true || bridePersonally === '1' || bridePersonally === 1,
@@ -1319,20 +1321,20 @@ const createManualApplication = async (req, res) => {
           });
           
           // Validate count matches
-          if (sanitizedValues.length !== 78) {
-            throw new Error(`Value count mismatch: Expected 78 values, got ${sanitizedValues.length}`);
+          if (sanitizedValues.length !== 80) {
+            throw new Error(`Value count mismatch: Expected 80 values, got ${sanitizedValues.length}`);
           }
           
           [insertResult] = await connection.execute(
             `INSERT INTO applications (
           application_number, user_id, contact_number,
           groom_full_name, groom_father_name, groom_date_of_birth, groom_place_of_birth, 
-          groom_id_number, groom_address,
+          groom_id_number, groom_address, groom_marital_status,
           groom_confirm, groom_personally, groom_representative,
           groom_rep_name, groom_rep_father_name, groom_rep_date_of_birth, 
           groom_rep_place_of_birth, groom_rep_address,
           bride_full_name, bride_father_name, bride_date_of_birth, bride_place_of_birth,
-          bride_id_number, bride_address,
+          bride_id_number, bride_address, bride_marital_status,
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
@@ -1349,7 +1351,7 @@ const createManualApplication = async (req, res) => {
           witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
           witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
           witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             sanitizedValues
           );
           insertSuccess = true;

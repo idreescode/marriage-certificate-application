@@ -115,15 +115,24 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       const divorcedChecked = (statusStr === 'divorced');
       const widowedChecked = (statusStr === 'widowed');
       
+      // Debug logging
+      console.log('Marital status checkboxes:', {
+        original: status,
+        processed: statusStr,
+        single: singleChecked,
+        divorced: divorcedChecked,
+        widowed: widowedChecked
+      });
+      
       return `
-        <div style="text-align: left; padding: 0; font-size: 7px;">
-          <div style="margin: 1px 0; line-height: 1.2;">
+        <div style="text-align: left; padding: 2px 0; font-size: 7px;">
+          <div style="margin: 2px 0; line-height: 1.3;">
             <span class="checkbox ${singleChecked ? 'checked' : ''}">${singleChecked ? '✓' : ''}</span> SINGLE
           </div>
-          <div style="margin: 1px 0; line-height: 1.2;">
+          <div style="margin: 2px 0; line-height: 1.3;">
             <span class="checkbox ${divorcedChecked ? 'checked' : ''}">${divorcedChecked ? '✓' : ''}</span> DIVORCED
           </div>
-          <div style="margin: 1px 0; line-height: 1.2;">
+          <div style="margin: 2px 0; line-height: 1.3;">
             <span class="checkbox ${widowedChecked ? 'checked' : ''}">${widowedChecked ? '✓' : ''}</span> WIDOWED
           </div>
         </div>
