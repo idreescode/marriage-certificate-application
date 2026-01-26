@@ -104,6 +104,26 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     // Helper function to ensure text is uppercase
     const toUpperCase = (text) => text ? String(text).toUpperCase() : '';
 
+    // Signature line HTML for table cells (clear, realistic placeholder)
+    const sigCell = '<span class="signature-cell">&nbsp;</span>';
+    const sigPresiding = '&nbsp;';
+
+    // Marital status: use stored value or NIL
+    const marital = (v) => (v && String(v).trim()) ? toUpperCase(String(v).trim()) : 'NIL';
+
+    // In Person / By Proxy: ✓ when selected, — otherwise
+    const tickInPerson = (personally) => (personally === true || personally === 1) ? '✓' : '—';
+    const tickByProxy = (byProxy) => (byProxy === true || byProxy === 1) ? '✓' : '—';
+
+    // Rep date/place of birth: format or — when no rep or no data
+    const repDobPob = (repName, dob, pob) => {
+      if (!repName || (!dob && !pob)) return '—';
+      const d = formatDate(dob);
+      const p = toUpperCase(pob || '');
+      if (d && p) return `${d}<br/>${p}`;
+      return d || p;
+    };
+
     // Prepare replacements
     const replacements = {
       application_number: toUpperCase(applicationData.application_number || 'N/A'),
@@ -119,8 +139,11 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
         return dob || pob;
       })(),
       groom_address: toUpperCase(applicationData.groom_address || ''),
-      groom_personally_text: applicationData.groom_personally ? 'PERSONALLY' : (applicationData.groom_representative ? 'REPRESENTATIVE' : ''),
-      
+      groom_marital_status: marital(applicationData.groom_marital_status),
+      groom_in_person_tick: tickInPerson(applicationData.groom_personally),
+      groom_by_proxy_tick: tickByProxy(applicationData.groom_representative),
+      groom_signature: sigCell,
+
       // Bride
       bride_full_name: toUpperCase(applicationData.bride_full_name || ''),
       bride_father_name: toUpperCase(applicationData.bride_father_name || ''),
@@ -132,128 +155,117 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
         return dob || pob;
       })(),
       bride_address: toUpperCase(applicationData.bride_address || ''),
-      bride_personally_text: applicationData.bride_personally ? 'PERSONALLY' : (applicationData.bride_representative ? 'REPRESENTATIVE' : ''),
-      
+      bride_marital_status: marital(applicationData.bride_marital_status),
+      bride_in_person_tick: tickInPerson(applicationData.bride_personally),
+      bride_by_proxy_tick: tickByProxy(applicationData.bride_representative),
+      bride_signature: sigCell,
+
       // Groom Representative
-      groom_rep_name: toUpperCase(applicationData.groom_rep_name || ''),
-      groom_rep_father_name: toUpperCase(applicationData.groom_rep_father_name || ''),
-      groom_rep_address: toUpperCase(applicationData.groom_rep_address || ''),
-      groom_rep_signature: applicationData.groom_rep_name ? '' : '',
+      groom_rep_name: applicationData.groom_rep_name ? toUpperCase(applicationData.groom_rep_name) : '—',
+      groom_rep_father_name: applicationData.groom_rep_father_name ? toUpperCase(applicationData.groom_rep_father_name) : '—',
+      groom_rep_date_place_of_birth: repDobPob(
+        applicationData.groom_rep_name,
+        applicationData.groom_rep_date_of_birth,
+        applicationData.groom_rep_place_of_birth
+      ),
+      groom_rep_address: applicationData.groom_rep_address ? toUpperCase(applicationData.groom_rep_address) : '—',
+      groom_rep_signature: applicationData.groom_rep_name ? sigCell : '—',
 
       // Bride Representative
-      bride_rep_name: toUpperCase(applicationData.bride_rep_name || ''),
-      bride_rep_father_name: toUpperCase(applicationData.bride_rep_father_name || ''),
-      bride_rep_address: toUpperCase(applicationData.bride_rep_address || ''),
-      bride_rep_signature: applicationData.bride_rep_name ? '' : '',
-      
+      bride_rep_name: applicationData.bride_rep_name ? toUpperCase(applicationData.bride_rep_name) : '—',
+      bride_rep_father_name: applicationData.bride_rep_father_name ? toUpperCase(applicationData.bride_rep_father_name) : '—',
+      bride_rep_date_place_of_birth: repDobPob(
+        applicationData.bride_rep_name,
+        applicationData.bride_rep_date_of_birth,
+        applicationData.bride_rep_place_of_birth
+      ),
+      bride_rep_address: applicationData.bride_rep_address ? toUpperCase(applicationData.bride_rep_address) : '—',
+      bride_rep_signature: applicationData.bride_rep_name ? sigCell : '—',
+
       // Mahr
-      mahr_amount: toUpperCase(applicationData.mahr_amount ? `${applicationData.mahr_amount}` : ''),
-      mahr_type_text: applicationData.mahr_type === 'deferred' ? 'DEFERRED' : (applicationData.mahr_type === 'prompt' ? 'PROMPT' : ''),
-      
-      // Solemnization - combine date and time from separate columns
-      solemnised_date_formatted: applicationData.solemnised_date 
-        ? (() => {
-            const datePart = formatDateFull(applicationData.solemnised_date, false);
-            if (applicationData.solemnised_time) {
-              const [hours, minutes] = applicationData.solemnised_time.substring(0, 5).split(':');
-              const hour12 = parseInt(hours) % 12 || 12;
-              const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-              return `${datePart} at ${hour12}:${minutes} ${ampm}`;
-            }
-            return datePart;
-          })()
-        : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date, true) : ''),
-      solemnised_place: toUpperCase(applicationData.solemnised_place || applicationData.appointment_location || ''),
-      solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed
-      solemnised_address: toUpperCase(applicationData.solemnised_address || ''),
-      
+      mahr_amount: applicationData.mahr_amount != null && applicationData.mahr_amount !== ''
+        ? toUpperCase(String(applicationData.mahr_amount)) : '—',
+      mahr_type_text: applicationData.mahr_type === 'deferred' ? 'DEFERRED' : (applicationData.mahr_type === 'prompt' ? 'PROMPT' : '—'),
+
+      // Solemnization
+      solemnised_date_formatted: (() => {
+        if (applicationData.solemnised_date) {
+          const datePart = formatDateFull(applicationData.solemnised_date, false);
+          if (applicationData.solemnised_time) {
+            const [hours, minutes] = applicationData.solemnised_time.substring(0, 5).split(':');
+            const hour12 = parseInt(hours) % 12 || 12;
+            const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+            return `${datePart} at ${hour12}:${minutes} ${ampm}`;
+          }
+          return datePart;
+        }
+        if (applicationData.appointment_date) return formatDateFull(applicationData.appointment_date, true);
+        return '—';
+      })(),
+      solemnised_place: (applicationData.solemnised_place || applicationData.appointment_location)
+        ? toUpperCase(applicationData.solemnised_place || applicationData.appointment_location) : '—',
+      solemnised_by_name: applicationData.solemnised_by ? toUpperCase(applicationData.solemnised_by) : '—',
+      solemnised_address: applicationData.solemnised_address ? toUpperCase(applicationData.solemnised_address) : '—',
+      presiding_signature: sigPresiding,
+
       // Witness 1
-      witness1_name: (witnesses && witnesses[0] && witnesses[0].witness_name) ? toUpperCase(witnesses[0].witness_name) : '',
-      witness1_father_name: (witnesses && witnesses[0] && witnesses[0].witness_father_name) ? toUpperCase(witnesses[0].witness_father_name) : '',
+      witness1_name: (witnesses && witnesses[0] && witnesses[0].witness_name) ? toUpperCase(witnesses[0].witness_name) : '—',
+      witness1_father_name: (witnesses && witnesses[0] && witnesses[0].witness_father_name) ? toUpperCase(witnesses[0].witness_father_name) : '—',
       witness1_date_place_of_birth: (() => {
-        if (!witnesses || !witnesses[0]) return '';
+        if (!witnesses || !witnesses[0]) return '—';
         const dob = formatDate(witnesses[0].witness_date_of_birth);
         const pob = toUpperCase(witnesses[0].witness_place_of_birth || '');
-        if (!dob && !pob) return '';
+        if (!dob && !pob) return '—';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness1_address: (witnesses && witnesses[0] && witnesses[0].witness_address) ? toUpperCase(witnesses[0].witness_address) : '',
-      witness1_signature: (witnesses && witnesses[0] && witnesses[0].witness_name) ? '' : '',
-      
+      witness1_address: (witnesses && witnesses[0] && witnesses[0].witness_address) ? toUpperCase(witnesses[0].witness_address) : '—',
+      witness1_signature: (witnesses && witnesses[0] && witnesses[0].witness_name) ? sigCell : '—',
+
       // Witness 2
-      witness2_name: (witnesses && witnesses[1] && witnesses[1].witness_name) ? toUpperCase(witnesses[1].witness_name) : '',
-      witness2_father_name: (witnesses && witnesses[1] && witnesses[1].witness_father_name) ? toUpperCase(witnesses[1].witness_father_name) : '',
+      witness2_name: (witnesses && witnesses[1] && witnesses[1].witness_name) ? toUpperCase(witnesses[1].witness_name) : '—',
+      witness2_father_name: (witnesses && witnesses[1] && witnesses[1].witness_father_name) ? toUpperCase(witnesses[1].witness_father_name) : '—',
       witness2_date_place_of_birth: (() => {
-        if (!witnesses || !witnesses[1]) return '';
+        if (!witnesses || !witnesses[1]) return '—';
         const dob = formatDate(witnesses[1].witness_date_of_birth);
         const pob = toUpperCase(witnesses[1].witness_place_of_birth || '');
-        if (!dob && !pob) return '';
+        if (!dob && !pob) return '—';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness2_address: (witnesses && witnesses[1] && witnesses[1].witness_address) ? toUpperCase(witnesses[1].witness_address) : '',
-      witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? '' : '',
-      
+      witness2_address: (witnesses && witnesses[1] && witnesses[1].witness_address) ? toUpperCase(witnesses[1].witness_address) : '—',
+      witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? sigCell : '—',
+
       // Witness 3
-      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name) ? toUpperCase(witnesses[2].witness_name) : '',
-      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name) ? toUpperCase(witnesses[2].witness_father_name) : '',
+      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name) ? toUpperCase(witnesses[2].witness_name) : '—',
+      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name) ? toUpperCase(witnesses[2].witness_father_name) : '—',
       witness3_date_place_of_birth: (() => {
-        if (!witnesses || !witnesses[2]) return '';
+        if (!witnesses || !witnesses[2]) return '—';
         const dob = formatDate(witnesses[2].witness_date_of_birth);
         const pob = toUpperCase(witnesses[2].witness_place_of_birth || '');
-        if (!dob && !pob) return '';
+        if (!dob && !pob) return '—';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address) ? toUpperCase(witnesses[2].witness_address) : '',
-      witness3_signature: (witnesses && witnesses[2] && witnesses[2].witness_name) ? '' : '',
-      
+      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address) ? toUpperCase(witnesses[2].witness_address) : '—',
+      witness3_signature: (witnesses && witnesses[2] && witnesses[2].witness_name) ? sigCell : '—',
+
       // Witness 4
-      witness4_name: (witnesses && witnesses[3] && witnesses[3].witness_name) ? toUpperCase(witnesses[3].witness_name) : '',
-      witness4_father_name: (witnesses && witnesses[3] && witnesses[3].witness_father_name) ? toUpperCase(witnesses[3].witness_father_name) : '',
+      witness4_name: (witnesses && witnesses[3] && witnesses[3].witness_name) ? toUpperCase(witnesses[3].witness_name) : '—',
+      witness4_father_name: (witnesses && witnesses[3] && witnesses[3].witness_father_name) ? toUpperCase(witnesses[3].witness_father_name) : '—',
       witness4_date_place_of_birth: (() => {
-        if (!witnesses || !witnesses[3]) return '';
+        if (!witnesses || !witnesses[3]) return '—';
         const dob = formatDate(witnesses[3].witness_date_of_birth);
         const pob = toUpperCase(witnesses[3].witness_place_of_birth || '');
-        if (!dob && !pob) return '';
+        if (!dob && !pob) return '—';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness4_address: (witnesses && witnesses[3] && witnesses[3].witness_address) ? toUpperCase(witnesses[3].witness_address) : '',
-      witness4_signature: (witnesses && witnesses[3] && witnesses[3].witness_name) ? '' : ''
+      witness4_address: (witnesses && witnesses[3] && witnesses[3].witness_address) ? toUpperCase(witnesses[3].witness_address) : '—',
+      witness4_signature: (witnesses && witnesses[3] && witnesses[3].witness_name) ? sigCell : '—'
     };
 
-    // Generate witness rows 3 and 4 conditionally
-    const witness3Row = (witnesses && witnesses[2] && witnesses[2].witness_name) 
-      ? `<tr>
-    <td class="bold">WITNESS NO</td>
-    <td class="height-lg">${replacements.witness3_name}</td>
-    <td>${replacements.witness3_father_name}</td>
-    <td>${replacements.witness3_date_place_of_birth}</td>
-    <td>${replacements.witness3_address}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td>${replacements.witness3_signature}</td>
-  </tr>`
-      : '';
-
-    const witness4Row = (witnesses && witnesses[3] && witnesses[3].witness_name) 
-      ? `<tr>
-    <td class="bold">WITNESS NO</td>
-    <td class="height-lg">${replacements.witness4_name}</td>
-    <td>${replacements.witness4_father_name}</td>
-    <td>${replacements.witness4_date_place_of_birth}</td>
-    <td>${replacements.witness4_address}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td>${replacements.witness4_signature}</td>
-  </tr>`
-      : '';
-
-    // Replace witness row placeholders first
-    html = html.replace(/{{witness3_row}}/g, witness3Row);
-    html = html.replace(/{{witness4_row}}/g, witness4Row);
+    // Witness rows 3 and 4 are now always shown in the template
 
     // Replace simple placeholders
     Object.keys(replacements).forEach(key => {
