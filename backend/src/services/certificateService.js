@@ -150,19 +150,59 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       mahr_amount: toUpperCase(applicationData.mahr_amount ? `${applicationData.mahr_amount}` : ''),
       mahr_type_text: applicationData.mahr_type === 'deferred' ? 'DEFERRED' : (applicationData.mahr_type === 'prompt' ? 'PROMPT' : ''),
       
-      // Solemnization - combine date and time from separate columns
-      solemnised_date_formatted: applicationData.solemnised_date 
-        ? (() => {
-            const datePart = formatDateFull(applicationData.solemnised_date, false);
-            if (applicationData.solemnised_time) {
-              const [hours, minutes] = applicationData.solemnised_time.substring(0, 5).split(':');
-              const hour12 = parseInt(hours) % 12 || 12;
-              const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-              return `${datePart} at ${hour12}:${minutes} ${ampm}`;
+      // Solemnization - separate date and time
+      solemnised_date_only: (() => {
+        if (applicationData.solemnised_date) {
+          const formatted = formatDateFull(applicationData.solemnised_date, false);
+          if (formatted) return formatted;
+        }
+        if (applicationData.appointment_date) {
+          const formatted = formatDateFull(applicationData.appointment_date, false);
+          if (formatted) return formatted;
+        }
+        return '';
+      })(),
+      solemnised_time_only: (() => {
+        // Try solemnised_time first
+        if (applicationData.solemnised_time) {
+          try {
+            // Handle MySQL TIME format (HH:MM:SS or HH:MM)
+            const timeStr = String(applicationData.solemnised_time).trim();
+            // Match HH:MM:SS or HH:MM format
+            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+            if (timeMatch) {
+              const hours = parseInt(timeMatch[1], 10);
+              const minutes = timeMatch[2];
+              if (!isNaN(hours) && hours >= 0 && hours < 24) {
+                const hour12 = hours % 12 || 12;
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                return `${hour12}:${minutes} ${ampm}`;
+              }
             }
-            return datePart;
-          })()
-        : (applicationData.appointment_date ? formatDateFull(applicationData.appointment_date, true) : ''),
+          } catch (e) {
+            console.warn('Error formatting solemnised_time:', e, applicationData.solemnised_time);
+          }
+        }
+        // Fallback to appointment_time if available
+        if (applicationData.appointment_time) {
+          try {
+            const timeStr = String(applicationData.appointment_time).trim();
+            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+            if (timeMatch) {
+              const hours = parseInt(timeMatch[1], 10);
+              const minutes = timeMatch[2];
+              if (!isNaN(hours) && hours >= 0 && hours < 24) {
+                const hour12 = hours % 12 || 12;
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                return `${hour12}:${minutes} ${ampm}`;
+              }
+            }
+          } catch (e) {
+            console.warn('Error formatting appointment_time:', e, applicationData.appointment_time);
+          }
+        }
+        return '';
+      })(),
       solemnised_place: toUpperCase(applicationData.solemnised_place || applicationData.appointment_location || ''),
       solemnised_by_name: '', // This field doesn't exist in DB, can be added later if needed
       solemnised_address: toUpperCase(applicationData.solemnised_address || ''),
@@ -224,41 +264,16 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       witness4_signature: (witnesses && witnesses[3] && witnesses[3].witness_name) ? '' : ''
     };
 
-    // Generate witness rows 3 and 4 conditionally
-    const witness3Row = (witnesses && witnesses[2] && witnesses[2].witness_name) 
-      ? `<tr>
-    <td class="bold">WITNESS NO</td>
-    <td class="height-lg">${replacements.witness3_name}</td>
-    <td>${replacements.witness3_father_name}</td>
-    <td>${replacements.witness3_date_place_of_birth}</td>
-    <td>${replacements.witness3_address}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td>${replacements.witness3_signature}</td>
-  </tr>`
-      : '';
-
-    const witness4Row = (witnesses && witnesses[3] && witnesses[3].witness_name) 
-      ? `<tr>
-    <td class="bold">WITNESS NO</td>
-    <td class="height-lg">${replacements.witness4_name}</td>
-    <td>${replacements.witness4_father_name}</td>
-    <td>${replacements.witness4_date_place_of_birth}</td>
-    <td>${replacements.witness4_address}</td>
-    <td class="center">/</td>
-    <td class="center">/</td>
-    <td>${replacements.witness4_signature}</td>
-  </tr>`
-      : '';
-
-    // Replace witness row placeholders first
-    html = html.replace(/{{witness3_row}}/g, witness3Row);
-    html = html.replace(/{{witness4_row}}/g, witness4Row);
-
     // Replace simple placeholders
     Object.keys(replacements).forEach(key => {
       const regex = new RegExp(`{{${key}}}`, 'g');
-      html = html.replace(regex, replacements[key] || '');
+      const value = replacements[key] || '';
+      html = html.replace(regex, value);
+      
+      // Debug logging for date/time fields
+      if (key === 'solemnised_date_only' || key === 'solemnised_time_only') {
+        console.log(`Certificate replacement: ${key} = "${value}"`);
+      }
     });
 
     // Launch Puppeteer and generate PDF
@@ -298,7 +313,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       // Using Promise-based delay instead of deprecated waitForTimeout
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Generate PDF in A4 Landscape orientation
+      // Generate PDF in A4 Landscape orientation with equal margins
       await page.pdf({
         path: filePath,
         format: 'A4',
@@ -306,10 +321,10 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
         printBackground: true,
         preferCSSPageSize: true,
         margin: {
-          top: '0mm',
-          right: '0mm',
-          bottom: '0mm',
-          left: '0mm'
+          top: '10mm',
+          right: '10mm',
+          bottom: '10mm',
+          left: '10mm'
         }
       });
     } finally {

@@ -161,7 +161,7 @@ const FormField = ({
           textTransform: "uppercase",
         }}
       >
-        {label} {required && <span style={{ color: "#FF0000" }}>*</span>}
+        {label} {required && <span className="required-asterisk">*</span>}
       </label>
       {type === "textarea" ? (
         <textarea
@@ -1642,14 +1642,12 @@ export default function AdminManualApplication() {
             <FormField
               label="Full Name"
               name="groomRepName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Father's Name"
               name="groomRepFatherName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1687,14 +1685,12 @@ export default function AdminManualApplication() {
             <FormField
               label="Full Name"
               name="brideRepName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Father's Name"
               name="brideRepFatherName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1732,12 +1728,14 @@ export default function AdminManualApplication() {
             <FormField
               label="Witness's Full Name"
               name="witness1MaleName"
+              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Witness's father's full Name"
               name="witness1MaleFatherName"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1775,12 +1773,14 @@ export default function AdminManualApplication() {
             <FormField
               label="Witness's Full Name"
               name="witness1FemaleName"
+              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Witness's father's full Name"
               name="witness1FemaleFatherName"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1816,16 +1816,14 @@ export default function AdminManualApplication() {
         <FormSection title="WITNESS 3">
           <FormRow>
             <FormField
-              label="Witness's Full Name *"
+              label="Witness's Full Name"
               name="witness2MaleName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
-              label="Witness's father's full Name *"
+              label="Witness's father's full Name"
               name="witness2MaleFatherName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1861,16 +1859,14 @@ export default function AdminManualApplication() {
         <FormSection title="WITNESS 4">
           <FormRow>
             <FormField
-              label="Witness's Full Name *"
+              label="Witness's Full Name"
               name="witness2FemaleName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
-              label="Witness's father's full Name *"
+              label="Witness's father's full Name"
               name="witness2FemaleFatherName"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1908,7 +1904,6 @@ export default function AdminManualApplication() {
             <FormField
               label="Mahar agreed amount"
               name="mahrAmount"
-              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1997,7 +1992,7 @@ export default function AdminManualApplication() {
         <FormSection title="NIKAH DATE AND TIME">
           <FormRow>
             <FormField
-              label="Date *"
+              label="Date"
               name="solemnisedDate"
               type="date"
               required={true}
@@ -2014,18 +2009,11 @@ export default function AdminManualApplication() {
           </FormRow>
           <FormRow>
             <FormField
-              label="Place"
-              name="solemnisedPlace"
-              formData={formData}
-              handleChange={handleChange}
-            />
-          </FormRow>
-          <FormRow>
-            <FormField
               label="Address"
               name="solemnisedAddress"
               type="textarea"
               span={2}
+              required={true}
               formData={formData}
               handleChange={handleChange}
             />
@@ -2773,6 +2761,13 @@ export default function AdminManualApplication() {
           background-color: white;
           border: 1px solid #CA6C41;
           border-radius: 5px;
+        }
+        
+        /* Required Asterisk - Red Color */
+        .required-asterisk {
+          color: #FF0000 !important;
+          font-weight: bold;
+          display: inline;
         }
       `}</style>
     </div>

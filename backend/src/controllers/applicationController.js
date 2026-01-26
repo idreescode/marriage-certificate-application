@@ -184,8 +184,9 @@ const submitApplication = async (req, res) => {
       ? normalizeTime(formData.solemnisedTime) 
       : null;
     
-    const solemnisedPlace = formData.solemnisedPlace || null;
-    const solemnisedAddress = formData.solemnisedAddress || null;
+    // Frontend now sends only solemnisedAddress, use it for both place and address
+    const solemnisedAddress = formData.solemnisedAddress || formData.solemnisedPlace || null;
+    const solemnisedPlace = formData.solemnisedPlace || formData.solemnisedAddress || null;
 
     // Contact Information
     const email = formData.email || null;
@@ -306,6 +307,103 @@ const submitApplication = async (req, res) => {
       // 2. Insert Application (linked to user_id)
       // If this fails, the transaction will rollback and the user will NOT be created
       console.log("Attempting to insert application for user_id:", userId);
+      
+      // Prepare values array - ensure all values are primitives
+      const insertValues = [
+        applicationNumber || null,
+        userId || null,
+        contactNumber || null,
+        groomName || null,
+        groomFatherName || null,
+        groomDateOfBirth || null,
+        groomPlaceOfBirth || null,
+        groomIdNumber || null,
+        groomAddress || null,
+        Boolean(groomConfirm),
+        Boolean(groomPersonally),
+        Boolean(groomRepresentative),
+        groomRepName || null,
+        groomRepFatherName || null,
+        groomRepDateOfBirth || null,
+        groomRepPlaceOfBirth || null,
+        groomRepAddress || null,
+        brideName || null,
+        brideFatherName || null,
+        brideDateOfBirth || null,
+        bridePlaceOfBirth || null,
+        brideIdNumber || null,
+        brideAddress || null,
+        Boolean(brideConfirm),
+        Boolean(bridePersonally),
+        Boolean(brideRepresentative),
+        brideRepName || null,
+        brideRepFatherName || null,
+        brideRepDateOfBirth || null,
+        brideRepPlaceOfBirth || null,
+        brideRepAddress || null,
+        mahrAmount || null,
+        mahrType || null,
+        normalizedSolemnisedDate || null,
+        normalizedSolemnisedTime || null,
+        solemnisedPlace || null,
+        solemnisedAddress || null,
+        "pending_admin_review", // payment_status default for user-submitted applications
+        "admin_review", // status value
+        witness1MaleName || null,
+        witness1MaleFatherName || null,
+        witness1MaleDateOfBirth || null,
+        witness1MalePlaceOfBirth || null,
+        witness1MaleAddress || null,
+        witness1FemaleName || null,
+        witness1FemaleFatherName || null,
+        witness1FemaleDateOfBirth || null,
+        witness1FemalePlaceOfBirth || null,
+        witness1FemaleAddress || null,
+        witness2MaleName || null,
+        witness2MaleFatherName || null,
+        witness2MaleDateOfBirth || null,
+        witness2MalePlaceOfBirth || null,
+        witness2MaleAddress || null,
+        witness2FemaleName || null,
+        witness2FemaleFatherName || null,
+        witness2FemaleDateOfBirth || null,
+        witness2FemalePlaceOfBirth || null,
+        witness2FemaleAddress || null,
+      ];
+      
+      // Ensure all values are primitives (not arrays or objects)
+      const sanitizedValues = insertValues.map(val => {
+        if (val === undefined) return null;
+        if (Array.isArray(val)) {
+          console.warn("Warning: Array value found in insertValues:", val);
+          return null;
+        }
+        if (typeof val === 'object' && val !== null) {
+          console.warn("Warning: Object value found in insertValues:", val);
+          return null;
+        }
+        return val;
+      });
+      
+      // Debug: Log the count and values
+      console.log("Insert values count:", sanitizedValues.length);
+      console.log("Expected columns: 59");
+      console.log("First 10 values:", sanitizedValues.slice(0, 10));
+      
+      // Count placeholders in SQL
+      const sqlPlaceholders = `?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?`.match(/\?/g);
+      const placeholderCount = sqlPlaceholders ? sqlPlaceholders.length : 0;
+      console.log("SQL placeholder count:", placeholderCount);
+      
+      if (sanitizedValues.length !== placeholderCount) {
+        throw new Error(`Mismatch: ${sanitizedValues.length} values but ${placeholderCount} placeholders`);
+      }
+      
       const [result] = await connection.execute(
         `INSERT INTO applications (
           application_number, user_id, contact_number,
@@ -334,67 +432,7 @@ const submitApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?
         )`,
-        [
-          applicationNumber,
-          userId,
-          contactNumber || null,
-          groomName || null,
-          groomFatherName || null,
-          groomDateOfBirth || null,
-          groomPlaceOfBirth || null,
-          groomIdNumber || null,
-          groomAddress || null,
-          groomConfirm || false,
-          groomPersonally || false,
-          groomRepresentative || false,
-          groomRepName || null,
-          groomRepFatherName || null,
-          groomRepDateOfBirth || null,
-          groomRepPlaceOfBirth || null,
-          groomRepAddress || null,
-          brideName || null,
-          brideFatherName || null,
-          brideDateOfBirth || null,
-          bridePlaceOfBirth || null,
-          brideIdNumber || null,
-          brideAddress || null,
-          brideConfirm || false,
-          bridePersonally || false,
-          brideRepresentative || false,
-          brideRepName || null,
-          brideRepFatherName || null,
-          brideRepDateOfBirth || null,
-          brideRepPlaceOfBirth || null,
-          brideRepAddress || null,
-          mahrAmount || null,
-          mahrType || null,
-          normalizedSolemnisedDate,
-          normalizedSolemnisedTime,
-          solemnisedPlace || null,
-          solemnisedAddress || null,
-          "pending_admin_review", // payment_status default for user-submitted applications
-          "admin_review", // status value
-          witness1MaleName || null,
-          witness1MaleFatherName || null,
-          witness1MaleDateOfBirth || null,
-          witness1MalePlaceOfBirth || null,
-          witness1MaleAddress || null,
-          witness1FemaleName || null,
-          witness1FemaleFatherName || null,
-          witness1FemaleDateOfBirth || null,
-          witness1FemalePlaceOfBirth || null,
-          witness1FemaleAddress || null,
-          witness2MaleName || null,
-          witness2MaleFatherName || null,
-          witness2MaleDateOfBirth || null,
-          witness2MalePlaceOfBirth || null,
-          witness2MaleAddress || null,
-          witness2FemaleName || null,
-          witness2FemaleFatherName || null,
-          witness2FemaleDateOfBirth || null,
-          witness2FemalePlaceOfBirth || null,
-          witness2FemaleAddress || null,
-        ]
+        sanitizedValues
       );
 
       const applicationId = result.insertId;

@@ -1151,20 +1151,16 @@ const createManualApplication = async (req, res) => {
 
         if (existingUser.length > 0) {
           userId = existingUser[0].id;
-          console.log("Using existing user with ID:", userId);
+          // Using existing user
         } else {
           // Create User (inside transaction - will be rolled back if application fails)
-          console.log("Creating user with email:", portalEmail);
           const [userResult] = await connection.execute(
             'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
             [portalEmail, hashedPassword, groomName || "Applicant"]
           );
           userId = userResult.insertId;
           isNewUser = true;
-          console.log("User created with ID:", userId);
         }
-      } else {
-        console.log("No email provided, skipping user creation");
       }
 
       // Normalize dates
@@ -1177,7 +1173,11 @@ const createManualApplication = async (req, res) => {
       const normalizedWitness2MaleDob = normalizeDate(witness2MaleDateOfBirth);
       const normalizedWitness2FemaleDob = normalizeDate(witness2FemaleDateOfBirth);
       const normalizedSolemnisedDate = normalizeDate(solemnisedDate); // Date only, no time
-      const normalizedSolemnisedTime = normalizeTime(solemnisedTime); // Time only
+      const normalizedSolemnisedTime = normalizeTime(solemnisedTime);
+      
+      // Frontend now sends only solemnisedAddress, use it for both place and address
+      const finalSolemnisedAddress = solemnisedAddress || solemnisedPlace || null;
+      const finalSolemnisedPlace = solemnisedPlace || solemnisedAddress || null; // Time only
       const normalizedPreferredDate = normalizeDate(preferredDate);
       const normalizedAppointmentDate = normalizeDate(appointmentDate);
 
@@ -1197,17 +1197,18 @@ const createManualApplication = async (req, res) => {
         statutoryDeclaration: "statutory_declaration_path",
       };
 
+      // Initialize documentPaths - all documents are optional
       const documentPaths = {};
-      for (const [fieldName, dbColumn] of Object.entries(fileFields)) {
-        if (files[fieldName] && files[fieldName][0]) {
-          documentPaths[
-            dbColumn
-          ] = `/uploads/documents/${files[fieldName][0].filename}`;
+      if (files && typeof files === 'object') {
+        for (const [fieldName, dbColumn] of Object.entries(fileFields)) {
+          if (files[fieldName] && Array.isArray(files[fieldName]) && files[fieldName][0]) {
+            documentPaths[dbColumn] = `/uploads/documents/${files[fieldName][0].filename}`;
+          }
         }
       }
+      console.log("Document paths provided:", Object.keys(documentPaths).length, "documents");
 
       // Insert Application with retry logic for collision
-      console.log("Attempting to insert application for user_id:", userId);
       let insertResult;
       let insertAttempts = 0;
       let finalApplicationNumber = applicationNumber;
@@ -1215,6 +1216,113 @@ const createManualApplication = async (req, res) => {
 
       while (!insertSuccess && insertAttempts < 3) {
         try {
+          // Prepare values array - ensure all values are primitives
+          const insertValues = [
+            finalApplicationNumber || null,
+            userId || null,
+            contactNumber || null,
+            groomName || null,
+            groomFatherName || null,
+            normalizedGroomDob || null,
+            groomPlaceOfBirth || null,
+            groomIdNumber || null,
+            groomAddress || null,
+            // Convert FormData string booleans properly
+            groomConfirm === 'true' || groomConfirm === true || groomConfirm === '1' || groomConfirm === 1,
+            groomPersonally === 'true' || groomPersonally === true || groomPersonally === '1' || groomPersonally === 1,
+            groomRepresentative === 'true' || groomRepresentative === true || groomRepresentative === '1' || groomRepresentative === 1,
+            groomRepName || null,
+            groomRepFatherName || null,
+            normalizedGroomRepDob || null,
+            groomRepPlaceOfBirth || null,
+            groomRepAddress || null,
+            brideName || null,
+            brideFatherName || null,
+            normalizedBrideDob || null,
+            bridePlaceOfBirth || null,
+            brideIdNumber || null,
+            brideAddress || null,
+            // Convert FormData string booleans properly
+            brideConfirm === 'true' || brideConfirm === true || brideConfirm === '1' || brideConfirm === 1,
+            bridePersonally === 'true' || bridePersonally === true || bridePersonally === '1' || bridePersonally === 1,
+            brideRepresentative === 'true' || brideRepresentative === true || brideRepresentative === '1' || brideRepresentative === 1,
+            brideRepName || null,
+            brideRepFatherName || null,
+            normalizedBrideRepDob || null,
+            brideRepPlaceOfBirth || null,
+            brideRepAddress || null,
+            // Convert mahrAmount to number if provided (FormData sends as string)
+            mahrAmount && mahrAmount !== '' && mahrAmount !== 'null' 
+              ? (typeof mahrAmount === 'string' ? (isNaN(parseFloat(mahrAmount)) ? null : parseFloat(mahrAmount)) : (isNaN(Number(mahrAmount)) ? null : Number(mahrAmount)))
+              : null,
+            mahrType || null,
+            normalizedSolemnisedDate || null,
+            normalizedSolemnisedTime || null,
+            finalSolemnisedPlace || null,
+            finalSolemnisedAddress || null,
+            normalizedPreferredDate || null,
+            specialRequests || null,
+            // Convert depositAmount to number (FormData sends as string)
+            depositAmount && depositAmount !== '' && depositAmount !== 'null'
+              ? (typeof depositAmount === 'string' ? (isNaN(parseFloat(depositAmount)) ? 200 : parseFloat(depositAmount)) : (isNaN(Number(depositAmount)) ? 200 : Number(depositAmount)))
+              : 200,
+            adminId || null,
+            paymentStatus || "amount_set",
+            normalizedAppointmentDate || null,
+            appointmentTime || null,
+            appointmentLocation || null,
+            status || "completed",
+            documentPaths?.groom_id_path || null,
+            documentPaths?.bride_id_path || null,
+            documentPaths?.witness1_male_id_path || null,
+            documentPaths?.witness1_female_id_path || null,
+            documentPaths?.witness2_male_id_path || null,
+            documentPaths?.witness2_female_id_path || null,
+            documentPaths?.mahr_declaration_path || null,
+            documentPaths?.civil_divorce_doc_path || null,
+            documentPaths?.islamic_divorce_doc_path || null,
+            documentPaths?.groom_conversion_cert_path || null,
+            documentPaths?.bride_conversion_cert_path || null,
+            documentPaths?.statutory_declaration_path || null,
+            witness1MaleName || null,
+            witness1MaleFatherName || null,
+            normalizedWitness1MaleDob || null,
+            witness1MalePlaceOfBirth || null,
+            witness1MaleAddress || null,
+            witness1FemaleName || null,
+            witness1FemaleFatherName || null,
+            normalizedWitness1FemaleDob || null,
+            witness1FemalePlaceOfBirth || null,
+            witness1FemaleAddress || null,
+            witness2MaleName || null,
+            witness2MaleFatherName || null,
+            normalizedWitness2MaleDob || null,
+            witness2MalePlaceOfBirth || null,
+            witness2MaleAddress || null,
+            witness2FemaleName || null,
+            witness2FemaleFatherName || null,
+            normalizedWitness2FemaleDob || null,
+            witness2FemalePlaceOfBirth || null,
+            witness2FemaleAddress || null,
+          ];
+          
+          // Ensure all values are primitives (not arrays or objects)
+          const sanitizedValues = insertValues.map(val => {
+            if (val === undefined) return null;
+            if (Array.isArray(val)) {
+              return null;
+            }
+            if (typeof val === 'object' && val !== null) {
+              return null;
+            }
+            return val;
+          });
+          
+          // Validate count matches
+          if (sanitizedValues.length !== 78) {
+            throw new Error(`Value count mismatch: Expected 78 values, got ${sanitizedValues.length}`);
+          }
+          
           [insertResult] = await connection.execute(
             `INSERT INTO applications (
           application_number, user_id, contact_number,
@@ -1241,87 +1349,8 @@ const createManualApplication = async (req, res) => {
           witness1_female_name, witness1_female_father_name, witness1_female_date_of_birth, witness1_female_place_of_birth, witness1_female_address,
           witness2_male_name, witness2_male_father_name, witness2_male_date_of_birth, witness2_male_place_of_birth, witness2_male_address,
           witness2_female_name, witness2_female_father_name, witness2_female_date_of_birth, witness2_female_place_of_birth, witness2_female_address
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              finalApplicationNumber,
-              userId,
-              contactNumber || null,
-              groomName || null,
-              groomFatherName || null,
-              normalizedGroomDob,
-              groomPlaceOfBirth || null,
-              groomIdNumber || null,
-              groomAddress || null,
-              groomConfirm || false,
-              groomPersonally || false,
-              groomRepresentative || false,
-              groomRepName || null,
-              groomRepFatherName || null,
-              normalizedGroomRepDob,
-              groomRepPlaceOfBirth || null,
-              groomRepAddress || null,
-              brideName || null,
-              brideFatherName || null,
-              normalizedBrideDob,
-              bridePlaceOfBirth || null,
-              brideIdNumber || null,
-              brideAddress || null,
-              brideConfirm || false,
-              bridePersonally || false,
-              brideRepresentative || false,
-              brideRepName || null,
-              brideRepFatherName || null,
-              normalizedBrideRepDob,
-              brideRepPlaceOfBirth || null,
-              brideRepAddress || null,
-              mahrAmount || null,
-              mahrType || null,
-              normalizedSolemnisedDate,
-              normalizedSolemnisedTime,
-              solemnisedPlace || null,
-              solemnisedAddress || null,
-              normalizedPreferredDate,
-              specialRequests || null,
-              depositAmount || 200,
-              adminId,
-              paymentStatus || "amount_set",
-              normalizedAppointmentDate,
-              appointmentTime || null,
-              appointmentLocation || null,
-              status || "completed",
-              documentPaths.groom_id_path || null,
-              documentPaths.bride_id_path || null,
-              documentPaths.witness1_male_id_path || null,
-              documentPaths.witness1_female_id_path || null,
-              documentPaths.witness2_male_id_path || null,
-              documentPaths.witness2_female_id_path || null,
-              documentPaths.mahr_declaration_path || null,
-              documentPaths.civil_divorce_doc_path || null,
-              documentPaths.islamic_divorce_doc_path || null,
-              documentPaths.groom_conversion_cert_path || null,
-              documentPaths.bride_conversion_cert_path || null,
-              documentPaths.statutory_declaration_path || null,
-              witness1MaleName || null,
-              witness1MaleFatherName || null,
-              normalizedWitness1MaleDob,
-              witness1MalePlaceOfBirth || null,
-              witness1MaleAddress || null,
-              witness1FemaleName || null,
-              witness1FemaleFatherName || null,
-              normalizedWitness1FemaleDob,
-              witness1FemalePlaceOfBirth || null,
-              witness1FemaleAddress || null,
-              witness2MaleName || null,
-              witness2MaleFatherName || null,
-              normalizedWitness2MaleDob,
-              witness2MalePlaceOfBirth || null,
-              witness2MaleAddress || null,
-              witness2FemaleName || null,
-              witness2FemaleFatherName || null,
-              normalizedWitness2FemaleDob,
-              witness2FemalePlaceOfBirth || null,
-              witness2FemaleAddress || null,
-            ]
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            sanitizedValues
           );
           insertSuccess = true;
           break; // Success, exit loop
@@ -1357,8 +1386,8 @@ const createManualApplication = async (req, res) => {
                   "Unable to generate unique application number after multiple attempts. Please try again.",
               });
             }
-          } else {
-            // Other database errors, throw to outer catch
+            } else {
+            // Other database errors - throw to outer catch
             throw insertError;
           }
         }
@@ -1374,37 +1403,37 @@ const createManualApplication = async (req, res) => {
       }
 
       const applicationId = insertResult.insertId;
-      console.log("Application created with ID:", applicationId);
 
       // Insert witnesses with extended fields
+      // Ensure all values are null instead of undefined
       const witnessesData = [
         {
-          name: witness1MaleName,
-          fatherName: witness1MaleFatherName,
-          dob: normalizedWitness1MaleDob,
-          pob: witness1MalePlaceOfBirth,
-          address: witness1MaleAddress,
+          name: witness1MaleName || null,
+          fatherName: witness1MaleFatherName || null,
+          dob: normalizedWitness1MaleDob || null,
+          pob: witness1MalePlaceOfBirth || null,
+          address: witness1MaleAddress || null,
         },
         {
-          name: witness1FemaleName,
-          fatherName: witness1FemaleFatherName,
-          dob: normalizedWitness1FemaleDob,
-          pob: witness1FemalePlaceOfBirth,
-          address: witness1FemaleAddress,
+          name: witness1FemaleName || null,
+          fatherName: witness1FemaleFatherName || null,
+          dob: normalizedWitness1FemaleDob || null,
+          pob: witness1FemalePlaceOfBirth || null,
+          address: witness1FemaleAddress || null,
         },
         {
-          name: witness2MaleName,
-          fatherName: witness2MaleFatherName,
-          dob: normalizedWitness2MaleDob,
-          pob: witness2MalePlaceOfBirth,
-          address: witness2MaleAddress,
+          name: witness2MaleName || null,
+          fatherName: witness2MaleFatherName || null,
+          dob: normalizedWitness2MaleDob || null,
+          pob: witness2MalePlaceOfBirth || null,
+          address: witness2MaleAddress || null,
         },
         {
-          name: witness2FemaleName,
-          fatherName: witness2FemaleFatherName,
-          dob: normalizedWitness2FemaleDob,
-          pob: witness2FemalePlaceOfBirth,
-          address: witness2FemaleAddress,
+          name: witness2FemaleName || null,
+          fatherName: witness2FemaleFatherName || null,
+          dob: normalizedWitness2FemaleDob || null,
+          pob: witness2FemalePlaceOfBirth || null,
+          address: witness2FemaleAddress || null,
         },
       ];
 
@@ -1421,11 +1450,11 @@ const createManualApplication = async (req, res) => {
               ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
               [
                 applicationId,
-                w.name,
-                w.fatherName,
-                w.dob,
-                w.pob,
-                w.address,
+                w.name || null,
+                w.fatherName || null,
+                w.dob || null,
+                w.pob || null,
+                w.address || null,
                 i + 1,
               ]
             );
@@ -1433,7 +1462,6 @@ const createManualApplication = async (req, res) => {
             // If witness insertion fails, rollback and return error
             await connection.rollback();
             connection.release();
-            console.error("Error inserting witness:", witnessError);
             return res.status(500).json({
               success: false,
               message: `Failed to insert witness ${i + 1}: ${
@@ -1447,7 +1475,6 @@ const createManualApplication = async (req, res) => {
       // COMMIT TRANSACTION - Only commit if everything succeeded
       try {
         await connection.commit();
-        console.log("Transaction Committed");
 
         // Send success response AFTER successful commit
         const responseData = {
@@ -1544,38 +1571,14 @@ const createManualApplication = async (req, res) => {
         */
 
         // Send confirmation email if email is provided
-        console.log("📧 ========== EMAIL SENDING PROCESS START ==========");
-        console.log(
-          "📧 Email sending check - portalEmail:",
-          portalEmail,
-          "isNewUser:",
-          isNewUser,
-          "applicationId:",
-          applicationId
-        );
-
         if (portalEmail && portalEmail.trim()) {
           try {
-            console.log("📧 Email is provided, fetching application data...");
             // Fetch application data for email
             const [appData] = await pool.execute(
               `SELECT id, application_number, groom_full_name, bride_full_name 
                FROM applications WHERE id = ?`,
               [applicationId]
             );
-
-            console.log(
-              "📧 Application data fetched:",
-              appData.length > 0 ? "Found" : "Not found"
-            );
-            if (appData.length > 0) {
-              console.log("📧 Application data:", {
-                id: appData[0].id,
-                application_number: appData[0].application_number,
-                groom_full_name: appData[0].groom_full_name,
-                bride_full_name: appData[0].bride_full_name,
-              });
-            }
 
             if (appData.length > 0) {
               const emailData = {
@@ -1588,60 +1591,19 @@ const createManualApplication = async (req, res) => {
                 isManualApplication: true, // Flag to indicate this is a manual application
               };
 
-              console.log("📧 Calling sendApplicationConfirmation with data:", {
-                id: emailData.id,
-                application_number: emailData.application_number,
-                portal_email: emailData.portal_email,
-                has_portalPassword: !!emailData.portalPassword,
-              });
-
-              const emailResult = await sendApplicationConfirmation(emailData);
-              console.log(
-                "✅ Application confirmation email sent successfully:",
-                emailResult
-              );
-              console.log("✅ Email sent to:", portalEmail);
-            } else {
-              console.error(
-                "❌ Application data not found for email sending, applicationId:",
-                applicationId
-              );
+              await sendApplicationConfirmation(emailData);
             }
           } catch (emailError) {
             // Don't fail the request if email fails, just log it
-            console.error("❌ ========== EMAIL SENDING FAILED ==========");
-            console.error("❌ Error sending confirmation email:", emailError);
-            console.error("❌ Error name:", emailError.name);
-            console.error("❌ Error message:", emailError.message);
-            console.error("❌ Error code:", emailError.code);
-            console.error("❌ Error stack:", emailError.stack);
-            console.error("❌ Email error details:", {
-              message: emailError.message,
-              code: emailError.code,
-              command: emailError.command,
-              response: emailError.response,
-              portalEmail: portalEmail,
-              applicationId: applicationId,
-            });
-            console.error("❌ ==========================================");
+            console.error("Error sending confirmation email:", emailError);
           }
-        } else {
-          console.log(
-            "⚠️ No email provided or email is empty, skipping email notification"
-          );
-          console.log("⚠️ portalEmail value:", portalEmail);
         }
-        console.log("📧 ========== EMAIL SENDING PROCESS END ==========");
 
         return res.status(201).json(responseData);
       } catch (commitError) {
         // If commit fails, rollback
         try {
           await connection.rollback();
-          console.error(
-            "Transaction Rolled Back due to commit error:",
-            commitError
-          );
         } catch (rollbackError) {
           console.error("Error during rollback:", rollbackError);
         }
@@ -1655,10 +1617,6 @@ const createManualApplication = async (req, res) => {
         // Check if connection is still active before rollback
         if (connection && !connection._fatalError) {
           await connection.rollback();
-          console.error("Transaction Rolled Back due to:", transactionError);
-          console.error(
-            "User creation has been rolled back - no user was created"
-          );
         }
       } catch (rollbackError) {
         console.error("Error during rollback:", rollbackError);
@@ -1675,7 +1633,6 @@ const createManualApplication = async (req, res) => {
     }
   } catch (error) {
     console.error("Error creating manual application:", error);
-    console.error("Stack:", error.stack);
 
     // Handle MySQL Duplicate Entry Error
     if (error.code === "ER_DUP_ENTRY") {
@@ -1691,10 +1648,19 @@ const createManualApplication = async (req, res) => {
       });
     }
 
+    // Always include error details in response for debugging
     res.status(500).json({
       success: false,
       message: "Failed to create application",
-      error: error.message,
+      error: error.message || error.sqlMessage || "Unknown error occurred",
+      errorCode: error.code,
+      errorDetails: {
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        sqlMessage: error.sqlMessage,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      }
     });
   }
 };
