@@ -33,6 +33,8 @@ const migrations = [
   require('./030_add_witness_columns_to_applications'),
   require('./031_remove_unused_columns'),
   require('./032_split_solemnised_datetime'),
+  require('./033_add_marital_status_fields'),
+  require('./034_remove_mahr_type_field'),
 ];
 
 // Run migrations
