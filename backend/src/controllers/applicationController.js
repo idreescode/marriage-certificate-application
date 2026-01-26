@@ -224,6 +224,12 @@ const submitApplication = async (req, res) => {
       ? normalizeTime(formData.solemnisedTime || formData['mf-time']) 
       : null;
     
+    // Debug logging for solemnised_time
+    console.log('🔍 Solemnised Time Debug:');
+    console.log('  - Raw formData.solemnisedTime:', formData.solemnisedTime);
+    console.log('  - Raw formData["mf-time"]:', formData['mf-time']);
+    console.log('  - Normalized solemnised_time:', normalizedSolemnisedTime);
+    
     // Frontend now sends only solemnisedAddress, use it for both place and address
     const solemnisedAddress = formData.solemnisedAddress || formData.solemnisedPlace || null;
     const solemnisedPlace = formData.solemnisedPlace || formData.solemnisedAddress || null;

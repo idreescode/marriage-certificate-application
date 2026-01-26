@@ -272,6 +272,7 @@ export default function AdminManualApplication() {
     groomPlaceOfBirth: "",
     groomAddress: "",
     groomIdNumber: "",
+    groomMaritalStatus: "",
     groomConfirm: false,
     groomPersonally: false,
     groomRepresentative: false,
@@ -288,6 +289,7 @@ export default function AdminManualApplication() {
     bridePlaceOfBirth: "",
     brideAddress: "",
     brideIdNumber: "",
+    brideMaritalStatus: "",
     brideConfirm: false,
     bridePersonally: false,
     brideRepresentative: false,
@@ -542,6 +544,7 @@ export default function AdminManualApplication() {
               groomPlaceOfBirth: app.groom_place_of_birth || "",
               groomAddress: app.groom_address || "",
               groomIdNumber: app.groom_id_number || "",
+              groomMaritalStatus: app.groom_marital_status || "",
               groomConfirm: Boolean(app.groom_confirm),
               groomPersonally: Boolean(app.groom_personally),
               groomRepresentative: Boolean(app.groom_representative),
@@ -556,6 +559,7 @@ export default function AdminManualApplication() {
               bridePlaceOfBirth: app.bride_place_of_birth || "",
               brideAddress: app.bride_address || "",
               brideIdNumber: app.bride_id_number || "",
+              brideMaritalStatus: app.bride_marital_status || "",
               brideConfirm: Boolean(app.bride_confirm),
               bridePersonally: Boolean(app.bride_personally),
               brideRepresentative: Boolean(app.bride_representative),
@@ -1323,6 +1327,59 @@ export default function AdminManualApplication() {
               handleChange={handleChange}
             />
           </FormRow>
+          <div style={{ marginTop: "1.5rem", marginBottom: "1rem" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "10px",
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: "clamp(16px, 3vw, 25px)",
+                fontWeight: 400,
+                color: "#2E2E2E",
+                textTransform: "uppercase",
+              }}
+            >
+              Marital Status <span className="required-asterisk">*</span>
+            </label>
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+              {["single", "divorced", "widowed"].map((status) => (
+                <label
+                  key={status}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="groomMaritalStatus"
+                    value={status}
+                    checked={formData.groomMaritalStatus === status}
+                    onChange={handleChange}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: "2.7px solid #CA6C41",
+                      cursor: "pointer",
+                      accentColor: "#CA6C41",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "Montserrat, sans-serif",
+                      fontSize: "clamp(16px, 3vw, 25px)",
+                      color: "#2E2E2E",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
           <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
             <label
               style={{
@@ -1489,6 +1546,59 @@ export default function AdminManualApplication() {
               handleChange={handleChange}
             />
           </FormRow>
+          <div style={{ marginTop: "1.5rem", marginBottom: "1rem" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "10px",
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: "clamp(16px, 3vw, 25px)",
+                fontWeight: 400,
+                color: "#2E2E2E",
+                textTransform: "uppercase",
+              }}
+            >
+              Marital Status <span className="required-asterisk">*</span>
+            </label>
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+              {["single", "divorced", "widowed"].map((status) => (
+                <label
+                  key={status}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="brideMaritalStatus"
+                    value={status}
+                    checked={formData.brideMaritalStatus === status}
+                    onChange={handleChange}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: "2.7px solid #CA6C41",
+                      cursor: "pointer",
+                      accentColor: "#CA6C41",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "Montserrat, sans-serif",
+                      fontSize: "clamp(16px, 3vw, 25px)",
+                      color: "#2E2E2E",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
           <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
             <label
               style={{
