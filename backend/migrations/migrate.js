@@ -35,6 +35,7 @@ const migrations = [
   require('./032_split_solemnised_datetime'),
   require('./033_add_marital_status_fields'),
   require('./034_remove_mahr_type_field'),
+  require('./035_change_solemnised_time_to_varchar'),
 ];
 
 // Run migrations
