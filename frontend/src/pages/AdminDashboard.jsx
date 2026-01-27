@@ -55,10 +55,10 @@ export default function AdminDashboard() {
     try {
       setError(null);
 
-      // Fetch settings to get total_fee
+      // Fetch settings to get default_deposit_amount
       const settingsResponse = await getSettings();
-      const totalFeeSetting = settingsResponse.data.data.total_fee?.value;
-      const totalFee = totalFeeSetting ? parseFloat(totalFeeSetting) : 0;
+      const defaultDepositSetting = settingsResponse.data.data.default_deposit_amount?.value;
+      const defaultDepositAmount = defaultDepositSetting ? parseFloat(defaultDepositSetting) : 200; // Default to 200 if not set
 
       // Request all applications without pagination for dashboard stats
       const response = await getAllApplications({ limit: 10000, page: 1 });
@@ -83,11 +83,10 @@ export default function AdminDashboard() {
       ).length;
       const completed = apps.filter((a) => a.status === "completed").length;
 
-      // Calculate deposit fee (all time) - Sum deposit_amount from all applications (status independent)
-      // Deposit Fee = Sum of all deposit_amount from all applications
-      const revenue = apps
-        .filter((app) => app.deposit_amount)
-        .reduce((sum, app) => sum + (parseFloat(app.deposit_amount) || 0), 0);
+      // Calculate deposit fee (all time) - Total applications × default_deposit_amount
+      // Revenue = Total Applications Count × default_deposit_amount (deposit_amount set ho ya na ho)
+      const totalApplicationsCount = apps.length;
+      const revenue = totalApplicationsCount * defaultDepositAmount;
 
       // Calculate deposit fee for current month and last month
       const today = new Date();
@@ -99,22 +98,19 @@ export default function AdminDashboard() {
       let currentMonthRevenue = 0;
       let lastMonthRevenue = 0;
 
+      // Calculate monthly revenue: Applications count in that month × default_deposit_amount
       apps.forEach((app) => {
-        // Sum deposit_amount from all applications (status independent)
-        if (app.deposit_amount) {
-          const amount = parseFloat(app.deposit_amount) || 0;
-          const appDate = new Date(app.created_at);
-          const appMonth = appDate.getMonth();
-          const appYear = appDate.getFullYear();
+        const appDate = new Date(app.created_at);
+        const appMonth = appDate.getMonth();
+        const appYear = appDate.getFullYear();
 
-          // Check if application was created in current month
-          if (appMonth === currentMonth && appYear === currentYear) {
-            currentMonthRevenue += amount;
-          }
-          // Check if application was created in last month
-          else if (appMonth === lastMonth && appYear === lastMonthYear) {
-            lastMonthRevenue += amount;
-          }
+        // Check if application was created in current month
+        if (appMonth === currentMonth && appYear === currentYear) {
+          currentMonthRevenue += defaultDepositAmount;
+        }
+        // Check if application was created in last month
+        else if (appMonth === lastMonth && appYear === lastMonthYear) {
+          lastMonthRevenue += defaultDepositAmount;
         }
       });
 
