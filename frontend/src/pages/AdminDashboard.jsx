@@ -54,12 +54,12 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setError(null);
-      
+
       // Fetch settings to get total_fee
       const settingsResponse = await getSettings();
       const totalFeeSetting = settingsResponse.data.data.total_fee?.value;
       const totalFee = totalFeeSetting ? parseFloat(totalFeeSetting) : 0;
-      
+
       // Request all applications without pagination for dashboard stats
       const response = await getAllApplications({ limit: 10000, page: 1 });
 
@@ -84,10 +84,10 @@ export default function AdminDashboard() {
       const completed = apps.filter((a) => a.status === "completed").length;
 
       // Calculate deposit fee (all time) - Sum deposit_amount from completed applications
-      // Deposit Fee = Sum of all deposit_amount where status = "completed"
+      // Deposit Fee = Sum of all deposit_amount where status = "completed" (case-insensitive)
       const revenue = apps
-        .filter((app) => app.status === "completed" && app.deposit_amount)
-        .reduce((sum, app) => sum + Number(app.deposit_amount), 0);
+        .filter((app) => app.status?.toLowerCase() === "completed" && app.deposit_amount)
+        .reduce((sum, app) => sum + (parseFloat(app.deposit_amount) || 0), 0);
 
       // Calculate deposit fee for current month and last month
       const today = new Date();
@@ -100,19 +100,20 @@ export default function AdminDashboard() {
       let lastMonthRevenue = 0;
 
       apps.forEach((app) => {
-        // Only sum deposit_amount from completed applications
-        if (app.status === "completed" && app.deposit_amount) {
+        // Only sum deposit_amount from completed applications (case-insensitive)
+        if (app.status?.toLowerCase() === "completed" && app.deposit_amount) {
+          const amount = parseFloat(app.deposit_amount) || 0;
           const appDate = new Date(app.created_at);
           const appMonth = appDate.getMonth();
           const appYear = appDate.getFullYear();
 
           // Check if application was completed in current month
           if (appMonth === currentMonth && appYear === currentYear) {
-            currentMonthRevenue += Number(app.deposit_amount);
+            currentMonthRevenue += amount;
           }
           // Check if application was completed in last month
           else if (appMonth === lastMonth && appYear === lastMonthYear) {
-            lastMonthRevenue += Number(app.deposit_amount);
+            lastMonthRevenue += amount;
           }
         }
       });
@@ -564,7 +565,7 @@ export default function AdminDashboard() {
           </div>
           <div style={{ padding: "1rem" }}>
             {applications.filter((a) => a.status !== "completed").length ===
-            0 ? (
+              0 ? (
               <p
                 style={{
                   color: "var(--slate-500)",
@@ -674,33 +675,33 @@ export default function AdminDashboard() {
                               app.status === "admin_review"
                                 ? "#dbeafe"
                                 : app.status === "payment_pending"
-                                ? "#fef3c7"
-                                : app.status === "payment_verified"
-                                ? "#d1fae5"
-                                : app.status === "appointment_scheduled"
-                                ? "#e0e7ff"
-                                : "#f1f5f9",
+                                  ? "#fef3c7"
+                                  : app.status === "payment_verified"
+                                    ? "#d1fae5"
+                                    : app.status === "appointment_scheduled"
+                                      ? "#e0e7ff"
+                                      : "#f1f5f9",
                             color:
                               app.status === "admin_review"
                                 ? "#1e40af"
                                 : app.status === "payment_pending"
-                                ? "#92400e"
-                                : app.status === "payment_verified"
-                                ? "#065f46"
-                                : app.status === "appointment_scheduled"
-                                ? "#3730a3"
-                                : "#475569",
+                                  ? "#92400e"
+                                  : app.status === "payment_verified"
+                                    ? "#065f46"
+                                    : app.status === "appointment_scheduled"
+                                      ? "#3730a3"
+                                      : "#475569",
                           }}
                         >
                           {app.status === "admin_review"
                             ? "Review"
                             : app.status === "payment_pending"
-                            ? "Payment Due"
-                            : app.status === "payment_verified"
-                            ? "Verified"
-                            : app.status === "appointment_scheduled"
-                            ? "Scheduled"
-                            : app.status}
+                              ? "Payment Due"
+                              : app.status === "payment_verified"
+                                ? "Verified"
+                                : app.status === "appointment_scheduled"
+                                  ? "Scheduled"
+                                  : app.status}
                         </span>
                         <ChevronRight size={16} color="#94a3b8" />
                       </div>
@@ -709,34 +710,34 @@ export default function AdminDashboard() {
 
                 {applications.filter((a) => a.status !== "completed").length >
                   2 && (
-                  <div style={{ padding: "0.5rem 0 0 0" }}>
-                    <Link
-                      to="/admin/applications"
-                      className="btn btn-primary"
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        background: "var(--brand-600)",
-                        color: "white",
-                        border: "none",
-                        padding: "0.75rem",
-                        borderRadius: "var(--radius-md)",
-                        textDecoration: "none",
-                        fontWeight: 500,
-                      }}
-                    >
-                      View All{" "}
-                      {
-                        applications.filter((a) => a.status !== "completed")
-                          .length
-                      }{" "}
-                      Pending Applications
-                    </Link>
-                  </div>
-                )}
+                    <div style={{ padding: "0.5rem 0 0 0" }}>
+                      <Link
+                        to="/admin/applications"
+                        className="btn btn-primary"
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          background: "var(--brand-600)",
+                          color: "white",
+                          border: "none",
+                          padding: "0.75rem",
+                          borderRadius: "var(--radius-md)",
+                          textDecoration: "none",
+                          fontWeight: 500,
+                        }}
+                      >
+                        View All{" "}
+                        {
+                          applications.filter((a) => a.status !== "completed")
+                            .length
+                        }{" "}
+                        Pending Applications
+                      </Link>
+                    </div>
+                  )}
               </div>
             )}
           </div>
