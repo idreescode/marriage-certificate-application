@@ -488,6 +488,39 @@ const submitApplication = async (req, res) => {
       const applicationId = result.insertId;
       console.log("Application created with ID:", applicationId);
 
+      // Automatically calculate and set deposit amount (revenue) from default_deposit_amount setting
+      try {
+        const [settingRows] = await connection.execute(
+          "SELECT setting_value FROM settings WHERE setting_key = 'default_deposit_amount'",
+          []
+        );
+        
+        if (settingRows.length > 0 && settingRows[0].setting_value) {
+          const depositAmountStr = settingRows[0].setting_value;
+          const depositAmount = parseFloat(depositAmountStr);
+          
+          if (!isNaN(depositAmount) && depositAmount > 0) {
+            // Update deposit_amount automatically based on default_deposit_amount
+            await connection.execute(
+              `UPDATE applications 
+               SET deposit_amount = ?,
+                   deposit_amount_set_at = NOW(),
+                   payment_status = 'amount_set'
+               WHERE id = ?`,
+              [depositAmount, applicationId]
+            );
+            console.log(`✅ Deposit amount calculated automatically: £${depositAmount} (from default_deposit_amount setting)`);
+          } else {
+            console.log("⚠️ default_deposit_amount setting exists but is not a valid positive number");
+          }
+        } else {
+          console.log("ℹ️ default_deposit_amount setting not found, deposit_amount will be set manually by admin");
+        }
+      } catch (revenueError) {
+        // Don't fail the transaction if revenue calculation fails
+        console.error("Error calculating deposit amount automatically:", revenueError);
+      }
+
       // Insert witnesses with extended fields
       const witnessesData = [
         {

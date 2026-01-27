@@ -83,10 +83,10 @@ export default function AdminDashboard() {
       ).length;
       const completed = apps.filter((a) => a.status === "completed").length;
 
-      // Calculate deposit fee (all time) - Sum deposit_amount from completed applications
-      // Deposit Fee = Sum of all deposit_amount where status = "completed" (case-insensitive)
+      // Calculate deposit fee (all time) - Sum deposit_amount from all applications (status independent)
+      // Deposit Fee = Sum of all deposit_amount from all applications
       const revenue = apps
-        .filter((app) => app.status?.toLowerCase() === "completed" && app.deposit_amount)
+        .filter((app) => app.deposit_amount)
         .reduce((sum, app) => sum + (parseFloat(app.deposit_amount) || 0), 0);
 
       // Calculate deposit fee for current month and last month
@@ -100,18 +100,18 @@ export default function AdminDashboard() {
       let lastMonthRevenue = 0;
 
       apps.forEach((app) => {
-        // Only sum deposit_amount from completed applications (case-insensitive)
-        if (app.status?.toLowerCase() === "completed" && app.deposit_amount) {
+        // Sum deposit_amount from all applications (status independent)
+        if (app.deposit_amount) {
           const amount = parseFloat(app.deposit_amount) || 0;
           const appDate = new Date(app.created_at);
           const appMonth = appDate.getMonth();
           const appYear = appDate.getFullYear();
 
-          // Check if application was completed in current month
+          // Check if application was created in current month
           if (appMonth === currentMonth && appYear === currentYear) {
             currentMonthRevenue += amount;
           }
-          // Check if application was completed in last month
+          // Check if application was created in last month
           else if (appMonth === lastMonth && appYear === lastMonthYear) {
             lastMonthRevenue += amount;
           }
