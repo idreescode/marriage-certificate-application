@@ -46,25 +46,27 @@ body{
   margin: 0;
   padding: 0;
   font-family: "Times New Roman", serif;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: bold;
   overflow: hidden;
   text-transform: uppercase;
 }
 
 * {
   text-transform: uppercase;
+  font-weight: bold;
 }
 
 /* ===== CONTAINER ===== */
 .certificate-container{
   width: 100%;
-  max-width: 1083px; /* A4 landscape (297mm) - 10mm margins = 287mm ≈ 1083px at 96 DPI */
+  max-width: 1083px;
   margin: 0 auto;
   padding: 0;
-  height: 755px; /* A4 landscape (210mm) - 10mm margins = 200mm ≈ 755px at 96 DPI */
+  height: 755px;
   display: grid;
   grid-template-rows: auto 1fr auto auto;
-  gap: 3px;
+  gap: 2px;
   overflow: hidden;
 }
 
@@ -77,16 +79,16 @@ table{
 }
 
 td, th{
-  border: 1px solid #000 !important;
-  padding: 5px 6px;
+  border: 2px solid #000 !important;
+  padding: 6px 8px;
   vertical-align: middle;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: bold;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.3;
 }
-
 
 .no-border{ 
   border: none !important; 
@@ -101,20 +103,22 @@ td, th{
 }
 
 .small{ 
-  font-size: 10px; 
-  line-height: 1.3; 
+  font-size: 11px; 
+  font-weight: bold;
+  line-height: 1.4; 
 }
 
 .cell-tight{ 
-  font-size: 9px; 
+  font-size: 12px; 
+  font-weight: bold;
   line-height: 1.3; 
 }
 
 /* ===== HEADER ===== */
 .title{
-  font-size: 12px;
-  font-style: italic;
-  letter-spacing: -0.5px;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -128,15 +132,16 @@ td, th{
 }
 
 .logo-img{
-  max-width: 70px;
-  max-height: 60px;
+  max-width: 80px;
+  max-height: 70px;
   width: auto;
   height: auto;
 }
 
 .cert-number{
   width: 130px;
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: bold;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -144,26 +149,26 @@ td, th{
 
 /* ===== ROW HEIGHTS ===== */
 .height-lg{ 
-  height: 50px; 
-  min-height: 50px;
+  height: 45px; 
+  min-height: 45px;
   text-transform: uppercase; 
 }
 
 .height-xl{ 
-  height: 52px; 
-  min-height: 52px;
+  height: 48px; 
+  min-height: 48px;
   text-transform: uppercase; 
 }
 
 .height-md{
-  height: 36px;
-  min-height: 36px;
+  height: 32px;
+  min-height: 32px;
 }
 
 /* Standard row height for main table */
 .main-details-table tr:not(.height-md):not(.height-lg):not(.height-xl) {
-  height: 48px;
-  min-height: 48px;
+  height: 42px;
+  min-height: 42px;
 }
 
 /* ===== COLUMN WIDTHS (MAIN TABLE) ===== */
@@ -179,7 +184,7 @@ td, th{
 /* ===== MARRIAGE DETAILS BOX ===== */
 .marriage-details-box{
   border: 2px solid #000;
-  padding: 4px 4px 4px 2px;
+  padding: 6px 6px 6px 4px;
   margin: 0;
   background-color: #fff;
   height: 100%;
@@ -198,19 +203,21 @@ td, th{
   border: none;
   text-align: left;
   vertical-align: top;
-  font-size: 9px;
-  line-height: 1.3;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.4;
 }
 
 .marriage-details-box .label{
   font-weight: bold;
-  padding: 2px 6px 2px 2px;
+  padding: 3px 6px 3px 3px;
   white-space: nowrap;
-  border-right: 1px solid #000;
+  border-right: 2px solid #000;
 }
 
 .marriage-details-box .value{
-  padding: 2px 2px 2px 6px;
+  padding: 3px 3px 3px 6px;
+  font-weight: bold;
 }
 
 .marriage-details-box .address-value{
@@ -219,15 +226,47 @@ td, th{
   word-break: keep-all;
 }
 
-/* ===== SIGNATURE LINES ===== */
+/* ===== SIGNATURE SECTION ===== */
+.signature-section{
+  border: 2px solid #000;
+  padding: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.signature-logo{
+  margin-bottom: 8px;
+}
+
+.signature-logo img{
+  max-width: 60px;
+  max-height: 55px;
+  width: auto;
+  height: auto;
+}
+
+.signature-text{
+  font-size: 9px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
 .signature-line{
   display: block;
-  min-height: 20px;
+  min-height: 40px;
+  width: 100%;
   font-family: "Segoe Script", "Brush Script MT", cursive;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: bold;
   font-style: italic;
-  padding-bottom: 1px;
-  margin-top: 3px;
+  padding-top: 8px;
+  border-top: 1px solid #000;
+  margin-top: auto;
 }
 
 .signature-cell{
@@ -239,29 +278,29 @@ td, th{
 
 /* ===== FOOTER ===== */
 .footer{
-  font-size: 10px;
+  font-size: 11px;
   font-weight: bold;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.4;
   text-transform: none;
-  padding: 4px;
+  padding: 6px;
 }
 
 /* ===== SPACING ===== */
 .spacer{
-  height: 10px;
+  height: 8px;
 }
 
 /* ===== CHECKBOXES ===== */
 .checkbox{
   display: inline-block;
-  width: 11px;
-  height: 11px;
-  border: 1px solid #000;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #000;
   margin-right: 6px;
   vertical-align: middle;
-  font-size: 8px;
-  line-height: 11px;
+  font-size: 9px;
+  line-height: 12px;
   text-align: center;
   font-family: "Times New Roman", serif;
   background-color: #fff;
@@ -280,7 +319,7 @@ td, th{
 <div class="certificate-container">
 
 <!-- ===== HEADER ===== -->
-<table style="table-layout: fixed; margin-bottom: 3px;">
+<table style="table-layout: fixed; margin-bottom: 2px;">
   <colgroup>
     <col style="width: 120px;">
     <col style="width: auto;">
@@ -288,19 +327,19 @@ td, th{
   </colgroup>
   <tr>
     <td class="no-border logo-cell">
-      <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" class="logo-img" alt="Logo">
+      <!-- Logo moved to signature section -->
     </td>
-    <td class="no-border center bold title" style="padding: 4px 3px;">
+    <td class="no-border center bold title" style="padding: 6px 4px;">
       ISLAMIC MARRIAGE CERTIFICATE
     </td>
-    <td class="no-border center bold cert-number" style="padding: 4px 3px;">
+    <td class="no-border center bold cert-number" style="padding: 6px 4px;">
       No. <span style="color: red;">{{application_number}}</span>
     </td>
   </tr>
 </table>
 
 <!-- ===== MAIN DETAILS TABLE ===== -->
-<table class="main-details-table" style="margin-bottom: 3px;">
+<table class="main-details-table" style="margin-bottom: 2px;">
   <colgroup>
     <col class="col-role">
     <col class="col-name">
@@ -329,7 +368,7 @@ td, th{
     <td class="cell-tight">{{groom_father_name}}</td>
     <td class="cell-tight">{{groom_date_place_of_birth}}</td>
     <td class="cell-tight">{{groom_address}}</td>
-      <td class="cell-tight" style="text-align: left;">{{groom_marital_status}}</td>
+    <td class="cell-tight" style="text-align: left;">{{groom_marital_status}}</td>
     <td class="center">{{groom_in_person_tick}}</td>
     <td>{{groom_signature}}</td>
   </tr>
@@ -340,7 +379,7 @@ td, th{
     <td class="cell-tight">{{bride_father_name}}</td>
     <td class="cell-tight">{{bride_date_place_of_birth}}</td>
     <td class="cell-tight">{{bride_address}}</td>
-      <td class="cell-tight" style="text-align: left;">{{bride_marital_status}}</td>
+    <td class="cell-tight" style="text-align: left;">{{bride_marital_status}}</td>
     <td class="center">{{bride_in_person_tick}}</td>
     <td>{{bride_signature}}</td>
   </tr>
@@ -413,11 +452,11 @@ td, th{
 </table>
 
 <!-- ===== BOTTOM SECTION ===== -->
-<table style="margin-bottom: 0; height: 140px;">
+<table style="margin-bottom: 0; height: 120px;">
   <tr style="height: 100%;">
-    <td width="35%" style="vertical-align: top; padding: 5px; font-size: 9px;">
+    <td width="35%" style="vertical-align: top; padding: 6px; font-size: 11px; font-weight: bold;">
       <b>MAHR:</b> {{mahr_amount}}<br><br>
-      <p class="small" style="margin: 0; padding: 0; line-height: 1.3; text-align: justify;">
+      <p class="small" style="margin: 0; padding: 0; line-height: 1.4; text-align: justify; font-weight: bold;">
         This marriage certificate is issued in accordance with Islamic laws and
         may not be accepted by authorities in the U.K. and other non-Muslim countries.
         To be married in accordance with British Marriage Laws, both parties are advised
@@ -425,13 +464,19 @@ td, th{
       </p>
     </td>
 
-    <td width="20%" style="vertical-align: top; padding: 5px; font-size: 9px; text-align: center;">
-      <b>SIGNATURE AND SEAL OF PRESIDING AUTHORITY SOLEMNIZING MARRIAGE</b>
-      <br>
-      <span class="signature-line">{{presiding_signature}}</span>
+    <td width="20%" style="vertical-align: top; padding: 0;">
+      <div class="signature-section">
+        <div class="signature-logo">
+          <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" alt="Logo">
+        </div>
+        <div class="signature-text">
+          <b>SIGNATURE AND SEAL OF PRESIDING AUTHORITY SOLEMNIZING MARRIAGE</b>
+        </div>
+        <span class="signature-line">{{presiding_signature}}</span>
+      </div>
     </td>
 
-    <td width="45%" style="vertical-align: top; padding: 5px 10px 5px 5px;">
+    <td width="45%" style="vertical-align: top; padding: 6px 8px 6px 6px;">
       <div class="marriage-details-box">
         <table>
           <colgroup>
