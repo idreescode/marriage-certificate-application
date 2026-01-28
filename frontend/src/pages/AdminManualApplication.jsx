@@ -340,8 +340,6 @@ export default function AdminManualApplication() {
     appointmentDate: "",
     appointmentTime: "",
     appointmentLocation: "",
-    preferredDate: "",
-    specialRequests: "",
   });
 
   const [showAdditional, setShowAdditional] = useState(false);
@@ -605,8 +603,6 @@ export default function AdminManualApplication() {
               appointmentDate: formatDate(app.appointment_date),
               appointmentTime: formatTime(app.appointment_time),
               appointmentLocation: app.appointment_location || "",
-              preferredDate: formatDate(app.preferred_date),
-              specialRequests: app.special_requests || "",
             });
 
             // Debug: Log formatted dates

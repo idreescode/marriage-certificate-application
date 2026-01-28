@@ -30,7 +30,7 @@ export default function ApplicantLayout() {
       <ApplicantNavbar />
       <div className="applicant-content" style={{ marginLeft: 0 }}>
          {/* Main Content */}
-         <main className="applicant-main" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', padding: '2rem' }}>
+         <main className="applicant-main" style={{ width: '100%', padding: '2rem' }}>
             <Outlet />
          </main>
       </div>

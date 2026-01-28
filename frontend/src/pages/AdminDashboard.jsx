@@ -78,9 +78,7 @@ export default function AdminDashboard() {
 
       const newApps = apps.filter((a) => a.status === "admin_review").length;
       const pending = apps.filter((a) => a.status === "payment_pending").length;
-      const scheduled = apps.filter(
-        (a) => a.status === "appointment_scheduled"
-      ).length;
+      const scheduled = 0; // Appointment scheduling removed
       const completed = apps.filter((a) => a.status === "completed").length;
 
       // Calculate deposit fee (all time) - Total applications × default_deposit_amount
@@ -340,14 +338,6 @@ export default function AdminDashboard() {
           color="white"
           bg="rgba(255,255,255,0.15)"
           variant="purple"
-        />
-        <StatCard
-          title="Scheduled Nikkahs"
-          value={stats.scheduled}
-          icon={Calendar}
-          color="white"
-          bg="rgba(255,255,255,0.15)"
-          variant="green"
         />
       </div>
 
@@ -674,7 +664,7 @@ export default function AdminDashboard() {
                                   ? "#fef3c7"
                                   : app.status === "payment_verified"
                                     ? "#d1fae5"
-                                    : app.status === "appointment_scheduled"
+                                    : false
                                       ? "#e0e7ff"
                                       : "#f1f5f9",
                             color:
@@ -684,7 +674,7 @@ export default function AdminDashboard() {
                                   ? "#92400e"
                                   : app.status === "payment_verified"
                                     ? "#065f46"
-                                    : app.status === "appointment_scheduled"
+                                    : false
                                       ? "#3730a3"
                                       : "#475569",
                           }}

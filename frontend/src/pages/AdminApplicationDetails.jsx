@@ -5,6 +5,7 @@ import {
   getFileUrl,
   generateCertificate,
   approveApplication,
+  markComplete,
 } from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
@@ -99,6 +100,37 @@ export default function AdminApplicationDetails() {
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to approve application",
+        { id: toastId }
+      );
+    }
+  };
+
+  const handleMarkComplete = async () => {
+    if (!application) {
+      toast.error("Application data not loaded");
+      return;
+    }
+
+    // Check if application is in the correct status for completion
+    if (application.status !== "payment_verified") {
+      toast.error(
+        "Application payment must be verified before marking as complete"
+      );
+      return;
+    }
+
+    const toastId = toast.loading("Marking application as complete...");
+    try {
+      await markComplete(id);
+      toast.success(
+        "Application marked as completed successfully!",
+        { id: toastId }
+      );
+      // Refresh application data
+      fetchApplicationDetails();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to mark application as complete",
         { id: toastId }
       );
     }
@@ -311,10 +343,6 @@ export default function AdminApplicationDetails() {
         color: "bg-indigo-100 text-indigo-700",
         label: "Payment Verified",
       },
-      appointment_scheduled: {
-        color: "bg-purple-100 text-purple-700",
-        label: "Appointment Set",
-      },
       completed: {
         color: "bg-emerald-100 text-emerald-700",
         label: "Completed",
@@ -326,9 +354,6 @@ export default function AdminApplicationDetails() {
     let label = config[status]?.label || status;
     if (status === "admin_review" && application?.approved_at) {
       label = "Approved";
-      if (application.payment_choice === false || application.payment_choice === 0) {
-        label = "Approved (Payment Skipped)";
-      }
     }
 
     const style = config[status] || {
@@ -512,12 +537,6 @@ export default function AdminApplicationDetails() {
                   <Clock size={16} /> Applied on{" "}
                   {new Date(application.created_at).toLocaleDateString()}
                 </span>
-                {application.preferred_date && (
-                  <span className="flex items-center gap-1.5">
-                    <Calendar size={16} /> Preferred:{" "}
-                    {new Date(application.preferred_date).toLocaleDateString()}
-                  </span>
-                )}
                 {/* Solemnised Information */}
                 {(application.solemnised_date ||
                   application.solemnised_time ||
@@ -585,6 +604,25 @@ export default function AdminApplicationDetails() {
                   }}
                 >
                   <CheckCircle size={16} /> Approve Application
+                </button>
+              )}
+              {application.status === "payment_verified" && (
+                <button
+                  onClick={handleMarkComplete}
+                  className="btn-back-nav"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    width: "100%",
+                    background: "rgba(16, 185, 129, 0.9)",
+                    border: "1px solid rgba(16, 185, 129, 1)",
+                    color: "white",
+                    fontWeight: "600",
+                  }}
+                >
+                  <CheckCircle size={16} /> Mark as Complete
                 </button>
               )}
               <button
@@ -1152,35 +1190,6 @@ export default function AdminApplicationDetails() {
               </div>
             )}
 
-            {/* Additional Information Section */}
-            {(application.preferred_date || application.special_requests) && (
-              <div className="details-card bg-witness-card">
-                <div className="card-title-row">
-                  <div className="icon-box icon-box-slate">
-                    <FileText size={22} />
-                  </div>
-                  <h2 className="card-title-text">ADDITIONAL INFORMATION</h2>
-                </div>
-                <div className="card-body">
-                  {application.preferred_date && (
-                    <InfoItem
-                      icon={Calendar}
-                      label="PREFERRED DATE"
-                      value={new Date(
-                        application.preferred_date
-                      ).toLocaleDateString(undefined, { dateStyle: "long" })}
-                    />
-                  )}
-                  {application.special_requests && (
-                    <InfoItem
-                      icon={FileText}
-                      label="SPECIAL REQUESTS"
-                      value={application.special_requests}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Sidebar */}
@@ -1188,54 +1197,6 @@ export default function AdminApplicationDetails() {
             className="no-print-sidebar"
             style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
           >
-            {/* Appointment Details Card */}
-            <div className="details-card bg-appointment-card">
-              <div className="card-title-row">
-                <div className="icon-box icon-box-purple">
-                  <Calendar size={22} />
-                </div>
-                <h2 className="card-title-text">APPOINTMENT</h2>
-              </div>
-              <div className="card-body">
-                {application.appointment_date ? (
-                  <>
-                    <InfoItem
-                      icon={Calendar}
-                      label="DATE"
-                      value={new Date(
-                        application.appointment_date
-                      ).toLocaleDateString(undefined, { dateStyle: "long" })}
-                    />
-                    <InfoItem
-                      icon={Clock}
-                      label="Time Slot"
-                      value={application.appointment_time}
-                    />
-                    <InfoItem
-                      icon={MapPin}
-                      label="LOCATION"
-                      value={application.appointment_location}
-                    />
-                  </>
-                ) : (
-                  <div className="py-4 text-center">
-                    <p className="text-slate-400 italic text-sm">
-                      Appointment not yet scheduled.
-                    </p>
-                  </div>
-                )}
-
-                {application.special_requests && (
-                  <div className="mt-6 pt-6 border-t border-indigo-100/50">
-                    <p className="info-label">Special Requests</p>
-                    <div className="bg-white/60 p-4 rounded-xl border border-indigo-100/40 text-sm text-slate-600 line-height-relaxed">
-                      "{application.special_requests}"
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Payment Status Card */}
             <div className="details-card bg-payment-card">
               <div className="card-title-row">
@@ -1256,13 +1217,9 @@ export default function AdminApplicationDetails() {
                   subValue={
                     application.payment_verified_at
                       ? "Verified"
-                      : application.payment_choice === false || application.payment_choice === 0 || application.payment_status === 'skipped'
-                      ? "Skipped"
-                      : application.payment_choice === true || application.payment_choice === 1
-                      ? application.payment_receipt_url
-                        ? "Receipt Uploaded"
-                        : "Payment Required"
-                      : application.payment_status || "Pending Verification"
+                      : application.payment_receipt_url
+                      ? "Receipt Uploaded (Awaiting Verification)"
+                      : application.payment_status || "Payment Pending"
                   }
                 />
               </div>

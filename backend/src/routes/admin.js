@@ -9,7 +9,6 @@ const {
   verifyDocuments,
   setDepositAmount,
   verifyPayment,
-  scheduleAppointment,
   markComplete,
   generateCertificate,
   updateApplicationNumber,
@@ -51,8 +50,13 @@ router.put('/applications/:id/set-deposit', setDepositAmount);
 // PUT /api/admin/applications/:id/verify-payment - Verify payment
 router.put('/applications/:id/verify-payment', verifyPayment);
 
-// PUT /api/admin/applications/:id/schedule-appointment - Schedule appointment
-router.put('/applications/:id/schedule-appointment', scheduleAppointment);
+// PUT /api/admin/applications/:id/schedule-appointment - Schedule appointment (DISABLED)
+router.put('/applications/:id/schedule-appointment', (req, res) => {
+  res.status(410).json({
+    success: false,
+    message: 'Appointment scheduling functionality has been removed.',
+  });
+});
 
 // PUT /api/admin/applications/:id/complete - Mark application complete
 router.put('/applications/:id/complete', markComplete);

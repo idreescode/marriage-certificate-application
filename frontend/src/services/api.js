@@ -114,12 +114,12 @@ export const resetPassword = (data) => api.post('/auth/reset-password', data);
 // export const applicantLogin = (credentials) => api.post('/applicants/login', credentials); // DEPRECATED
 export const getApplicantDashboard = () => api.get('/applicants/dashboard');
 
-export const uploadReceipt = (formData) => api.post('/applicants/upload-receipt', formData, {
-  headers: { 'Content-Type': 'multipart/form-data' }
-});
-export const skipPayment = () => api.post('/applicants/skip-payment');
-export const chooseToPay = () => api.post('/applicants/choose-to-pay');
-export const requestBankDetails = () => api.post('/applicants/request-bank-details');
+export const uploadReceipt = (formData) =>
+  api.post('/applicants/upload-receipt', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+export const requestBankDetails = () =>
+  api.post('/applicants/request-bank-details');
 export const getCertificate = () => api.get('/applicants/certificate');
 export const uploadDocuments = (formData) => api.post('/applicants/upload-documents', formData, {
   headers: { 'Content-Type': 'multipart/form-data' }
@@ -172,11 +172,12 @@ export const createAdmin = (data) => api.post('/admin/users', data);
 export const updateUser = (id, data) => api.put(`/admin/users/${id}`, data);
 export const deleteUser = (id) => api.delete(`/admin/users/${id}`);
 
-// Payment APIs - Online payment disabled, only bank transfer is available
-// export const createCheckoutSession = () => api.post('/payment/create-checkout-session');
-// export const verifySession = (sessionId) => api.post('/payment/verify-session', { sessionId });
-// export const createPaymentIntent = () => api.post('/payment/create-payment-intent');
-// export const confirmPayment = (data) => api.post('/payment/confirm-payment', data);
+// Payment APIs - Online payment via Stripe Checkout
+export const createCheckoutSession = () =>
+  api.post('/payment/create-checkout-session');
+
+export const verifySession = (sessionId) =>
+  api.post('/payment/verify-session', { sessionId });
 
 // Notification APIs
 export const getNotifications = () => api.get('/notifications');

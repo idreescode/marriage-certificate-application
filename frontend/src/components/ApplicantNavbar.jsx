@@ -45,7 +45,7 @@ export default function ApplicantNavbar() {
 
   return (
     <nav className="navbar" style={{ background: 'white', borderBottom: '1px solid #eee', height: '80px', padding: '0' }}>
-      <div className="container" style={{ maxWidth: '1200px', height: '100%' }}>
+      <div className="container" style={{ width: '100%', height: '100%', padding: '0 2rem' }}>
          <div className="d-flex justify-between items-center w-full" style={{ height: '100%' }}>
             
             {/* Logo area */}

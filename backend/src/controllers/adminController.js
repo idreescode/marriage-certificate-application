@@ -381,10 +381,10 @@ const approveApplication = async (req, res) => {
       app.user_id,
     ]);
 
-    // Keep status as 'admin_review' - this indicates approved
-    // Set payment status to verified when admin approves
-    // Set approved_at timestamp to track approval
-    // Set deposit amount when application is approved
+    // Mark application as approved and payment pending
+    // - Set deposit amount when application is approved
+    // - Set payment_status to 'amount_set' (awaiting payment)
+    // - Set status to 'payment_pending' so applicant must pay before proceeding
     await pool.execute(
       `UPDATE applications 
        SET approved_at = NOW(),
@@ -392,12 +392,10 @@ const approveApplication = async (req, res) => {
            deposit_amount = ?,
            deposit_amount_set_by = ?,
            deposit_amount_set_at = NOW(),
-           payment_status = 'verified',
-           payment_verified_by = ?,
-           payment_verified_at = NOW(),
-           status = 'admin_review'
+           payment_status = 'amount_set',
+           status = 'payment_pending'
        WHERE id = ?`,
-      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, adminId, id]
+      [adminId, DEFAULT_DEPOSIT_AMOUNT, adminId, id]
     );
 
     // Send approval email with password
@@ -416,7 +414,8 @@ const approveApplication = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Application approved successfully. Deposit amount set to £200. Portal credentials sent to applicant.",
+      message:
+        "Application approved successfully. Deposit amount set and payment is now pending. Portal credentials sent to applicant.",
     });
   } catch (error) {
     console.error("Error approving application:", error);
@@ -610,9 +609,9 @@ const scheduleAppointment = async (req, res) => {
     const { id } = req.params;
     const { appointmentDate, appointmentTime, appointmentLocation } = req.body;
 
-    // Get application to check status
+    // Get application to check status and payment status
     const [appRows] = await pool.execute(
-      "SELECT status FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
+      "SELECT status, payment_status FROM applications WHERE id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)",
       [id]
     );
 
@@ -623,13 +622,14 @@ const scheduleAppointment = async (req, res) => {
       });
     }
 
-    // Allow scheduling from admin_review, payment_pending, or payment_verified status
-    // Payment is now optional, so we don't require payment_verified
-    const allowedStatuses = ['admin_review', 'payment_pending', 'payment_verified'];
-    if (!allowedStatuses.includes(appRows[0].status)) {
+    const app = appRows[0];
+
+    // Require payment to be verified before scheduling appointment
+    if (app.payment_status !== "verified" || app.status !== "payment_verified") {
       return res.status(400).json({
         success: false,
-        message: `Cannot schedule appointment from current status: ${appRows[0].status}`,
+        message:
+          "Cannot schedule appointment until payment has been verified.",
       });
     }
 
@@ -1025,8 +1025,6 @@ const createManualApplication = async (req, res) => {
       appointmentDate,
       appointmentTime,
       appointmentLocation,
-      preferredDate,
-      specialRequests,
     } = req.body;
 
     // Validate required fields
@@ -1152,8 +1150,6 @@ const createManualApplication = async (req, res) => {
       // Frontend now sends only solemnisedAddress, use it for both place and address
       const finalSolemnisedAddress = solemnisedAddress || solemnisedPlace || null;
       const finalSolemnisedPlace = solemnisedPlace || solemnisedAddress || null; // Time only
-      const normalizedPreferredDate = normalizeDate(preferredDate);
-      const normalizedAppointmentDate = normalizeDate(appointmentDate);
 
       // Handle file uploads - prepare document paths
       const fileFields = {
@@ -1235,17 +1231,12 @@ const createManualApplication = async (req, res) => {
             normalizedSolemnisedTime || null,
             finalSolemnisedPlace || null,
             finalSolemnisedAddress || null,
-            normalizedPreferredDate || null,
-            specialRequests || null,
             // Convert depositAmount to number (FormData sends as string)
             depositAmount && depositAmount !== '' && depositAmount !== 'null'
               ? (typeof depositAmount === 'string' ? (isNaN(parseFloat(depositAmount)) ? 200 : parseFloat(depositAmount)) : (isNaN(Number(depositAmount)) ? 200 : Number(depositAmount)))
               : 200,
             adminId || null,
             paymentStatus || "amount_set",
-            normalizedAppointmentDate || null,
-            appointmentTime || null,
-            appointmentLocation || null,
             status || "completed",
             documentPaths?.groom_id_path || null,
             documentPaths?.bride_id_path || null,
@@ -1294,8 +1285,8 @@ const createManualApplication = async (req, res) => {
           });
           
           // Validate count matches
-          // Count: 3 (app info) + 10 (groom) + 5 (groom rep) + 10 (bride) + 5 (bride rep) + 1 (mahr) + 4 (solemnised) + 2 (preferred/special) + 7 (deposit/payment/appointment/status) + 12 (documents) + 20 (witnesses) = 79
-          const expectedCount = 79;
+          // Count: 3 (app info) + 10 (groom) + 5 (groom rep) + 10 (bride) + 5 (bride rep) + 1 (mahr) + 4 (solemnised) + 4 (deposit/payment/status) + 12 (documents) + 20 (witnesses) = 74
+          const expectedCount = 74;
           if (sanitizedValues.length !== expectedCount) {
             console.error(`Value count mismatch: Expected ${expectedCount} values, got ${sanitizedValues.length}`);
             console.error('Values:', sanitizedValues);
@@ -1317,9 +1308,7 @@ const createManualApplication = async (req, res) => {
           bride_rep_place_of_birth, bride_rep_address,
           mahr_amount,
           solemnised_date, solemnised_time, solemnised_place, solemnised_address,
-          preferred_date, special_requests,
           deposit_amount, deposit_amount_set_by, payment_status,
-          appointment_date, appointment_time, appointment_location,
           status,
           groom_id_path, bride_id_path, witness1_male_id_path, witness1_female_id_path, witness2_male_id_path, witness2_female_id_path,
           mahr_declaration_path, civil_divorce_doc_path, islamic_divorce_doc_path,
@@ -1739,11 +1728,6 @@ const updateApplication = async (req, res) => {
       status,
       depositAmount,
       paymentStatus,
-      appointmentDate,
-      appointmentTime,
-      appointmentLocation,
-      preferredDate,
-      specialRequests,
     } = req.body;
 
     // Check if application exists
@@ -1823,12 +1807,6 @@ const updateApplication = async (req, res) => {
       : null;
     const normalizedSolemnisedTime = solemnisedTime
       ? normalizeTime(solemnisedTime) // Time only
-      : null;
-    const normalizedPreferredDate = preferredDate
-      ? normalizeDate(preferredDate)
-      : null;
-    const normalizedAppointmentDate = appointmentDate
-      ? normalizeDate(appointmentDate)
       : null;
 
     // Handle file uploads - only update if new files are provided
@@ -2026,26 +2004,6 @@ const updateApplication = async (req, res) => {
     if (paymentStatus !== undefined) {
       updateFields.push("payment_status = ?");
       updateValues.push(paymentStatus);
-    }
-    if (normalizedAppointmentDate !== undefined) {
-      updateFields.push("appointment_date = ?");
-      updateValues.push(normalizedAppointmentDate);
-    }
-    if (appointmentTime !== undefined) {
-      updateFields.push("appointment_time = ?");
-      updateValues.push(appointmentTime || null);
-    }
-    if (appointmentLocation !== undefined) {
-      updateFields.push("appointment_location = ?");
-      updateValues.push(appointmentLocation || null);
-    }
-    if (normalizedPreferredDate !== undefined) {
-      updateFields.push("preferred_date = ?");
-      updateValues.push(normalizedPreferredDate);
-    }
-    if (specialRequests !== undefined) {
-      updateFields.push("special_requests = ?");
-      updateValues.push(specialRequests || null);
     }
 
     // Witness fields

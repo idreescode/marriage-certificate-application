@@ -6,9 +6,10 @@ import {
   getAllApplications,
   approveApplication as approveApplicationAPI,
   verifyPayment as verifyPaymentAPI,
-  generateCertificate as generateCertAPI,
   deleteApplication as deleteApplicationAPI,
   updateApplicationNumber,
+  getFileUrl,
+  markComplete as markCompleteAPI,
 } from "../services/api";
 import toast from "react-hot-toast";
 import {
@@ -27,6 +28,7 @@ import {
   Check,
   X,
   Pencil,
+  CheckCircle,
 } from "lucide-react";
 
 import { useSearchParams } from "react-router-dom";
@@ -49,6 +51,8 @@ export default function AdminApplications() {
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [deleteAppData, setDeleteAppData] = useState(null); // { id, applicationNumber }
   const [approveAppData, setApproveAppData] = useState(null); // { id, applicationNumber, groomName, brideName }
+  const [receiptLoading, setReceiptLoading] = useState(false);
+  const [receiptError, setReceiptError] = useState(false);
 
   // Edit Application Number State
   const [editingAppId, setEditingAppId] = useState(null);
@@ -127,9 +131,16 @@ export default function AdminApplications() {
   };
 
   // Open Handlers
-  const openVerifyPayment = (id) => {
+  const openVerifyPayment = (id, receiptUrl) => {
     setSelectedAppId(id);
     setActiveModal("verify");
+    // Set loading to true initially, but image will load and hide it
+    setReceiptLoading(true);
+    setReceiptError(false);
+    // Auto-hide loading after a short delay if image loads quickly
+    setTimeout(() => {
+      // This will be overridden by onLoad/onError handlers
+    }, 500);
   };
 
   const openApproveModal = (app) => {
@@ -153,6 +164,8 @@ export default function AdminApplications() {
     setSelectedAppId(null);
     setDeleteAppData(null);
     setApproveAppData(null);
+    setReceiptLoading(false);
+    setReceiptError(false);
   };
 
   // Action Handlers
@@ -163,7 +176,7 @@ export default function AdminApplications() {
     try {
       await approveApplicationAPI(approveAppData.id);
       toast.success(
-        "Application approved successfully! Deposit amount set to £200. User will receive portal credentials. User can now choose to pay or skip payment.",
+        "Application approved successfully! Deposit amount set and payment is now pending. Applicant has received portal credentials to complete payment.",
         { id: toastId }
       );
       closeModal();
@@ -189,6 +202,20 @@ export default function AdminApplications() {
     }
   };
 
+  const handleMarkComplete = async (appId) => {
+    const toastId = toast.loading("Marking application as complete...");
+    try {
+      await markCompleteAPI(appId);
+      toast.success("Application marked as completed successfully!", { id: toastId });
+      fetchApplications();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to mark application as complete",
+        { id: toastId }
+      );
+    }
+  };
+
   const openDeleteModal = (appId, applicationNumber) => {
     setDeleteAppData({ id: appId, applicationNumber });
     setActiveModal("delete");
@@ -211,22 +238,6 @@ export default function AdminApplications() {
     }
   };
 
-  const handleGenerateCertificate = async (appId) => {
-    const toastId = toast.loading("Generating certificate...");
-    try {
-      await generateCertAPI(appId);
-      toast.success("Certificate generated successfully!", { id: toastId });
-      fetchApplications();
-    } catch (error) {
-      console.error("Certificate generation error:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to generate certificate";
-      toast.error(errorMessage, { id: toastId, duration: 5000 });
-    }
-  };
 
   // Edit Application Number Handlers
   const startEditing = (appId, currentNumber) => {
@@ -268,7 +279,6 @@ export default function AdminApplications() {
       admin_review: "badge-warning",
       payment_pending: "badge-warning",
       payment_verified: "badge-info",
-      appointment_scheduled: "badge-info",
       completed: "badge-success",
     };
 
@@ -277,25 +287,18 @@ export default function AdminApplications() {
       submitted: "SUBMITTED",
       payment_pending: "PAYMENT PENDING",
       payment_verified: "PAYMENT VERIFIED",
-      appointment_scheduled: "APPOINTMENT SCHEDULED",
       completed: "COMPLETED",
     };
 
     // For admin_review status:
-    // - If approved_at exists, it means approved → "APPROVED"
-    // - If payment_choice is false, payment was skipped → show "APPROVED"
-    // - Otherwise, it's not approved yet → "UNDER REVIEW"
+    // - If approved_at exists, it means approved → \"APPROVED\"
+    // - Otherwise, it's not approved yet → \"UNDER REVIEW\"
     if (status === "admin_review") {
       if (app && app.approved_at) {
         statusText.admin_review = "APPROVED";
       } else {
         statusText.admin_review = "UNDER REVIEW";
       }
-    }
-    
-    // Show payment status in status badge if payment is skipped
-    if ((app.payment_choice === false || app.payment_choice === 0) && status === "admin_review" && app.approved_at) {
-      statusText.admin_review = "APPROVED";
     }
 
     return (
@@ -709,45 +712,33 @@ export default function AdminApplications() {
                         </>
                       )}
 
-                      {/* Show Verify Payment button when payment_choice is true, receipt uploaded, and not verified */}
-                      {((app.payment_choice === true || app.payment_choice === 1) &&
-                        app.status === "payment_pending" &&
-                        app.payment_receipt_url && 
-                        !app.payment_verified_at) && (
+                      {/* Show Verify Payment button when receipt uploaded and not yet verified */}
+                      {app.status === "payment_pending" &&
+                        app.payment_receipt_url &&
+                        !app.payment_verified_at && (
                           <button
-                            onClick={() => openVerifyPayment(app.id)}
+                            onClick={() => openVerifyPayment(app.id, app.payment_receipt_url)}
                             className="btn btn-sm btn-primary"
                             style={{ whiteSpace: "nowrap" }}
                           >
                             Verify Payment
                           </button>
                         )}
-                      {/* Show Generate Certificate button when: 
-                          - payment_choice is false/0 (skipped) OR 
-                          - payment is verified OR 
-                          - appointment is scheduled OR
-                          - admin_review status with payment_status skipped (for backward compatibility) */}
-                      {((app.payment_choice === false || app.payment_choice === 0 || 
-                          (app.status === "admin_review" && app.payment_status === "skipped") ||
-                          app.status === "payment_verified" || 
-                          app.status === "appointment_scheduled") && 
-                          app.status !== "completed" && !app.certificate_url) && (
+
+                      {/* Show Mark Complete button when payment is verified */}
+                      {app.status === "payment_verified" && (
                         <button
-                          onClick={() => handleGenerateCertificate(app.id)}
-                          className="btn btn-sm btn-success text-white"
+                          onClick={() => handleMarkComplete(app.id)}
+                          className="btn btn-sm btn-success"
                           style={{
-                            backgroundColor: "var(--success)",
-                            border: "none",
-                            color: "white",
                             whiteSpace: "nowrap",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            minWidth: "130px",
-                            padding: "0.5rem 1rem",
+                            backgroundColor: "var(--success)",
+                            color: "white",
+                            border: "none",
                           }}
                         >
-                          Generate Certificate
+                          <CheckCircle size={14} />
+                          Mark Complete
                         </button>
                       )}
                     </div>
@@ -819,51 +810,245 @@ export default function AdminApplications() {
         onClose={closeModal}
         title="Verify Payment"
       >
-        <div style={{ marginBottom: "1.5rem" }}>
-          <p
-            style={{
-              color: "var(--slate-700)",
-              fontSize: "0.95rem",
-              lineHeight: "1.6",
-              margin: 0,
-            }}
-          >
-            Are you sure you want to verify the payment receipt?
-          </p>
-          <p
-            style={{
-              color: "var(--slate-500)",
-              fontSize: "0.875rem",
-              marginTop: "0.5rem",
-              margin: 0,
-            }}
-          >
-            This action will mark the payment as verified.
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "0.75rem",
-            marginTop: "1.75rem",
-          }}
-        >
-          <button
-            onClick={closeModal}
-            className="btn btn-secondary"
-            style={{ minWidth: "100px" }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleVerifyPayment}
-            className="btn btn-primary"
-            style={{ minWidth: "100px" }}
-          >
-            Verify Payment
-          </button>
-        </div>
+        {(() => {
+          const app = applications.find(a => a.id === selectedAppId);
+          const receiptUrl = app?.payment_receipt_url;
+          const fullReceiptUrl = receiptUrl ? getFileUrl(receiptUrl) : null;
+          const isPdf = receiptUrl?.toLowerCase().endsWith('.pdf');
+          
+          return (
+            <>
+              {/* Receipt Display */}
+              {fullReceiptUrl && (
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <h4
+                    style={{
+                      color: "var(--slate-700)",
+                      fontSize: "0.95rem",
+                      fontWeight: 600,
+                      marginBottom: "0.75rem",
+                      margin: 0,
+                    }}
+                  >
+                    Payment Receipt:
+                  </h4>
+                  <div
+                    style={{
+                      border: "2px solid var(--slate-200)",
+                      borderRadius: "0.5rem",
+                      overflow: "hidden",
+                      backgroundColor: "white",
+                      maxHeight: "500px",
+                      minHeight: "300px",
+                      position: "relative",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {/* Always render the receipt, but show loading overlay */}
+                    {isPdf ? (
+                      <iframe
+                        src={fullReceiptUrl}
+                        style={{
+                          width: "100%",
+                          height: "500px",
+                          border: "none",
+                          minHeight: "300px",
+                        }}
+                        title="Payment Receipt PDF"
+                        onLoad={() => {
+                          setReceiptLoading(false);
+                          setReceiptError(false);
+                        }}
+                        onError={() => {
+                          setReceiptLoading(false);
+                          setReceiptError(true);
+                        }}
+                      />
+                    ) : (
+                      <img
+                        key={fullReceiptUrl}
+                        src={fullReceiptUrl}
+                        alt="Payment Receipt"
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          display: "block",
+                          maxHeight: "500px",
+                          objectFit: "contain",
+                          padding: "0.5rem",
+                        }}
+                        onLoad={() => {
+                          setReceiptLoading(false);
+                          setReceiptError(false);
+                        }}
+                        onError={(e) => {
+                          setReceiptLoading(false);
+                          setReceiptError(true);
+                        }}
+                      />
+                    )}
+                    
+                    {/* Loading Overlay */}
+                    {receiptLoading && (
+                      <div style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 10
+                      }}>
+                        <p style={{ 
+                          margin: 0, 
+                          color: "var(--slate-500)",
+                          fontSize: "0.9rem"
+                        }}>
+                          Loading receipt...
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Error Overlay */}
+                    {receiptError && !receiptLoading && (
+                      <div style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 10,
+                        padding: "2rem"
+                      }}>
+                        <p style={{ 
+                          margin: "0 0 0.5rem 0", 
+                          fontSize: "0.9rem",
+                          color: "var(--slate-700)",
+                          fontWeight: 600
+                        }}>
+                          Unable to display receipt.
+                        </p>
+                        <p style={{ 
+                          margin: "0 0 1rem 0", 
+                          fontSize: "0.8rem", 
+                          color: "var(--slate-400)",
+                          wordBreak: "break-all",
+                          textAlign: "center"
+                        }}>
+                          URL: {fullReceiptUrl}
+                        </p>
+                        <button
+                          onClick={() => {
+                            setReceiptError(false);
+                            setReceiptLoading(true);
+                            // Force reload by updating the image src with timestamp
+                            const app = applications.find(a => a.id === selectedAppId);
+                            if (app?.payment_receipt_url) {
+                              const newUrl = getFileUrl(app.payment_receipt_url) + '?t=' + Date.now();
+                              const img = document.querySelector('img[alt="Payment Receipt"]');
+                              const iframe = document.querySelector('iframe[title="Payment Receipt PDF"]');
+                              if (img) {
+                                img.src = newUrl;
+                              }
+                              if (iframe) {
+                                iframe.src = newUrl;
+                              }
+                            }
+                          }}
+                          style={{
+                            padding: "0.5rem 1rem",
+                            backgroundColor: "var(--brand-500)",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "0.25rem",
+                            cursor: "pointer",
+                            fontSize: "0.875rem"
+                          }}
+                        >
+                          Retry Loading
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {!fullReceiptUrl && (
+                <div style={{ 
+                  marginBottom: "1.5rem",
+                  padding: "1rem",
+                  backgroundColor: "var(--slate-50)",
+                  borderRadius: "0.5rem",
+                  border: "1px solid var(--slate-200)"
+                }}>
+                  <p style={{
+                    color: "var(--slate-500)",
+                    fontSize: "0.875rem",
+                    margin: 0,
+                    textAlign: "center"
+                  }}>
+                    No receipt available for this application.
+                  </p>
+                </div>
+              )}
+              
+              <div style={{ marginBottom: "1.5rem" }}>
+                <p
+                  style={{
+                    color: "var(--slate-700)",
+                    fontSize: "0.95rem",
+                    lineHeight: "1.6",
+                    margin: 0,
+                  }}
+                >
+                  Are you sure you want to verify the payment receipt?
+                </p>
+                <p
+                  style={{
+                    color: "var(--slate-500)",
+                    fontSize: "0.875rem",
+                    marginTop: "0.5rem",
+                    margin: 0,
+                  }}
+                >
+                  This action will mark the payment as verified.
+                </p>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "0.75rem",
+                  marginTop: "1.75rem",
+                }}
+              >
+                <button
+                  onClick={closeModal}
+                  className="btn btn-secondary"
+                  style={{ minWidth: "100px" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleVerifyPayment}
+                  className="btn btn-primary"
+                  style={{ minWidth: "100px" }}
+                  disabled={!fullReceiptUrl}
+                >
+                  Verify Payment
+                </button>
+              </div>
+            </>
+          );
+        })()}
       </Modal>
 
       {/* Delete Confirmation Modal */}

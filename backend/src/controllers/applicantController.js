@@ -124,55 +124,6 @@ const uploadReceipt = async (req, res) => {
   }
 };
 
-// Skip Payment
-const skipPayment = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    // Find application first (exclude deleted)
-    const [rows] = await pool.execute(
-      'SELECT id, application_number FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
-      [userId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Application not found' });
-    }
-
-    const applicationId = rows[0].id;
-
-    // Update application to mark payment as skipped
-    // Set payment_choice = false to indicate user chose to skip payment
-    // Update status appropriately based on current status
-    await pool.execute(
-      `UPDATE applications 
-       SET payment_status = 'skipped',
-           payment_choice = FALSE,
-           status = CASE 
-             WHEN status = 'payment_pending' THEN 'admin_review'
-             WHEN status = 'admin_review' THEN 'admin_review'  -- Keep admin_review, ready for appointment/certificate
-             WHEN status IN ('submitted', 'pending_admin_review') THEN 'admin_review'
-             ELSE status
-           END
-       WHERE id = ?`,
-      [applicationId]
-    );
-
-    res.json({
-      success: true,
-      message: 'Payment skipped successfully. Your application will proceed.',
-    });
-
-  } catch (error) {
-    console.error('Error skipping payment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to skip payment',
-      error: error.message
-    });
-  }
-};
-
 // Download Certificate
 // DISABLED: Certificate download is disabled - users cannot download certificates
 const downloadCertificate = async (req, res) => {
@@ -337,52 +288,9 @@ const uploadDocuments = async (req, res) => {
   }
 };
 
-// Choose to Pay (Set payment_choice = true)
-const chooseToPay = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    // Find application first (exclude deleted)
-    const [rows] = await pool.execute(
-      'SELECT id, application_number FROM applications WHERE user_id = ? AND (is_deleted = FALSE OR is_deleted IS NULL)',
-      [userId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Application not found' });
-    }
-
-    const applicationId = rows[0].id;
-
-    // Update application to mark that user chose to pay
-    // Set payment_choice = true to indicate user chose to pay
-    await pool.execute(
-      `UPDATE applications 
-       SET payment_choice = TRUE
-       WHERE id = ?`,
-      [applicationId]
-    );
-
-    res.json({
-      success: true,
-      message: 'Payment choice recorded. Please proceed with bank transfer and upload receipt.',
-    });
-
-  } catch (error) {
-    console.error('Error choosing to pay:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to record payment choice',
-      error: error.message
-    });
-  }
-};
-
 module.exports = {
   getDashboard,
   uploadReceipt,
-  skipPayment,
-  chooseToPay,
   downloadCertificate,
   requestBankDetails,
   uploadDocuments
