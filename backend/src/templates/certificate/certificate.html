@@ -83,7 +83,7 @@
     td,
     th {
       border: 2px solid #000 !important;
-      padding: 6px 8px;
+      padding: 4px 6px;
       vertical-align: middle;
       word-wrap: break-word;
       overflow-wrap: break-word;
@@ -135,8 +135,9 @@
     }
 
     .logo-img {
-      width: 100% !important;
+      width: auto !important;
       height: auto;
+      max-width: 100%;
     }
 
     .cert-number {
@@ -150,26 +151,26 @@
 
     /* ===== ROW HEIGHTS ===== */
     .height-lg {
-      height: 45px;
-      min-height: 45px;
+      height: 38px;
+      min-height: 38px;
       text-transform: uppercase;
     }
 
     .height-xl {
-      height: 48px;
-      min-height: 48px;
+      height: 40px;
+      min-height: 40px;
       text-transform: uppercase;
     }
 
     .height-md {
-      height: 32px;
-      min-height: 32px;
+      height: 28px;
+      min-height: 28px;
     }
 
     /* Standard row height for main table */
     .main-details-table tr:not(.height-md):not(.height-lg):not(.height-xl) {
-      height: 42px;
-      min-height: 42px;
+      height: 36px;
+      min-height: 36px;
     }
 
     /* ===== COLUMN WIDTHS (MAIN TABLE) ===== */
@@ -208,7 +209,7 @@
     /* ===== MARRIAGE DETAILS BOX ===== */
     .marriage-details-box {
       border: 2px solid #000;
-      padding: 6px 6px 6px 4px;
+      padding: 4px 4px 4px 3px;
       margin: 0;
       background-color: #fff;
       height: 100%;
@@ -234,13 +235,13 @@
 
     .marriage-details-box .label {
       font-weight: bold;
-      padding: 3px 6px 3px 3px;
+      padding: 2px 4px 2px 2px;
       white-space: nowrap;
       border-right: 2px solid #000;
     }
 
     .marriage-details-box .value {
-      padding: 3px 3px 3px 6px;
+      padding: 2px 2px 2px 4px;
       font-weight: bold;
     }
 
@@ -253,7 +254,7 @@
     /* ===== SIGNATURE SECTION ===== */
     .signature-section {
       border: 2px solid #000;
-      padding: 8px;
+      padding: 4px;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -262,7 +263,7 @@
     }
 
     .signature-logo {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
 
@@ -271,7 +272,7 @@
       font-size: 9px;
       font-weight: bold;
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       line-height: 1.3;
     }
 
@@ -301,7 +302,7 @@
       text-align: center;
       line-height: 1.4;
       text-transform: none;
-      padding: 6px;
+      padding: 4px;
     }
 
     /* ===== SPACING ===== */
@@ -470,9 +471,9 @@
     </table>
 
     <!-- ===== BOTTOM SECTION ===== -->
-    <table style="margin-bottom: 0; height: 120px;">
+    <table style="margin-bottom: 0; height: 100px;">
       <tr style="height: 100%;">
-        <td width="35%" style="vertical-align: top; padding: 6px; font-size: 11px; font-weight: bold;">
+        <td width="35%" style="vertical-align: top; padding: 4px; font-size: 11px; font-weight: bold;">
           <b>MAHR:</b> {{mahr_amount}}<br><br>
           <p class="small" style="margin: 0; padding: 0; line-height: 1.4; text-align: justify; font-weight: bold;">
             This marriage certificate is issued in accordance with Islamic laws and
@@ -485,7 +486,7 @@
         <td width="20%" style="vertical-align: top; padding: 0;">
           <div class="signature-section">
             <img src="https://www.jamiyat.org/wp-content/uploads/2021/07/Logo.svg" class="logo-img" alt="Logo"
-              style="margin-bottom: 8px;">
+              style="margin-bottom: 4px; max-height: 55px; width: auto;">
             <span class="signature-line">{{presiding_signature}}</span>
             <div class="signature-text">
               <b>SIGNATURE AND SEAL OF PRESIDING AUTHORITY SOLEMNIZING MARRIAGE</b>
@@ -493,7 +494,7 @@
           </div>
         </td>
 
-        <td width="45%" style="vertical-align: top; padding: 6px 8px 6px 6px;">
+        <td width="45%" style="vertical-align: top; padding: 4px 6px 4px 4px;">
           <div class="marriage-details-box">
             <table>
               <colgroup>
