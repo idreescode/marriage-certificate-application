@@ -263,6 +263,79 @@ const submitApplication = async (req, res) => {
       });
     }
 
+    // Validate required fields BEFORE starting transaction
+    // If validation fails, transaction will NOT start, so no user will be created
+    // This ensures user is only created if application can be saved successfully
+    const requiredFields = [];
+    
+    // Groom required fields
+    if (!groomName || String(groomName).trim() === '') {
+      requiredFields.push('Groom name');
+    }
+    if (!groomFatherName || String(groomFatherName).trim() === '') {
+      requiredFields.push('Groom father name');
+    }
+    if (!groomMaritalStatus || String(groomMaritalStatus).trim() === '') {
+      requiredFields.push('Groom marital status');
+    }
+    
+    // Bride required fields
+    if (!brideName || String(brideName).trim() === '') {
+      requiredFields.push('Bride name');
+    }
+    if (!brideFatherName || String(brideFatherName).trim() === '') {
+      requiredFields.push('Bride father name');
+    }
+    if (!brideMaritalStatus || String(brideMaritalStatus).trim() === '') {
+      requiredFields.push('Bride marital status');
+    }
+    
+    // Witness 1 required fields (either male or female)
+    const hasWitness1 = (witness1MaleName && String(witness1MaleName).trim() !== '') || 
+                        (witness1FemaleName && String(witness1FemaleName).trim() !== '');
+    const hasWitness1Father = (witness1MaleFatherName && String(witness1MaleFatherName).trim() !== '') || 
+                              (witness1FemaleFatherName && String(witness1FemaleFatherName).trim() !== '');
+    
+    if (!hasWitness1) {
+      requiredFields.push('Witness 1 name');
+    }
+    if (!hasWitness1Father) {
+      requiredFields.push('Witness 1 father name');
+    }
+    
+    // Witness 2 required fields (either male or female)
+    const hasWitness2 = (witness2MaleName && String(witness2MaleName).trim() !== '') || 
+                        (witness2FemaleName && String(witness2FemaleName).trim() !== '');
+    const hasWitness2Father = (witness2MaleFatherName && String(witness2MaleFatherName).trim() !== '') || 
+                              (witness2FemaleFatherName && String(witness2FemaleFatherName).trim() !== '');
+    
+    if (!hasWitness2) {
+      requiredFields.push('Witness 2 name');
+    }
+    if (!hasWitness2Father) {
+      requiredFields.push('Witness 2 father name');
+    }
+    
+    // Solemnised required fields
+    if (!solemnisedAddress || String(solemnisedAddress).trim() === '') {
+      requiredFields.push('Solemnised address');
+    }
+    if (!normalizedSolemnisedTime || String(normalizedSolemnisedTime).trim() === '') {
+      requiredFields.push('Solemnised time');
+    }
+    if (!normalizedSolemnisedDate || String(normalizedSolemnisedDate).trim() === '') {
+      requiredFields.push('Solemnised date');
+    }
+    
+    // If any required fields are missing, return error and do not save to database
+    if (requiredFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `The following required fields are missing: ${requiredFields.join(', ')}`,
+        missingFields: requiredFields,
+      });
+    }
+
     // DEBUG: Log date transformations from WordPress
     console.log("===== DATE TRANSFORMATIONS (WordPress → MySQL) =====");
     console.log("Original dates from WordPress:", {
@@ -307,6 +380,9 @@ const submitApplication = async (req, res) => {
     });
 
     // GET CONNECTION FOR TRANSACTION
+    // NOTE: All validation is done BEFORE this point
+    // If validation fails, we return early and never start transaction
+    // This ensures user is NOT created if application cannot be saved
     let connection;
     try {
       connection = await pool.getConnection();
@@ -342,6 +418,8 @@ const submitApplication = async (req, res) => {
       }
 
       // 1. Create User (inside transaction - will be rolled back if application fails)
+      // IMPORTANT: User creation is inside transaction, so if application insert fails,
+      // the entire transaction (including user creation) will be rolled back
       console.log("Creating user with email:", portalEmail);
       const [userResult] = await connection.execute(
         'INSERT INTO users (email, password, role, full_name) VALUES (?, ?, "applicant", ?)',
@@ -351,7 +429,8 @@ const submitApplication = async (req, res) => {
       console.log("User created with ID:", userId);
 
       // 2. Insert Application (linked to user_id)
-      // If this fails, the transaction will rollback and the user will NOT be created
+      // IMPORTANT: If this fails, the transaction will rollback and the user will NOT be created
+      // Both user and application are in the same transaction, ensuring atomicity
       console.log("Attempting to insert application for user_id:", userId);
       
       // Prepare values array - ensure all values are primitives
@@ -633,11 +712,14 @@ const submitApplication = async (req, res) => {
       });
     } catch (transactionError) {
       // Rollback transaction - this will undo user creation if application insertion failed
+      // IMPORTANT: Since user and application are in the same transaction,
+      // if application fails, user creation is automatically rolled back
       if (connection) {
         try {
           await connection.rollback();
           console.error("Transaction Rolled Back due to:", transactionError);
-          console.error("User creation has been rolled back - no user was created");
+          console.error("⚠️ User creation has been rolled back - no user was created");
+          console.error("⚠️ This ensures user is only created if application is successfully saved");
         } catch (rollbackError) {
           console.error("Error during rollback:", rollbackError);
         }

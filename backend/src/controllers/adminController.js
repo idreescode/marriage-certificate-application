@@ -1027,14 +1027,77 @@ const createManualApplication = async (req, res) => {
       appointmentLocation,
     } = req.body;
 
-    // Validate required fields
-    if (!groomName || !brideName) {
+    // Validate required fields before saving to database
+    const requiredFields = [];
+    
+    // Groom required fields
+    if (!groomName || String(groomName).trim() === '') {
+      requiredFields.push('Groom name');
+    }
+    if (!groomFatherName || String(groomFatherName).trim() === '') {
+      requiredFields.push('Groom father name');
+    }
+    if (!groomMaritalStatus || String(groomMaritalStatus).trim() === '') {
+      requiredFields.push('Groom marital status');
+    }
+    
+    // Bride required fields
+    if (!brideName || String(brideName).trim() === '') {
+      requiredFields.push('Bride name');
+    }
+    if (!brideFatherName || String(brideFatherName).trim() === '') {
+      requiredFields.push('Bride father name');
+    }
+    if (!brideMaritalStatus || String(brideMaritalStatus).trim() === '') {
+      requiredFields.push('Bride marital status');
+    }
+    
+    // Witness 1 required fields (either male or female)
+    const hasWitness1 = (witness1MaleName && String(witness1MaleName).trim() !== '') || 
+                        (witness1FemaleName && String(witness1FemaleName).trim() !== '');
+    const hasWitness1Father = (witness1MaleFatherName && String(witness1MaleFatherName).trim() !== '') || 
+                              (witness1FemaleFatherName && String(witness1FemaleFatherName).trim() !== '');
+    
+    if (!hasWitness1) {
+      requiredFields.push('Witness 1 name');
+    }
+    if (!hasWitness1Father) {
+      requiredFields.push('Witness 1 father name');
+    }
+    
+    // Witness 2 required fields (either male or female)
+    const hasWitness2 = (witness2MaleName && String(witness2MaleName).trim() !== '') || 
+                        (witness2FemaleName && String(witness2FemaleName).trim() !== '');
+    const hasWitness2Father = (witness2MaleFatherName && String(witness2MaleFatherName).trim() !== '') || 
+                              (witness2FemaleFatherName && String(witness2FemaleFatherName).trim() !== '');
+    
+    if (!hasWitness2) {
+      requiredFields.push('Witness 2 name');
+    }
+    if (!hasWitness2Father) {
+      requiredFields.push('Witness 2 father name');
+    }
+    
+    // Solemnised required fields
+    const tempSolemnisedAddress = solemnisedAddress || solemnisedPlace || null;
+    if (!tempSolemnisedAddress || String(tempSolemnisedAddress).trim() === '') {
+      requiredFields.push('Solemnised address');
+    }
+    if (!solemnisedTime || String(solemnisedTime).trim() === '') {
+      requiredFields.push('Solemnised time');
+    }
+    if (!solemnisedDate || String(solemnisedDate).trim() === '') {
+      requiredFields.push('Solemnised date');
+    }
+    
+    // If any required fields are missing, return error and do not save to database
+    if (requiredFields.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "Groom and Bride names are required",
+        message: `The following required fields are missing: ${requiredFields.join(', ')}`,
+        missingFields: requiredFields,
       });
     }
-
 
     // Email validation (only if email is provided)
     if (email && email.trim()) {
@@ -2107,6 +2170,135 @@ const updateApplication = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "No fields to update",
+      });
+    }
+
+    // Validate required fields - check if being updated to null/empty
+    const requiredFields = [];
+    
+    // Groom required fields
+    if (groomName !== undefined && (!groomName || String(groomName).trim() === '')) {
+      requiredFields.push('Groom name');
+    }
+    if (groomFatherName !== undefined && (!groomFatherName || String(groomFatherName).trim() === '')) {
+      requiredFields.push('Groom father name');
+    }
+    if (groomMaritalStatus !== undefined && (!groomMaritalStatus || String(groomMaritalStatus).trim() === '')) {
+      requiredFields.push('Groom marital status');
+    }
+    
+    // Bride required fields
+    if (brideName !== undefined && (!brideName || String(brideName).trim() === '')) {
+      requiredFields.push('Bride name');
+    }
+    if (brideFatherName !== undefined && (!brideFatherName || String(brideFatherName).trim() === '')) {
+      requiredFields.push('Bride father name');
+    }
+    if (brideMaritalStatus !== undefined && (!brideMaritalStatus || String(brideMaritalStatus).trim() === '')) {
+      requiredFields.push('Bride marital status');
+    }
+    
+    // Witness 1 required fields (either male or female)
+    if (witness1MaleName !== undefined || witness1FemaleName !== undefined) {
+      const hasWitness1 = (witness1MaleName !== undefined && witness1MaleName && String(witness1MaleName).trim() !== '') || 
+                          (witness1FemaleName !== undefined && witness1FemaleName && String(witness1FemaleName).trim() !== '');
+      if (!hasWitness1) {
+        requiredFields.push('Witness 1 name');
+      }
+    }
+    if (witness1MaleFatherName !== undefined || witness1FemaleFatherName !== undefined) {
+      const hasWitness1Father = (witness1MaleFatherName !== undefined && witness1MaleFatherName && String(witness1MaleFatherName).trim() !== '') || 
+                                (witness1FemaleFatherName !== undefined && witness1FemaleFatherName && String(witness1FemaleFatherName).trim() !== '');
+      if (!hasWitness1Father) {
+        requiredFields.push('Witness 1 father name');
+      }
+    }
+    
+    // Witness 2 required fields (either male or female)
+    if (witness2MaleName !== undefined || witness2FemaleName !== undefined) {
+      const hasWitness2 = (witness2MaleName !== undefined && witness2MaleName && String(witness2MaleName).trim() !== '') || 
+                          (witness2FemaleName !== undefined && witness2FemaleName && String(witness2FemaleName).trim() !== '');
+      if (!hasWitness2) {
+        requiredFields.push('Witness 2 name');
+      }
+    }
+    if (witness2MaleFatherName !== undefined || witness2FemaleFatherName !== undefined) {
+      const hasWitness2Father = (witness2MaleFatherName !== undefined && witness2MaleFatherName && String(witness2MaleFatherName).trim() !== '') || 
+                                (witness2FemaleFatherName !== undefined && witness2FemaleFatherName && String(witness2FemaleFatherName).trim() !== '');
+      if (!hasWitness2Father) {
+        requiredFields.push('Witness 2 father name');
+      }
+    }
+    
+    // Solemnised required fields
+    if (solemnisedAddress !== undefined && (!solemnisedAddress || String(solemnisedAddress).trim() === '')) {
+      requiredFields.push('Solemnised address');
+    }
+    if (solemnisedTime !== undefined && (!normalizedSolemnisedTime || String(normalizedSolemnisedTime).trim() === '')) {
+      requiredFields.push('Solemnised time');
+    }
+    if (solemnisedDate !== undefined && (!normalizedSolemnisedDate || String(normalizedSolemnisedDate).trim() === '')) {
+      requiredFields.push('Solemnised date');
+    }
+    
+    // If any required fields are being set to null/empty, return error and do not save to database
+    if (requiredFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `The following required fields cannot be empty: ${requiredFields.join(', ')}`,
+        missingFields: requiredFields,
+      });
+    }
+
+    // After update, verify final state has all required fields
+    // Get current values and merge with updates to check final state
+    const finalGroomName = groomName !== undefined ? groomName : application.groom_full_name;
+    const finalGroomFatherName = groomFatherName !== undefined ? groomFatherName : application.groom_father_name;
+    const finalGroomMaritalStatus = groomMaritalStatus !== undefined ? groomMaritalStatus : application.groom_marital_status;
+    const finalBrideName = brideName !== undefined ? brideName : application.bride_full_name;
+    const finalBrideFatherName = brideFatherName !== undefined ? brideFatherName : application.bride_father_name;
+    const finalBrideMaritalStatus = brideMaritalStatus !== undefined ? brideMaritalStatus : application.bride_marital_status;
+    const finalSolemnisedAddress = solemnisedAddress !== undefined ? solemnisedAddress : application.solemnised_address;
+    const finalSolemnisedTime = normalizedSolemnisedTime !== undefined ? normalizedSolemnisedTime : application.solemnised_time;
+    const finalSolemnisedDate = normalizedSolemnisedDate !== undefined ? normalizedSolemnisedDate : application.solemnised_date;
+    
+    // Check witness 1 - need to query witnesses table after update, but we can check if we're removing required fields
+    // For now, validate that if we're updating witnesses, at least one witness 1 has name and father name
+    
+    const finalRequiredFields = [];
+    if (!finalGroomName || String(finalGroomName).trim() === '') {
+      finalRequiredFields.push('Groom name');
+    }
+    if (!finalGroomFatherName || String(finalGroomFatherName).trim() === '') {
+      finalRequiredFields.push('Groom father name');
+    }
+    if (!finalGroomMaritalStatus || String(finalGroomMaritalStatus).trim() === '') {
+      finalRequiredFields.push('Groom marital status');
+    }
+    if (!finalBrideName || String(finalBrideName).trim() === '') {
+      finalRequiredFields.push('Bride name');
+    }
+    if (!finalBrideFatherName || String(finalBrideFatherName).trim() === '') {
+      finalRequiredFields.push('Bride father name');
+    }
+    if (!finalBrideMaritalStatus || String(finalBrideMaritalStatus).trim() === '') {
+      finalRequiredFields.push('Bride marital status');
+    }
+    if (!finalSolemnisedAddress || String(finalSolemnisedAddress).trim() === '') {
+      finalRequiredFields.push('Solemnised address');
+    }
+    if (!finalSolemnisedTime || String(finalSolemnisedTime).trim() === '') {
+      finalRequiredFields.push('Solemnised time');
+    }
+    if (!finalSolemnisedDate || String(finalSolemnisedDate).trim() === '') {
+      finalRequiredFields.push('Solemnised date');
+    }
+    
+    if (finalRequiredFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `After update, the following required fields would be missing: ${finalRequiredFields.join(', ')}`,
+        missingFields: finalRequiredFields,
       });
     }
 
