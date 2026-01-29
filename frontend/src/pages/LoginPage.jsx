@@ -206,10 +206,12 @@ export default function LoginPage() {
                   className="form-input"
                   style={{
                     paddingLeft: "48px",
+                    paddingRight: "12px",
                     height: "56px",
                     fontSize: "1.1rem",
                     fontWeight: 500,
                     width: "100%",
+                    boxSizing: "border-box",
                   }}
                   placeholder="name@example.com"
                   value={formData.email}
@@ -222,7 +224,7 @@ export default function LoginPage() {
             </div>
 
             <div className="form-group" style={{ marginBottom: "2rem" }}>
-              <div style={{ 
+              <div className="password-label-container" style={{ 
                 display: "flex", 
                 justifyContent: "space-between", 
                 alignItems: "center", 
@@ -230,11 +232,12 @@ export default function LoginPage() {
                 flexWrap: "wrap",
                 gap: "0.5rem"
               }}>
-                <label className="form-label" style={{ marginBottom: 0, flex: "1 1 auto", minWidth: "fit-content" }}>
+                <label className="form-label password-label" style={{ marginBottom: 0, flex: "1 1 auto", minWidth: "fit-content" }}>
                   Password
                 </label>
                 <Link
                   to="/applicant/forgot-password"
+                  className="forgot-password-link"
                   style={{
                     fontSize: "0.85rem",
                     color: "var(--brand-600)",
@@ -266,10 +269,12 @@ export default function LoginPage() {
                   className="form-input"
                   style={{
                     paddingLeft: "48px",
+                    paddingRight: "12px",
                     height: "56px",
                     fontSize: "1.1rem",
                     fontWeight: 500,
                     width: "100%",
+                    boxSizing: "border-box",
                   }}
                   placeholder="••••••••"
                   value={formData.password}
@@ -336,10 +341,26 @@ export default function LoginPage() {
             font-size: 0.85rem !important;
             margin-bottom: 0.5rem !important;
           }
+          .password-label-container {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .password-label {
+            margin-bottom: 0 !important;
+            flex: 0 0 auto !important;
+          }
+          .forgot-password-link {
+            margin-left: auto !important;
+            flex-shrink: 0 !important;
+          }
           .form-input {
             font-size: 16px !important;
             height: 50px !important;
             padding-left: 44px !important;
+            padding-right: 12px !important;
+            box-sizing: border-box !important;
           }
           .login-submit-btn {
             height: 50px !important;
@@ -374,9 +395,28 @@ export default function LoginPage() {
             height: 48px !important;
             padding-left: 42px !important;
             padding-right: 12px !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
           }
           .form-label {
             font-size: 0.8rem !important;
+            margin-bottom: 0.4rem !important;
+          }
+          .password-label-container {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.25rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .password-label {
+            margin-bottom: 0 !important;
+            width: 100% !important;
+          }
+          .forgot-password-link {
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            font-size: 0.8rem !important;
+            align-self: flex-start !important;
           }
           .login-submit-btn {
             height: 48px !important;
@@ -387,16 +427,6 @@ export default function LoginPage() {
             left: 12px !important;
             width: 16px !important;
             height: 16px !important;
-          }
-          /* Password label and forgot password link */
-          div[style*="justify-content: space-between"] {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 0.25rem !important;
-          }
-          div[style*="justify-content: space-between"] a {
-            margin-top: 0.25rem !important;
-            font-size: 0.8rem !important;
           }
         }
         
@@ -412,10 +442,24 @@ export default function LoginPage() {
           .form-input {
             height: 46px !important;
             padding-left: 40px !important;
+            padding-right: 10px !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+          }
+          .form-label {
+            font-size: 0.75rem !important;
+          }
+          .forgot-password-link {
+            font-size: 0.75rem !important;
           }
           .login-submit-btn {
             height: 46px !important;
             font-size: 0.9rem !important;
+          }
+          [class*="lucide"] {
+            left: 10px !important;
+            width: 14px !important;
+            height: 14px !important;
           }
         }
         
