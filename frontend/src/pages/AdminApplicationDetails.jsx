@@ -539,8 +539,7 @@ export default function AdminApplicationDetails() {
                 </span>
                 {/* Solemnised Information */}
                 {(application.solemnised_date ||
-                  application.solemnised_time ||
-                  application.solemnised_address) && (
+                  application.solemnised_time) && (
                   <div
                     style={{
                       marginTop: "0.75rem",
@@ -565,12 +564,6 @@ export default function AdminApplicationDetails() {
                           const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
                           return `${hour12}:${minutes} ${ampm}`;
                         })()}
-                      </span>
-                    )}
-                    {application.solemnised_address && (
-                      <span className="flex items-center gap-1.5">
-                        <MapPin size={16} /> Solemnised Address:{" "}
-                        {application.solemnised_address}
                       </span>
                     )}
                   </div>
@@ -916,14 +909,14 @@ export default function AdminApplicationDetails() {
             {(application.witness1_male_name || application.witness1_female_name || 
               application.witness2_male_name || application.witness2_female_name) ? (
               <div className="grid-2-cols">
-                {/* Witness No 1 (MALE) */}
+                {/* Witness No 1 */}
                 {application.witness1_male_name && (
                   <div className="details-card bg-witness-amber">
                     <div className="card-title-row">
                       <div className="icon-box icon-box-amber">
                         <User size={22} />
                       </div>
-                      <h2 className="card-title-text">Witness No 1 (MALE)</h2>
+                      <h2 className="card-title-text">Witness No 1</h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
@@ -967,14 +960,14 @@ export default function AdminApplicationDetails() {
                   </div>
                 )}
 
-                {/* Witness No 1 (FEMALE) */}
+                {/* Witness No 2 */}
                 {application.witness1_female_name && (
                   <div className="details-card bg-witness-emerald">
                     <div className="card-title-row">
                       <div className="icon-box icon-box-emerald">
                         <User size={22} />
                       </div>
-                      <h2 className="card-title-text">Witness No 1 (FEMALE)</h2>
+                      <h2 className="card-title-text">Witness No 2</h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
@@ -1018,14 +1011,14 @@ export default function AdminApplicationDetails() {
                   </div>
                 )}
 
-                {/* Witness No 2 (MALE) */}
+                {/* Witness No 3 */}
                 {application.witness2_male_name && (
                   <div className="details-card bg-witness-violet">
                     <div className="card-title-row">
                       <div className="icon-box icon-box-violet">
                         <User size={22} />
                       </div>
-                      <h2 className="card-title-text">Witness No 2 (MALE)</h2>
+                      <h2 className="card-title-text">Witness No 3</h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
@@ -1069,14 +1062,14 @@ export default function AdminApplicationDetails() {
                   </div>
                 )}
 
-                {/* Witness No 2 (FEMALE) */}
+                {/* Witness No 4 */}
                 {application.witness2_female_name && (
                   <div className="details-card bg-witness-orange">
                     <div className="card-title-row">
                       <div className="icon-box icon-box-orange">
                         <User size={22} />
                       </div>
-                      <h2 className="card-title-text">Witness No 2 (FEMALE)</h2>
+                      <h2 className="card-title-text">Witness No 4</h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
@@ -1148,8 +1141,7 @@ export default function AdminApplicationDetails() {
             )}
 
             {/* Solemnisation Details Section */}
-            {(application.solemnised_date ||
-              application.solemnised_address) && (
+            {application.solemnised_date && (
               <div className="details-card bg-appointment-card">
                 <div className="card-title-row">
                   <div className="icon-box icon-box-purple">
@@ -1177,13 +1169,6 @@ export default function AdminApplicationDetails() {
                         const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
                         return `${hour12}:${minutes} ${ampm}`;
                       })()}
-                    />
-                  )}
-                  {application.solemnised_address && (
-                    <InfoItem
-                      icon={MapPin}
-                      label="SOLEMNISED ADDRESS"
-                      value={application.solemnised_address}
                     />
                   )}
                 </div>
@@ -1559,7 +1544,7 @@ export default function AdminApplicationDetails() {
               )}
 
               {/* WITNESSES - From applications table */}
-              {/* Witness No 1 (MALE) */}
+              {/* Witness No 1 */}
               {application.witness1_male_name && (
                 <tr>
                   <td
@@ -1571,7 +1556,7 @@ export default function AdminApplicationDetails() {
                       verticalAlign: "middle",
                     }}
                   >
-                    WITNESS No 1 (MALE)
+                    WITNESS No 1
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
                     {application.witness1_male_name || "NIL"}
@@ -1614,7 +1599,7 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* Witness No 1 (FEMALE) */}
+              {/* Witness No 2 */}
               {application.witness1_female_name && (
                 <tr>
                   <td
@@ -1626,7 +1611,7 @@ export default function AdminApplicationDetails() {
                       verticalAlign: "middle",
                     }}
                   >
-                    WITNESS No 1 (FEMALE)
+                    WITNESS No 2
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
                     {application.witness1_female_name || "NIL"}
@@ -1669,7 +1654,7 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* Witness No 2 (MALE) */}
+              {/* Witness No 3 */}
               {application.witness2_male_name && (
                 <tr>
                   <td
@@ -1681,7 +1666,7 @@ export default function AdminApplicationDetails() {
                       verticalAlign: "middle",
                     }}
                   >
-                    WITNESS No 2 (MALE)
+                    WITNESS No 3
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
                     {application.witness2_male_name || "NIL"}
@@ -1724,7 +1709,7 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* Witness No 2 (FEMALE) */}
+              {/* Witness No 4 */}
               {application.witness2_female_name && (
                 <tr>
                   <td
@@ -1736,7 +1721,7 @@ export default function AdminApplicationDetails() {
                       verticalAlign: "middle",
                     }}
                   >
-                    WITNESS No 2 (FEMALE)
+                    WITNESS No 4
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
                     {application.witness2_female_name || "NIL"}
@@ -1891,9 +1876,6 @@ export default function AdminApplicationDetails() {
                     )
                   : "NIL"}
               </p>
-              <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>
-                Address: {application.solemnised_address || "NIL"}
-              </p>
               <p
                 style={{
                   fontWeight: "bold",
@@ -1906,9 +1888,6 @@ export default function AdminApplicationDetails() {
               </p>
               <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>
                 Name: {application.solemnised_by || "NIL"}
-              </p>
-              <p style={{ margin: "0.2rem 0", wordBreak: "break-word" }}>
-                Address: {application.solemnised_address || "NIL"}
               </p>
             </div>
           </div>
