@@ -47,6 +47,7 @@ const submitApplication = async (req, res) => {
       });
       
       // Build formData object from form_data[index][name] and form_data[index][value]
+      // For duplicate field names, only keep the one with a non-empty value
       indices.forEach(index => {
         const nameKey = `form_data[${index}][name]`;
         const valueKey = `form_data[${index}][value]`;
@@ -54,12 +55,19 @@ const submitApplication = async (req, res) => {
         const fieldValue = req.body[valueKey];
         
         if (fieldName) {
-          // Handle duplicate fields - keep the last non-empty value
-          if (fieldValue && String(fieldValue).trim() !== '') {
+          const trimmedValue = fieldValue ? String(fieldValue).trim() : '';
+          const hasValue = trimmedValue !== '';
+          
+          // If field doesn't exist yet, set it
+          if (!formData.hasOwnProperty(fieldName)) {
+            formData[fieldName] = hasValue ? fieldValue : null;
+          } 
+          // If field exists but is empty/null, and current value has data, replace it
+          else if (hasValue && (!formData[fieldName] || String(formData[fieldName]).trim() === '')) {
             formData[fieldName] = fieldValue;
-          } else if (!formData[fieldName]) {
-            formData[fieldName] = fieldValue || null;
           }
+          // If field exists and has value, and current value also has data, keep the existing one (first non-empty wins)
+          // This prevents empty values from overwriting non-empty ones
         }
       });
     } else if (req.body.data && Array.isArray(req.body.data)) {
