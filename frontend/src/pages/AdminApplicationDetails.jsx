@@ -687,13 +687,15 @@ export default function AdminApplicationDetails() {
                     label="ADDRESS"
                     value={application.groom_address}
                   />
-                  {application.groom_marital_status && (
-                    <InfoItem
-                      icon={User}
-                      label="MARITAL STATUS"
-                      value={application.groom_marital_status.charAt(0).toUpperCase() + application.groom_marital_status.slice(1)}
-                    />
-                  )}
+                  <InfoItem
+                    icon={User}
+                    label="MARITAL STATUS"
+                    value={
+                      application.groom_marital_status
+                        ? application.groom_marital_status.charAt(0).toUpperCase() + application.groom_marital_status.slice(1)
+                        : "NOT SPECIFIED"
+                    }
+                  />
                   {application.groom_id_number && (
                     <InfoItem
                       icon={FileText}
@@ -710,9 +712,9 @@ export default function AdminApplicationDetails() {
                     icon={User}
                     label="PERSONALLY/REPRESENTATIVE"
                     value={
-                      (application.groom_personally === 1 || application.groom_personally === true)
+                      (application.groom_personally === 1 || application.groom_personally === true || application.groom_personally === "1")
                         ? "PERSONALLY"
-                        : (application.groom_representative === 1 || application.groom_representative === true)
+                        : (application.groom_representative === 1 || application.groom_representative === true || application.groom_representative === "1")
                         ? "REPRESENTATIVE"
                         : "NOT SPECIFIED"
                     }
@@ -760,13 +762,15 @@ export default function AdminApplicationDetails() {
                     label="ADDRESS"
                     value={application.bride_address}
                   />
-                  {application.bride_marital_status && (
-                    <InfoItem
-                      icon={User}
-                      label="MARITAL STATUS"
-                      value={application.bride_marital_status.charAt(0).toUpperCase() + application.bride_marital_status.slice(1)}
-                    />
-                  )}
+                  <InfoItem
+                    icon={User}
+                    label="MARITAL STATUS"
+                    value={
+                      application.bride_marital_status
+                        ? application.bride_marital_status.charAt(0).toUpperCase() + application.bride_marital_status.slice(1)
+                        : "NOT SPECIFIED"
+                    }
+                  />
                   {application.bride_id_number && (
                     <InfoItem
                       icon={FileText}
@@ -783,9 +787,9 @@ export default function AdminApplicationDetails() {
                     icon={User}
                     label="PERSONALLY/REPRESENTATIVE"
                     value={
-                      (application.bride_personally === 1 || application.bride_personally === true)
+                      (application.bride_personally === 1 || application.bride_personally === true || application.bride_personally === "1")
                         ? "PERSONALLY"
-                        : (application.bride_representative === 1 || application.bride_representative === true)
+                        : (application.bride_representative === 1 || application.bride_representative === true || application.bride_representative === "1")
                         ? "REPRESENTATIVE"
                         : "NOT SPECIFIED"
                     }

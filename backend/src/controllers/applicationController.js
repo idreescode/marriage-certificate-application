@@ -125,16 +125,18 @@ const submitApplication = async (req, res) => {
       }
     }
 
-    // Handle groomConfirm and brideConfirm (convert "Yes" to true)
-    if (formData.groomConfirm === "Yes" || formData.groomConfirm === "yes") {
-      formData.groomConfirm = true;
-    } else if (formData.groomConfirm === "" || !formData.groomConfirm) {
+    // Handle groomConfirm and brideConfirm (convert "Yes" to true - case insensitive)
+    if (formData.groomConfirm) {
+      const confirmValue = String(formData.groomConfirm).toLowerCase().trim();
+      formData.groomConfirm = (confirmValue === "yes" || confirmValue === "true" || confirmValue === "1");
+    } else {
       formData.groomConfirm = false;
     }
 
-    if (formData.brideConfirm === "Yes" || formData.brideConfirm === "yes") {
-      formData.brideConfirm = true;
-    } else if (formData.brideConfirm === "" || !formData.brideConfirm) {
+    if (formData.brideConfirm) {
+      const confirmValue = String(formData.brideConfirm).toLowerCase().trim();
+      formData.brideConfirm = (confirmValue === "yes" || confirmValue === "true" || confirmValue === "1");
+    } else {
       formData.brideConfirm = false;
     }
 
@@ -146,7 +148,7 @@ const submitApplication = async (req, res) => {
     const groomPlaceOfBirth = formData.groomPlaceOfBirth || null;
     const groomIdNumber = formData.groomIdNumber || null;
     const groomAddress = formData.groomAddress || null;
-    // Normalize marital status to lowercase
+    // Normalize marital status to lowercase (handle "Single", "Divorced", "Widowed" from WordPress)
     const groomMaritalStatus = formData.groomMaritalStatus 
       ? String(formData.groomMaritalStatus).toLowerCase().trim() 
       : null;
