@@ -1299,12 +1299,14 @@ export default function AdminManualApplication() {
               label="Date of Birth"
               name="groomDateOfBirth"
               type="date"
+              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
               name="groomPlaceOfBirth"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1315,6 +1317,7 @@ export default function AdminManualApplication() {
               name="groomAddress"
               type="textarea"
               span={2}
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1516,12 +1519,14 @@ export default function AdminManualApplication() {
               label="Date of Birth"
               name="brideDateOfBirth"
               type="date"
+              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
               name="bridePlaceOfBirth"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1532,6 +1537,7 @@ export default function AdminManualApplication() {
               name="brideAddress"
               type="textarea"
               span={2}
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1819,12 +1825,14 @@ export default function AdminManualApplication() {
               label="Date of Birth"
               name="witness1MaleDateOfBirth"
               type="date"
+              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
               name="witness1MalePlaceOfBirth"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1835,6 +1843,7 @@ export default function AdminManualApplication() {
               name="witness1MaleAddress"
               type="textarea"
               span={2}
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1864,12 +1873,14 @@ export default function AdminManualApplication() {
               label="Date of Birth"
               name="witness1FemaleDateOfBirth"
               type="date"
+              required
               formData={formData}
               handleChange={handleChange}
             />
             <FormField
               label="Place of Birth"
               name="witness1FemalePlaceOfBirth"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1880,6 +1891,7 @@ export default function AdminManualApplication() {
               name="witness1FemaleAddress"
               type="textarea"
               span={2}
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -1978,6 +1990,7 @@ export default function AdminManualApplication() {
             <FormField
               label="Mahar agreed amount"
               name="mahrAmount"
+              required
               formData={formData}
               handleChange={handleChange}
             />
@@ -2009,7 +2022,7 @@ export default function AdminManualApplication() {
               name="solemnisedAddress"
               type="textarea"
               span={2}
-              required={true}
+              required={false}
               formData={formData}
               handleChange={handleChange}
             />
