@@ -48,6 +48,7 @@ const submitApplication = async (req, res) => {
       
       // Build formData object from form_data[index][name] and form_data[index][value]
       // For duplicate field names, only keep the one with a non-empty value
+      // Don't add fields with empty values to formData at all
       indices.forEach(index => {
         const nameKey = `form_data[${index}][name]`;
         const valueKey = `form_data[${index}][value]`;
@@ -58,21 +59,27 @@ const submitApplication = async (req, res) => {
           const trimmedValue = fieldValue ? String(fieldValue).trim() : '';
           const hasValue = trimmedValue !== '';
           
-          // If field doesn't exist yet, set it
-          if (!formData.hasOwnProperty(fieldName)) {
-            formData[fieldName] = hasValue ? fieldValue : null;
-          } 
-          // If field exists but is empty/null, and current value has data, replace it
-          else if (hasValue && (!formData[fieldName] || String(formData[fieldName]).trim() === '')) {
-            formData[fieldName] = fieldValue;
+          // Only process fields that have actual values
+          if (hasValue) {
+            // If field doesn't exist yet, set it
+            if (!formData.hasOwnProperty(fieldName)) {
+              formData[fieldName] = fieldValue;
+            } 
+            // If field exists but is empty/null, replace it with the new value
+            else if (!formData[fieldName] || String(formData[fieldName]).trim() === '') {
+              formData[fieldName] = fieldValue;
+            }
+            // If field already has a value, keep the existing one (first non-empty wins)
           }
-          // If field exists and has value, and current value also has data, keep the existing one (first non-empty wins)
-          // This prevents empty values from overwriting non-empty ones
+          // If value is empty, don't add it to formData at all (skip it completely)
         }
       });
     } else if (req.body.data && Array.isArray(req.body.data)) {
       req.body.data.forEach((item) => {
-        formData[item.name] = item.value || null;
+        // Only add fields with non-empty values
+        if (item.value && String(item.value).trim() !== '') {
+          formData[item.name] = item.value;
+        }
       });
     } else {
       // If data is already in object format, use it directly
