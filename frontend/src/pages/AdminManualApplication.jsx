@@ -326,6 +326,7 @@ export default function AdminManualApplication() {
     witness2FemaleAddress: "",
     // Mahr
     mahrAmount: "",
+    mahrType: "",
     // Solemnisation
     solemnisedDate: "",
     solemnisedTime: "",
@@ -591,6 +592,7 @@ export default function AdminManualApplication() {
               witness2FemalePlaceOfBirth: sortedWitnesses[3]?.witness_place_of_birth || sortedWitnesses[3]?.place_of_birth || "",
               witness2FemaleAddress: sortedWitnesses[3]?.witness_address || sortedWitnesses[3]?.address || "",
               mahrAmount: app.mahr_amount || "",
+              mahrType: app.mahr_type || "",
               solemnisedDate: formatDate(app.solemnised_date, false), // Date only from DATE column
               solemnisedTime: formatTime(app.solemnised_time), // Time only from TIME column
               solemnisedPlace: app.solemnised_place || "",
@@ -1995,6 +1997,59 @@ export default function AdminManualApplication() {
               handleChange={handleChange}
             />
           </FormRow>
+          <div style={{ marginTop: "1.5rem", marginBottom: "1rem" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "10px",
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: "clamp(16px, 3vw, 25px)",
+                fontWeight: 400,
+                color: "#2E2E2E",
+                textTransform: "uppercase",
+              }}
+            >
+              Mahr Type
+            </label>
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+              {["deferred", "prompt"].map((type) => (
+                <label
+                  key={type}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="mahrType"
+                    value={type}
+                    checked={formData.mahrType === type}
+                    onChange={handleChange}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: "2.7px solid #CA6C41",
+                      cursor: "pointer",
+                      accentColor: "#CA6C41",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "Montserrat, sans-serif",
+                      fontSize: "clamp(16px, 3vw, 25px)",
+                      color: "#2E2E2E",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
         </FormSection>
 
         {/* NIKAH DATE AND TIME Section */}
@@ -2012,17 +2067,6 @@ export default function AdminManualApplication() {
               label="Time"
               name="solemnisedTime"
               type="time"
-              formData={formData}
-              handleChange={handleChange}
-            />
-          </FormRow>
-          <FormRow>
-            <FormField
-              label="Address"
-              name="solemnisedAddress"
-              type="textarea"
-              span={2}
-              required={false}
               formData={formData}
               handleChange={handleChange}
             />

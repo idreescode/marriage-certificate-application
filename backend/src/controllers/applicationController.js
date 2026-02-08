@@ -230,6 +230,18 @@ const submitApplication = async (req, res) => {
 
     // Mahr
     const mahrAmount = formData.mahrAmount || null;
+    
+    // Handle Deffered_Prompt field from WordPress (note: WordPress sends "Deffered" with typo)
+    // Map to mahr_type: normalize "Deffered" -> "deferred", "Prompt" -> "prompt"
+    let mahrType = null;
+    if (formData.Deffered_Prompt) {
+      const value = String(formData.Deffered_Prompt).toLowerCase().trim();
+      if (value === 'deffered' || value === 'deferred') {
+        mahrType = 'deferred';
+      } else if (value === 'prompt') {
+        mahrType = 'prompt';
+      }
+    }
 
     // Solemnised - expect separate date and time fields
     // WordPress forms should be updated to send solemnisedDate and solemnisedTime separately
@@ -407,6 +419,7 @@ const submitApplication = async (req, res) => {
         brideRepPlaceOfBirth || null,
         brideRepAddress || null,
         mahrAmount || null,
+        mahrType || null,
         normalizedSolemnisedDate || null,
         normalizedSolemnisedTime || null,
         solemnisedPlace || null,
@@ -451,7 +464,7 @@ const submitApplication = async (req, res) => {
       
       // Debug: Log the count and values
       console.log("Insert values count:", sanitizedValues.length);
-      console.log("Expected columns: 60");
+      console.log("Expected columns: 61");
       console.log("First 10 values:", sanitizedValues.slice(0, 10));
       
       // Count placeholders in SQL
@@ -460,7 +473,8 @@ const submitApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`.match(/\?/g);
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?`.match(/\?/g);
       const placeholderCount = sqlPlaceholders ? sqlPlaceholders.length : 0;
       console.log("SQL placeholder count:", placeholderCount);
       
@@ -484,7 +498,7 @@ const submitApplication = async (req, res) => {
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
-          mahr_amount,
+          mahr_amount, mahr_type,
           solemnised_date, solemnised_time, solemnised_place, solemnised_address,
           payment_status, status,
           witness1_male_name, witness1_male_father_name, witness1_male_date_of_birth, witness1_male_place_of_birth, witness1_male_address,
@@ -497,7 +511,8 @@ const submitApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?
         )`,
         sanitizedValues
       );

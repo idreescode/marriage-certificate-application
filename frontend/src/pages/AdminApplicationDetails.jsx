@@ -1042,6 +1042,13 @@ export default function AdminApplicationDetails() {
                     label="MAHR AMOUNT"
                     value={application.mahr_amount}
                   />
+                  {application.mahr_type && (
+                    <InfoItem
+                      icon={CreditCard}
+                      label="MAHR TYPE"
+                      value={application.mahr_type.charAt(0).toUpperCase() + application.mahr_type.slice(1)}
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -1683,14 +1690,19 @@ export default function AdminApplicationDetails() {
                 >
                   MAHR
                 </td>
-                <td
-                  style={{ border: "1px solid black", padding: "12px" }}
-                  colSpan="6"
-                >
-                  {application.mahr_amount || "NIL"}
-                </td>
-              </tr>
-            </tbody>
+                  <td
+                    style={{ border: "1px solid black", padding: "12px" }}
+                    colSpan="6"
+                  >
+                    {application.mahr_amount || "NIL"}
+                    {application.mahr_type && (
+                      <span style={{ marginLeft: "10px", fontWeight: "normal" }}>
+                        ({application.mahr_type.charAt(0).toUpperCase() + application.mahr_type.slice(1)})
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
           </table>
 
           {/* Bottom Section - Three Columns */}

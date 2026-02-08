@@ -37,6 +37,7 @@ const migrations = [
   require('./034_remove_mahr_type_field'),
   require('./035_change_solemnised_time_to_varchar'),
   require('./036_remove_appointment_columns'),
+  require('./037_add_mahr_type_field'),
 ];
 
 // Run migrations

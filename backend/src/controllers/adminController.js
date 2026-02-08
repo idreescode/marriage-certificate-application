@@ -1011,6 +1011,7 @@ const createManualApplication = async (req, res) => {
       witness2FemaleAddress,
       // Mahr
       mahrAmount,
+      mahrType,
       // Solemnisation
       solemnisedDate,
       solemnisedTime,
@@ -1227,6 +1228,10 @@ const createManualApplication = async (req, res) => {
             mahrAmount && mahrAmount !== '' && mahrAmount !== 'null' 
               ? (typeof mahrAmount === 'string' ? (isNaN(parseFloat(mahrAmount)) ? null : parseFloat(mahrAmount)) : (isNaN(Number(mahrAmount)) ? null : Number(mahrAmount)))
               : null,
+            // Normalize mahrType: handle "Deffered" typo from WordPress, convert to lowercase
+            mahrType && mahrType !== '' && mahrType !== 'null'
+              ? (String(mahrType).toLowerCase().trim() === 'deffered' || String(mahrType).toLowerCase().trim() === 'deferred' ? 'deferred' : (String(mahrType).toLowerCase().trim() === 'prompt' ? 'prompt' : null))
+              : null,
             normalizedSolemnisedDate || null,
             normalizedSolemnisedTime || null,
             finalSolemnisedPlace || null,
@@ -1285,8 +1290,8 @@ const createManualApplication = async (req, res) => {
           });
           
           // Validate count matches
-          // Count: 3 (app info) + 10 (groom) + 5 (groom rep) + 10 (bride) + 5 (bride rep) + 1 (mahr) + 4 (solemnised) + 4 (deposit/payment/status) + 12 (documents) + 20 (witnesses) = 74
-          const expectedCount = 74;
+          // Count: 3 (app info) + 10 (groom) + 5 (groom rep) + 10 (bride) + 5 (bride rep) + 2 (mahr + mahr_type) + 4 (solemnised) + 4 (deposit/payment/status) + 12 (documents) + 20 (witnesses) = 75
+          const expectedCount = 75;
           if (sanitizedValues.length !== expectedCount) {
             console.error(`Value count mismatch: Expected ${expectedCount} values, got ${sanitizedValues.length}`);
             console.error('Values:', sanitizedValues);
@@ -1306,7 +1311,7 @@ const createManualApplication = async (req, res) => {
           bride_confirm, bride_personally, bride_representative,
           bride_rep_name, bride_rep_father_name, bride_rep_date_of_birth,
           bride_rep_place_of_birth, bride_rep_address,
-          mahr_amount,
+          mahr_amount, mahr_type,
           solemnised_date, solemnised_time, solemnised_place, solemnised_address,
           deposit_amount, deposit_amount_set_by, payment_status,
           status,
@@ -1325,7 +1330,7 @@ const createManualApplication = async (req, res) => {
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?
+          ?, ?, ?, ?, ?
         )`,
             sanitizedValues
           );
@@ -1717,6 +1722,7 @@ const updateApplication = async (req, res) => {
       witness2FemaleAddress,
       // Mahr
       mahrAmount,
+      mahrType,
       // Solemnisation
       solemnisedDate,
       solemnisedTime,
@@ -1967,6 +1973,16 @@ const updateApplication = async (req, res) => {
     if (mahrAmount !== undefined) {
       updateFields.push("mahr_amount = ?");
       updateValues.push(mahrAmount || null);
+    }
+    if (mahrType !== undefined) {
+      // Normalize mahrType: handle "Deffered" typo, convert to lowercase
+      const normalizedMahrType = mahrType && mahrType !== '' && mahrType !== 'null'
+        ? (String(mahrType).toLowerCase().trim() === 'deffered' || String(mahrType).toLowerCase().trim() === 'deferred' 
+          ? 'deferred' 
+          : (String(mahrType).toLowerCase().trim() === 'prompt' ? 'prompt' : null))
+        : null;
+      updateFields.push("mahr_type = ?");
+      updateValues.push(normalizedMahrType);
     }
 
     // Solemnisation

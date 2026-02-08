@@ -161,6 +161,22 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       `;
     };
 
+    // Mahr Type: return checkboxes HTML (DEFERRED / PROMPT) - inline on same line
+    const mahrTypeCheckboxes = (mahrType) => {
+      const mahrTypeStr = mahrType ? String(mahrType).toLowerCase().trim() : '';
+      const deferredChecked = (mahrTypeStr === 'deferred');
+      const promptChecked = (mahrTypeStr === 'prompt');
+      
+      return `
+        <span style="display: inline-block; margin-left: 10px; font-size: 8px;">
+          <span class="checkbox ${deferredChecked ? 'checked' : ''}" style="display: inline-block; margin-right: 4px;">${deferredChecked ? '✓' : ''}</span> DEFERRED
+        </span>
+        <span style="display: inline-block; margin-left: 10px; font-size: 8px;">
+          <span class="checkbox ${promptChecked ? 'checked' : ''}" style="display: inline-block; margin-right: 4px;">${promptChecked ? '✓' : ''}</span> PROMPT
+        </span>
+      `;
+    };
+
 
     // Rep date/place of birth: format or — when no rep or no data
     const repDobPob = (repName, dob, pob) => {
@@ -230,6 +246,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       // Mahr
       mahr_amount: applicationData.mahr_amount != null && applicationData.mahr_amount !== ''
         ? toUpperCase(String(applicationData.mahr_amount)) : '—',
+      mahr_type_checkboxes: mahrTypeCheckboxes(applicationData.mahr_type),
       
       // Solemnization - separate date and time
       solemnised_date_only: (() => {
