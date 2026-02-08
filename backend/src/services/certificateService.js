@@ -140,10 +140,14 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
     };
 
     // In Person / By Proxy: return checkboxes HTML
-    const inPersonCheckboxes = (personally) => {
-      const personallyChecked = (personally === true || personally === 1);
-      // Representative is checked if NOT personally (i.e., by representative)
-      const representativeChecked = (personally === false || personally === 0 || !personally);
+    // Both checkboxes should be blank if neither is specified
+    const inPersonCheckboxes = (personally, representative) => {
+      // Check if personally is explicitly true/1
+      const personallyChecked = (personally === true || personally === 1 || personally === "1");
+      // Check if representative is explicitly true/1
+      const representativeChecked = (representative === true || representative === 1 || representative === "1");
+      
+      // If neither is specified (both null/undefined/0/false), both should be blank
       
       return `
         <div style="text-align: left; padding: 0; font-size: 8px;">
@@ -183,7 +187,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       })(),
       groom_address: toUpperCase(applicationData.groom_address || ''),
       groom_marital_status: maritalCheckboxes(applicationData.groom_marital_status),
-      groom_in_person_tick: inPersonCheckboxes(applicationData.groom_personally),
+      groom_in_person_tick: inPersonCheckboxes(applicationData.groom_personally, applicationData.groom_representative),
       groom_signature: sigCell,
 
       // Bride
@@ -198,7 +202,7 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       })(),
       bride_address: toUpperCase(applicationData.bride_address || ''),
       bride_marital_status: maritalCheckboxes(applicationData.bride_marital_status),
-      bride_in_person_tick: inPersonCheckboxes(applicationData.bride_personally),
+      bride_in_person_tick: inPersonCheckboxes(applicationData.bride_personally, applicationData.bride_representative),
       bride_signature: sigCell,
 
       // Groom Representative
