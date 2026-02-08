@@ -910,10 +910,11 @@ export default function AdminApplicationDetails() {
             )}
 
             {/* Witnesses Section - 4 Witnesses from applications table */}
+            {/* Display order: Male witnesses first, then female witnesses */}
             {(application.witness1_male_name || application.witness1_female_name || 
               application.witness2_male_name || application.witness2_female_name) ? (
               <div className="grid-2-cols">
-                {/* Witness No 1 */}
+                {/* Witness No 1 - Male 1 */}
                 {application.witness1_male_name && (
                   <div className="details-card bg-witness-amber">
                     <div className="card-title-row">
@@ -964,65 +965,14 @@ export default function AdminApplicationDetails() {
                   </div>
                 )}
 
-                {/* Witness No 2 */}
-                {application.witness1_female_name && (
-                  <div className="details-card bg-witness-emerald">
-                    <div className="card-title-row">
-                      <div className="icon-box icon-box-emerald">
-                        <User size={22} />
-                      </div>
-                      <h2 className="card-title-text">Witness No 2</h2>
-                    </div>
-                    <div className="card-body">
-                      <InfoItem
-                        icon={User}
-                        label="FULL NAME"
-                        value={application.witness1_female_name}
-                      />
-                      {application.witness1_female_father_name && (
-                        <InfoItem
-                          icon={User}
-                          label="FATHER'S NAME"
-                          value={application.witness1_female_father_name}
-                        />
-                      )}
-                      {application.witness1_female_date_of_birth && (
-                        <InfoItem
-                          icon={Calendar}
-                          label="DATE OF BIRTH"
-                          value={new Date(
-                            application.witness1_female_date_of_birth
-                          ).toLocaleDateString(undefined, {
-                            dateStyle: "long",
-                          })}
-                        />
-                      )}
-                      {application.witness1_female_place_of_birth && (
-                        <InfoItem
-                          icon={MapPin}
-                          label="PLACE OF BIRTH"
-                          value={application.witness1_female_place_of_birth}
-                        />
-                      )}
-                      {application.witness1_female_address && (
-                        <InfoItem
-                          icon={MapPin}
-                          label="ADDRESS"
-                          value={application.witness1_female_address}
-                        />
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Witness No 3 */}
+                {/* Witness No 2 - Male 2 */}
                 {application.witness2_male_name && (
                   <div className="details-card bg-witness-violet">
                     <div className="card-title-row">
                       <div className="icon-box icon-box-violet">
                         <User size={22} />
                       </div>
-                      <h2 className="card-title-text">Witness No 3</h2>
+                      <h2 className="card-title-text">Witness No 2</h2>
                     </div>
                     <div className="card-body">
                       <InfoItem
@@ -1066,7 +1016,58 @@ export default function AdminApplicationDetails() {
                   </div>
                 )}
 
-                {/* Witness No 4 */}
+                {/* Witness No 3 - Female 1 */}
+                {application.witness1_female_name && (
+                  <div className="details-card bg-witness-emerald">
+                    <div className="card-title-row">
+                      <div className="icon-box icon-box-emerald">
+                        <User size={22} />
+                      </div>
+                      <h2 className="card-title-text">Witness No 3</h2>
+                    </div>
+                    <div className="card-body">
+                      <InfoItem
+                        icon={User}
+                        label="FULL NAME"
+                        value={application.witness1_female_name}
+                      />
+                      {application.witness1_female_father_name && (
+                        <InfoItem
+                          icon={User}
+                          label="FATHER'S NAME"
+                          value={application.witness1_female_father_name}
+                        />
+                      )}
+                      {application.witness1_female_date_of_birth && (
+                        <InfoItem
+                          icon={Calendar}
+                          label="DATE OF BIRTH"
+                          value={new Date(
+                            application.witness1_female_date_of_birth
+                          ).toLocaleDateString(undefined, {
+                            dateStyle: "long",
+                          })}
+                        />
+                      )}
+                      {application.witness1_female_place_of_birth && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="PLACE OF BIRTH"
+                          value={application.witness1_female_place_of_birth}
+                        />
+                      )}
+                      {application.witness1_female_address && (
+                        <InfoItem
+                          icon={MapPin}
+                          label="ADDRESS"
+                          value={application.witness1_female_address}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Witness No 4 - Female 2 */}
                 {application.witness2_female_name && (
                   <div className="details-card bg-witness-orange">
                     <div className="card-title-row">
