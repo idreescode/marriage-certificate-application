@@ -267,29 +267,15 @@ const submitApplication = async (req, res) => {
     const email = formData.email || null;
     const contactNumber = formData.contactnumber || null;
 
-    // Validate email
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email address is required",
-      });
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
-    }
-
-    // Validate contact number
-    if (!contactNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "Contact number is required",
-      });
+    // Email validation (only if email is provided)
+    if (email && email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid email address",
+        });
+      }
     }
 
     // DEBUG: Log date transformations from WordPress
@@ -349,8 +335,16 @@ const submitApplication = async (req, res) => {
       // Generate sequential registration number starting from 1000
       const applicationNumber = await generateSequentialRegistrationNumber(pool);
 
-      // Use the email provided in the form
-      const portalEmail = email;
+      // Use the email provided in the form, or generate a fake email if not provided
+      let portalEmail;
+      if (email && email.trim()) {
+        portalEmail = email.toLowerCase().trim();
+      } else {
+        // Generate fake email: application-{applicationNumber}@noemail.jamiyat.org
+        portalEmail = `application-${applicationNumber}@noemail.jamiyat.org`;
+        console.log("No email provided - generating fake email:", portalEmail);
+      }
+
       const portalPassword = generatePassword();
       const hashedPassword = await bcrypt.hash(portalPassword, 10);
 
@@ -625,13 +619,22 @@ const submitApplication = async (req, res) => {
         isManualApplication: false, // Regular user submission
       };
 
+      // Check if fake email was used
+      const isFakeEmail = portalEmail.includes('@noemail.jamiyat.org');
+
       // Send emails in parallel (non-blocking)
-      // 1. Send "under review" email to user (no password)
-      // 2. Send notification email to admin
-      Promise.all([
-        sendApplicationUnderReviewEmail(applicationData),
-        sendAdminNewApplicationEmail(applicationData),
-      ]).catch((err) => console.error("Background Email Error:", err));
+      // Only send user email if real email was provided (not fake email)
+      if (!isFakeEmail) {
+        // 1. Send "under review" email to user (no password)
+        // 2. Send notification email to admin
+        Promise.all([
+          sendApplicationUnderReviewEmail(applicationData),
+          sendAdminNewApplicationEmail(applicationData),
+        ]).catch((err) => console.error("Background Email Error:", err));
+      } else {
+        // Only send admin notification if fake email (no real email provided)
+        sendAdminNewApplicationEmail(applicationData).catch((err) => console.error("Background Email Error:", err));
+      }
 
       // Create In-App Notification
       try {
@@ -646,13 +649,18 @@ const submitApplication = async (req, res) => {
         console.error("Notification Error:", notifErr);
       }
 
-      // DEVELOPMENT LOG - Credentials sent via email
+      // DEVELOPMENT LOG
       console.log("\n" + "=".repeat(60));
       console.log("✅ APPLICATION SUBMITTED SUCCESSFULLY");
       console.log("=".repeat(60));
-      console.log("📧 Confirmation email sent to:", portalEmail);
+      if (isFakeEmail) {
+        console.log("⚠️ No email provided - using fake email:", portalEmail);
+        console.log("📧 No confirmation email sent (fake email)");
+      } else {
+        console.log("📧 Confirmation email sent to:", portalEmail);
+        console.log("🔐 Password sent via email");
+      }
       console.log("🔗 Application Number:", applicationNumber);
-      console.log("🔐 Password sent via email");
       console.log("=".repeat(60) + "\n");
 
       res.status(201).json({
