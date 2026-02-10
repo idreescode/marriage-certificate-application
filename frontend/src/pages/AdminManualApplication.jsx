@@ -409,6 +409,65 @@ export default function AdminManualApplication() {
               return (a.id || 0) - (b.id || 0);
             });
             
+            // Build witness objects from applications table columns as fallback
+            // This ensures we have data even if witnesses table is empty
+            const witnessFromApp = {
+              // Witness 1 Male (order 1)
+              witness1Male: app.witness1_male_name ? {
+                witness_name: app.witness1_male_name,
+                witness_father_name: app.witness1_male_father_name,
+                witness_date_of_birth: app.witness1_male_date_of_birth,
+                witness_place_of_birth: app.witness1_male_place_of_birth,
+                witness_address: app.witness1_male_address,
+                witness_order: 1
+              } : null,
+              // Witness 1 Female (order 2)
+              witness1Female: app.witness1_female_name ? {
+                witness_name: app.witness1_female_name,
+                witness_father_name: app.witness1_female_father_name,
+                witness_date_of_birth: app.witness1_female_date_of_birth,
+                witness_place_of_birth: app.witness1_female_place_of_birth,
+                witness_address: app.witness1_female_address,
+                witness_order: 2
+              } : null,
+              // Witness 2 Male (order 3)
+              witness2Male: app.witness2_male_name ? {
+                witness_name: app.witness2_male_name,
+                witness_father_name: app.witness2_male_father_name,
+                witness_date_of_birth: app.witness2_male_date_of_birth,
+                witness_place_of_birth: app.witness2_male_place_of_birth,
+                witness_address: app.witness2_male_address,
+                witness_order: 3
+              } : null,
+              // Witness 2 Female (order 4)
+              witness2Female: app.witness2_female_name ? {
+                witness_name: app.witness2_female_name,
+                witness_father_name: app.witness2_female_father_name,
+                witness_date_of_birth: app.witness2_female_date_of_birth,
+                witness_place_of_birth: app.witness2_female_place_of_birth,
+                witness_address: app.witness2_female_address,
+                witness_order: 4
+              } : null
+            };
+            
+            // Merge witnesses from table with fallback from applications table
+            // Use witnesses table data if available, otherwise use applications table data
+            const finalWitnesses = [];
+            for (let i = 0; i < 4; i++) {
+              const order = i + 1;
+              const witnessFromTable = sortedWitnesses.find(w => w.witness_order === order);
+              
+              if (witnessFromTable) {
+                finalWitnesses[i] = witnessFromTable;
+              } else {
+                // Fallback to applications table columns
+                if (order === 1) finalWitnesses[i] = witnessFromApp.witness1Male;
+                else if (order === 2) finalWitnesses[i] = witnessFromApp.witness1Female;
+                else if (order === 3) finalWitnesses[i] = witnessFromApp.witness2Male;
+                else if (order === 4) finalWitnesses[i] = witnessFromApp.witness2Female;
+              }
+            }
+            
             // Format dates for input fields (YYYY-MM-DD)
             // Handle dates directly to avoid timezone conversion issues
             const formatDate = (date, includeTime = false) => {
@@ -567,30 +626,30 @@ export default function AdminManualApplication() {
               brideRepDateOfBirth: formatDate(app.bride_rep_date_of_birth),
               brideRepPlaceOfBirth: app.bride_rep_place_of_birth || "",
               brideRepAddress: app.bride_rep_address || "",
-              // Witness No 1 (MALE) - sortedWitnesses[0]
-              witness1MaleName: sortedWitnesses[0]?.witness_name || sortedWitnesses[0]?.full_name || "",
-              witness1MaleFatherName: sortedWitnesses[0]?.witness_father_name || sortedWitnesses[0]?.father_name || "",
-              witness1MaleDateOfBirth: formatDate(sortedWitnesses[0]?.witness_date_of_birth || sortedWitnesses[0]?.date_of_birth),
-              witness1MalePlaceOfBirth: sortedWitnesses[0]?.witness_place_of_birth || sortedWitnesses[0]?.place_of_birth || "",
-              witness1MaleAddress: sortedWitnesses[0]?.witness_address || sortedWitnesses[0]?.address || "",
-              // Witness No 1 (FEMALE) - sortedWitnesses[1]
-              witness1FemaleName: sortedWitnesses[1]?.witness_name || sortedWitnesses[1]?.full_name || "",
-              witness1FemaleFatherName: sortedWitnesses[1]?.witness_father_name || sortedWitnesses[1]?.father_name || "",
-              witness1FemaleDateOfBirth: formatDate(sortedWitnesses[1]?.witness_date_of_birth || sortedWitnesses[1]?.date_of_birth),
-              witness1FemalePlaceOfBirth: sortedWitnesses[1]?.witness_place_of_birth || sortedWitnesses[1]?.place_of_birth || "",
-              witness1FemaleAddress: sortedWitnesses[1]?.witness_address || sortedWitnesses[1]?.address || "",
-              // Witness No 2 (MALE) - sortedWitnesses[2]
-              witness2MaleName: sortedWitnesses[2]?.witness_name || sortedWitnesses[2]?.full_name || "",
-              witness2MaleFatherName: sortedWitnesses[2]?.witness_father_name || sortedWitnesses[2]?.father_name || "",
-              witness2MaleDateOfBirth: formatDate(sortedWitnesses[2]?.witness_date_of_birth || sortedWitnesses[2]?.date_of_birth),
-              witness2MalePlaceOfBirth: sortedWitnesses[2]?.witness_place_of_birth || sortedWitnesses[2]?.place_of_birth || "",
-              witness2MaleAddress: sortedWitnesses[2]?.witness_address || sortedWitnesses[2]?.address || "",
-              // Witness No 2 (FEMALE) - sortedWitnesses[3]
-              witness2FemaleName: sortedWitnesses[3]?.witness_name || sortedWitnesses[3]?.full_name || "",
-              witness2FemaleFatherName: sortedWitnesses[3]?.witness_father_name || sortedWitnesses[3]?.father_name || "",
-              witness2FemaleDateOfBirth: formatDate(sortedWitnesses[3]?.witness_date_of_birth || sortedWitnesses[3]?.date_of_birth),
-              witness2FemalePlaceOfBirth: sortedWitnesses[3]?.witness_place_of_birth || sortedWitnesses[3]?.place_of_birth || "",
-              witness2FemaleAddress: sortedWitnesses[3]?.witness_address || sortedWitnesses[3]?.address || "",
+              // Witness No 1 (MALE) - finalWitnesses[0]
+              witness1MaleName: finalWitnesses[0]?.witness_name || finalWitnesses[0]?.full_name || "",
+              witness1MaleFatherName: finalWitnesses[0]?.witness_father_name || finalWitnesses[0]?.father_name || "",
+              witness1MaleDateOfBirth: formatDate(finalWitnesses[0]?.witness_date_of_birth || finalWitnesses[0]?.date_of_birth),
+              witness1MalePlaceOfBirth: finalWitnesses[0]?.witness_place_of_birth || finalWitnesses[0]?.place_of_birth || "",
+              witness1MaleAddress: finalWitnesses[0]?.witness_address || finalWitnesses[0]?.address || "",
+              // Witness No 1 (FEMALE) - finalWitnesses[1]
+              witness1FemaleName: finalWitnesses[1]?.witness_name || finalWitnesses[1]?.full_name || "",
+              witness1FemaleFatherName: finalWitnesses[1]?.witness_father_name || finalWitnesses[1]?.father_name || "",
+              witness1FemaleDateOfBirth: formatDate(finalWitnesses[1]?.witness_date_of_birth || finalWitnesses[1]?.date_of_birth),
+              witness1FemalePlaceOfBirth: finalWitnesses[1]?.witness_place_of_birth || finalWitnesses[1]?.place_of_birth || "",
+              witness1FemaleAddress: finalWitnesses[1]?.witness_address || finalWitnesses[1]?.address || "",
+              // Witness No 2 (MALE) - finalWitnesses[2]
+              witness2MaleName: finalWitnesses[2]?.witness_name || finalWitnesses[2]?.full_name || "",
+              witness2MaleFatherName: finalWitnesses[2]?.witness_father_name || finalWitnesses[2]?.father_name || "",
+              witness2MaleDateOfBirth: formatDate(finalWitnesses[2]?.witness_date_of_birth || finalWitnesses[2]?.date_of_birth),
+              witness2MalePlaceOfBirth: finalWitnesses[2]?.witness_place_of_birth || finalWitnesses[2]?.place_of_birth || "",
+              witness2MaleAddress: finalWitnesses[2]?.witness_address || finalWitnesses[2]?.address || "",
+              // Witness No 2 (FEMALE) - finalWitnesses[3]
+              witness2FemaleName: finalWitnesses[3]?.witness_name || finalWitnesses[3]?.full_name || "",
+              witness2FemaleFatherName: finalWitnesses[3]?.witness_father_name || finalWitnesses[3]?.father_name || "",
+              witness2FemaleDateOfBirth: formatDate(finalWitnesses[3]?.witness_date_of_birth || finalWitnesses[3]?.date_of_birth),
+              witness2FemalePlaceOfBirth: finalWitnesses[3]?.witness_place_of_birth || finalWitnesses[3]?.place_of_birth || "",
+              witness2FemaleAddress: finalWitnesses[3]?.witness_address || finalWitnesses[3]?.address || "",
               mahrAmount: app.mahr_amount || "",
               mahrType: app.mahr_type || "",
               solemnisedDate: formatDate(app.solemnised_date, false), // Date only from DATE column
