@@ -909,11 +909,9 @@ export default function AdminApplicationDetails() {
               </div>
             )}
 
-            {/* Witnesses Section - Order-wise from witnesses table */}
-            {/* Dynamic numbering: Show witnesses in order (1, 2, 3, 4) based on witness_order */}
+            {/* Witnesses Section - Order-wise: Male, Female, Male, Female */}
+            {/* Ensure witnesses are displayed in pattern: Male, Female, Male, Female */}
             {(() => {
-              // Use witnesses from API response (witnesses table) sorted by witness_order
-              // Fallback to applications table columns if witnesses table is incomplete
               const witnessColors = [
                 { bgClass: "bg-witness-amber", iconClass: "icon-box-amber" },
                 { bgClass: "bg-witness-violet", iconClass: "icon-box-violet" },
@@ -921,85 +919,63 @@ export default function AdminApplicationDetails() {
                 { bgClass: "bg-witness-orange", iconClass: "icon-box-orange" }
               ];
               
-              let displayWitnesses = [];
-              
-              // First, try to use witnesses from witnesses table (sorted by witness_order)
-              if (witnesses && witnesses.length > 0) {
-                const sortedWitnesses = [...witnesses].sort((a, b) => {
-                  if (a.witness_order !== null && b.witness_order !== null) {
-                    return a.witness_order - b.witness_order;
-                  }
-                  if (a.witness_order !== null) return -1;
-                  if (b.witness_order !== null) return 1;
-                  return (a.id || 0) - (b.id || 0);
-                });
-                
-                displayWitnesses = sortedWitnesses.map((w, index) => ({
-                  name: w.witness_name || w.full_name || "",
-                  fatherName: w.witness_father_name || w.father_name || "",
-                  dateOfBirth: w.witness_date_of_birth || w.date_of_birth || null,
-                  placeOfBirth: w.witness_place_of_birth || w.place_of_birth || "",
-                  address: w.witness_address || w.address || "",
-                  bgClass: witnessColors[index % witnessColors.length]?.bgClass || "bg-witness-card",
-                  iconClass: witnessColors[index % witnessColors.length]?.iconClass || "icon-box-blue"
-                }));
-              }
-              
-              // Build fallback from applications table columns if needed
+              // Build witnesses from applications table columns in correct order: Male, Female, Male, Female
               const witnessesFromApp = [];
+              
+              // Witness 1 - Male
               if (application.witness1_male_name) {
                 witnessesFromApp.push({
                   name: application.witness1_male_name,
                   fatherName: application.witness1_male_father_name,
                   dateOfBirth: application.witness1_male_date_of_birth,
                   placeOfBirth: application.witness1_male_place_of_birth,
-                  address: application.witness1_male_address
+                  address: application.witness1_male_address,
+                  bgClass: witnessColors[0]?.bgClass || "bg-witness-card",
+                  iconClass: witnessColors[0]?.iconClass || "icon-box-blue"
                 });
               }
+              
+              // Witness 2 - Female
               if (application.witness1_female_name) {
                 witnessesFromApp.push({
                   name: application.witness1_female_name,
                   fatherName: application.witness1_female_father_name,
                   dateOfBirth: application.witness1_female_date_of_birth,
                   placeOfBirth: application.witness1_female_place_of_birth,
-                  address: application.witness1_female_address
+                  address: application.witness1_female_address,
+                  bgClass: witnessColors[1]?.bgClass || "bg-witness-card",
+                  iconClass: witnessColors[1]?.iconClass || "icon-box-blue"
                 });
               }
+              
+              // Witness 3 - Male
               if (application.witness2_male_name) {
                 witnessesFromApp.push({
                   name: application.witness2_male_name,
                   fatherName: application.witness2_male_father_name,
                   dateOfBirth: application.witness2_male_date_of_birth,
                   placeOfBirth: application.witness2_male_place_of_birth,
-                  address: application.witness2_male_address
+                  address: application.witness2_male_address,
+                  bgClass: witnessColors[2]?.bgClass || "bg-witness-card",
+                  iconClass: witnessColors[2]?.iconClass || "icon-box-blue"
                 });
               }
+              
+              // Witness 4 - Female
               if (application.witness2_female_name) {
                 witnessesFromApp.push({
                   name: application.witness2_female_name,
                   fatherName: application.witness2_female_father_name,
                   dateOfBirth: application.witness2_female_date_of_birth,
                   placeOfBirth: application.witness2_female_place_of_birth,
-                  address: application.witness2_female_address
+                  address: application.witness2_female_address,
+                  bgClass: witnessColors[3]?.bgClass || "bg-witness-card",
+                  iconClass: witnessColors[3]?.iconClass || "icon-box-blue"
                 });
               }
               
-              // Merge: Use witnesses table data if available, otherwise use applications table data
-              const finalWitnesses = [];
-              for (let i = 0; i < 4; i++) {
-                if (displayWitnesses[i] && displayWitnesses[i].name) {
-                  finalWitnesses.push(displayWitnesses[i]);
-                } else if (witnessesFromApp[i] && witnessesFromApp[i].name) {
-                  finalWitnesses.push({
-                    ...witnessesFromApp[i],
-                    bgClass: witnessColors[finalWitnesses.length % witnessColors.length]?.bgClass || "bg-witness-card",
-                    iconClass: witnessColors[finalWitnesses.length % witnessColors.length]?.iconClass || "icon-box-blue"
-                  });
-                }
-              }
-              
               // Filter out null/empty witnesses (only show witnesses with name)
-              const validWitnesses = finalWitnesses.filter(w => w && w.name && w.name.trim());
+              const validWitnesses = witnessesFromApp.filter(w => w && w.name && w.name.trim());
               
               if (validWitnesses.length === 0) {
                 return (
