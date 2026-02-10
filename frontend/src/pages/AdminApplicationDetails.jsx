@@ -909,8 +909,8 @@ export default function AdminApplicationDetails() {
               </div>
             )}
 
-            {/* Witnesses Section - Order-wise: Male, Female, Male, Female */}
-            {/* Ensure witnesses are displayed in pattern: Male, Female, Male, Female */}
+            {/* Witnesses Section - Order-wise: All Males First, Then All Females */}
+            {/* Ensure witnesses are displayed in pattern: Male, Male, Female, Female */}
             {(() => {
               const witnessColors = [
                 { bgClass: "bg-witness-amber", iconClass: "icon-box-amber" },
@@ -919,7 +919,7 @@ export default function AdminApplicationDetails() {
                 { bgClass: "bg-witness-orange", iconClass: "icon-box-orange" }
               ];
               
-              // Build witnesses from applications table columns in correct order: Male, Female, Male, Female
+              // Build witnesses from applications table columns: All Males First, Then All Females
               const witnessesFromApp = [];
               
               // Witness 1 - Male
@@ -935,20 +935,7 @@ export default function AdminApplicationDetails() {
                 });
               }
               
-              // Witness 2 - Female
-              if (application.witness1_female_name) {
-                witnessesFromApp.push({
-                  name: application.witness1_female_name,
-                  fatherName: application.witness1_female_father_name,
-                  dateOfBirth: application.witness1_female_date_of_birth,
-                  placeOfBirth: application.witness1_female_place_of_birth,
-                  address: application.witness1_female_address,
-                  bgClass: witnessColors[1]?.bgClass || "bg-witness-card",
-                  iconClass: witnessColors[1]?.iconClass || "icon-box-blue"
-                });
-              }
-              
-              // Witness 3 - Male
+              // Witness 2 - Male
               if (application.witness2_male_name) {
                 witnessesFromApp.push({
                   name: application.witness2_male_name,
@@ -956,6 +943,19 @@ export default function AdminApplicationDetails() {
                   dateOfBirth: application.witness2_male_date_of_birth,
                   placeOfBirth: application.witness2_male_place_of_birth,
                   address: application.witness2_male_address,
+                  bgClass: witnessColors[1]?.bgClass || "bg-witness-card",
+                  iconClass: witnessColors[1]?.iconClass || "icon-box-blue"
+                });
+              }
+              
+              // Witness 3 - Female
+              if (application.witness1_female_name) {
+                witnessesFromApp.push({
+                  name: application.witness1_female_name,
+                  fatherName: application.witness1_female_father_name,
+                  dateOfBirth: application.witness1_female_date_of_birth,
+                  placeOfBirth: application.witness1_female_place_of_birth,
+                  address: application.witness1_female_address,
                   bgClass: witnessColors[2]?.bgClass || "bg-witness-card",
                   iconClass: witnessColors[2]?.iconClass || "icon-box-blue"
                 });
@@ -1469,8 +1469,8 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* WITNESSES - From applications table */}
-              {/* Witness No 1 */}
+              {/* WITNESSES - From applications table: All Males First, Then All Females */}
+              {/* Witness No 1 - Male */}
               {application.witness1_male_name && (
                 <tr>
                   <td
@@ -1525,62 +1525,7 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* Witness No 2 */}
-              {application.witness1_female_name && (
-                <tr>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "12px",
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    WITNESS No 2
-                  </td>
-                  <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {application.witness1_female_name || "NIL"}
-                  </td>
-                  <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {application.witness1_female_father_name || "NIL"}
-                  </td>
-                  <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {application.witness1_female_date_of_birth
-                      ? new Date(
-                          application.witness1_female_date_of_birth
-                        ).toLocaleDateString("en-GB")
-                      : "NIL"}
-                    <br />
-                    {application.witness1_female_place_of_birth || "NIL"}
-                  </td>
-                  <td style={{ border: "1px solid black", padding: "12px" }}>
-                    {application.witness1_female_address || "NIL"}
-                  </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "12px",
-                      textAlign: "center",
-                      fontSize: "20pt",
-                    }}
-                  >
-                    /
-                  </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "12px",
-                      textAlign: "center",
-                      fontSize: "20pt",
-                    }}
-                  >
-                    /
-                  </td>
-                </tr>
-              )}
-
-              {/* Witness No 3 */}
+              {/* Witness No 2 - Male */}
               {application.witness2_male_name && (
                 <tr>
                   <td
@@ -1592,7 +1537,7 @@ export default function AdminApplicationDetails() {
                       verticalAlign: "middle",
                     }}
                   >
-                    WITNESS No 3
+                    WITNESS No 2
                   </td>
                   <td style={{ border: "1px solid black", padding: "12px" }}>
                     {application.witness2_male_name || "NIL"}
@@ -1635,7 +1580,62 @@ export default function AdminApplicationDetails() {
                 </tr>
               )}
 
-              {/* Witness No 4 */}
+              {/* Witness No 3 - Female */}
+              {application.witness1_female_name && (
+                <tr>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    WITNESS No 3
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_father_name || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_date_of_birth
+                      ? new Date(
+                          application.witness1_female_date_of_birth
+                        ).toLocaleDateString("en-GB")
+                      : "NIL"}
+                    <br />
+                    {application.witness1_female_place_of_birth || "NIL"}
+                  </td>
+                  <td style={{ border: "1px solid black", padding: "12px" }}>
+                    {application.witness1_female_address || "NIL"}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid black",
+                      padding: "12px",
+                      textAlign: "center",
+                      fontSize: "20pt",
+                    }}
+                  >
+                    /
+                  </td>
+                </tr>
+              )}
+
+              {/* Witness No 4 - Female */}
               {application.witness2_female_name && (
                 <tr>
                   <td
