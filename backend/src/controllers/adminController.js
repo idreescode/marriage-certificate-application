@@ -1872,15 +1872,18 @@ const updateApplication = async (req, res) => {
     }
     if (groomConfirm !== undefined) {
       updateFields.push("groom_confirm = ?");
-      updateValues.push(groomConfirm);
+      // Convert FormData string booleans properly
+      updateValues.push(groomConfirm === 'true' || groomConfirm === true || groomConfirm === '1' || groomConfirm === 1);
     }
     if (groomPersonally !== undefined) {
       updateFields.push("groom_personally = ?");
-      updateValues.push(groomPersonally);
+      // Convert FormData string booleans properly
+      updateValues.push(groomPersonally === 'true' || groomPersonally === true || groomPersonally === '1' || groomPersonally === 1);
     }
     if (groomRepresentative !== undefined) {
       updateFields.push("groom_representative = ?");
-      updateValues.push(groomRepresentative);
+      // Convert FormData string booleans properly
+      updateValues.push(groomRepresentative === 'true' || groomRepresentative === true || groomRepresentative === '1' || groomRepresentative === 1);
     }
 
     // Groom Representative
@@ -1936,15 +1939,18 @@ const updateApplication = async (req, res) => {
     }
     if (brideConfirm !== undefined) {
       updateFields.push("bride_confirm = ?");
-      updateValues.push(brideConfirm);
+      // Convert FormData string booleans properly
+      updateValues.push(brideConfirm === 'true' || brideConfirm === true || brideConfirm === '1' || brideConfirm === 1);
     }
     if (bridePersonally !== undefined) {
       updateFields.push("bride_personally = ?");
-      updateValues.push(bridePersonally);
+      // Convert FormData string booleans properly
+      updateValues.push(bridePersonally === 'true' || bridePersonally === true || bridePersonally === '1' || bridePersonally === 1);
     }
     if (brideRepresentative !== undefined) {
       updateFields.push("bride_representative = ?");
-      updateValues.push(brideRepresentative);
+      // Convert FormData string booleans properly
+      updateValues.push(brideRepresentative === 'true' || brideRepresentative === true || brideRepresentative === '1' || brideRepresentative === 1);
     }
 
     // Bride Representative
@@ -1972,7 +1978,11 @@ const updateApplication = async (req, res) => {
     // Mahr
     if (mahrAmount !== undefined) {
       updateFields.push("mahr_amount = ?");
-      updateValues.push(mahrAmount || null);
+      // Convert mahrAmount to number if provided (FormData sends as string)
+      const normalizedMahrAmount = mahrAmount && mahrAmount !== '' && mahrAmount !== 'null' 
+        ? (typeof mahrAmount === 'string' ? (isNaN(parseFloat(mahrAmount)) ? null : parseFloat(mahrAmount)) : (isNaN(Number(mahrAmount)) ? null : Number(mahrAmount)))
+        : null;
+      updateValues.push(normalizedMahrAmount);
     }
     if (mahrType !== undefined) {
       // Normalize mahrType: handle "Deffered" typo, convert to lowercase
@@ -1986,11 +1996,11 @@ const updateApplication = async (req, res) => {
     }
 
     // Solemnisation
-    if (normalizedSolemnisedDate !== undefined) {
+    if (solemnisedDate !== undefined) {
       updateFields.push("solemnised_date = ?");
       updateValues.push(normalizedSolemnisedDate);
     }
-    if (normalizedSolemnisedTime !== undefined) {
+    if (solemnisedTime !== undefined) {
       updateFields.push("solemnised_time = ?");
       updateValues.push(normalizedSolemnisedTime);
     }
@@ -2007,7 +2017,8 @@ const updateApplication = async (req, res) => {
     // Note: email is stored in users table, not applications table
     // We'll update it separately after updating the application
     if (contactNumber !== undefined) {
-      // This might map to a contact field, adjust as needed
+      updateFields.push("contact_number = ?");
+      updateValues.push(contactNumber || null);
     }
     if (status !== undefined) {
       updateFields.push("status = ?");
@@ -2015,7 +2026,11 @@ const updateApplication = async (req, res) => {
     }
     if (depositAmount !== undefined) {
       updateFields.push("deposit_amount = ?");
-      updateValues.push(depositAmount || null);
+      // Convert depositAmount to number (FormData sends as string)
+      const normalizedDepositAmount = depositAmount && depositAmount !== '' && depositAmount !== 'null'
+        ? (typeof depositAmount === 'string' ? (isNaN(parseFloat(depositAmount)) ? null : parseFloat(depositAmount)) : (isNaN(Number(depositAmount)) ? null : Number(depositAmount)))
+        : null;
+      updateValues.push(normalizedDepositAmount);
     }
     if (paymentStatus !== undefined) {
       updateFields.push("payment_status = ?");
@@ -2137,23 +2152,36 @@ const updateApplication = async (req, res) => {
 
     // Update email in users table if provided
     if (email !== undefined && application.user_id) {
-      try {
-        // Check if email is already in use by another user
-        const [existingUser] = await pool.execute(
-          "SELECT id FROM users WHERE email = ? AND id != ?",
-          [email, application.user_id]
-        );
-        if (existingUser.length > 0) {
-          return res.status(409).json({
+      // Validate email format if provided
+      if (email && email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          return res.status(400).json({
             success: false,
-            message: "Email already in use by another user",
+            message: "Please provide a valid email address",
           });
         }
-        // Update the email in users table
-        await pool.execute("UPDATE users SET email = ? WHERE id = ?", [
-          email,
-          application.user_id,
-        ]);
+      }
+      
+      try {
+        // Check if email is already in use by another user (only if email is provided)
+        if (email && email.trim()) {
+          const [existingUser] = await pool.execute(
+            "SELECT id FROM users WHERE email = ? AND id != ?",
+            [email.toLowerCase().trim(), application.user_id]
+          );
+          if (existingUser.length > 0) {
+            return res.status(409).json({
+              success: false,
+              message: "Email already in use by another user",
+            });
+          }
+          // Update the email in users table
+          await pool.execute("UPDATE users SET email = ? WHERE id = ?", [
+            email.toLowerCase().trim(),
+            application.user_id,
+          ]);
+        }
       } catch (error) {
         console.error("Error updating user email:", error);
         return res.status(500).json({
