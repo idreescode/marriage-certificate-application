@@ -409,63 +409,12 @@ export default function AdminManualApplication() {
               return (a.id || 0) - (b.id || 0);
             });
             
-            // Build witness objects from applications table columns as fallback
-            // This ensures we have data even if witnesses table is empty
-            const witnessFromApp = {
-              // Witness 1 Male (order 1)
-              witness1Male: app.witness1_male_name ? {
-                witness_name: app.witness1_male_name,
-                witness_father_name: app.witness1_male_father_name,
-                witness_date_of_birth: app.witness1_male_date_of_birth,
-                witness_place_of_birth: app.witness1_male_place_of_birth,
-                witness_address: app.witness1_male_address,
-                witness_order: 1
-              } : null,
-              // Witness 1 Female (order 2)
-              witness1Female: app.witness1_female_name ? {
-                witness_name: app.witness1_female_name,
-                witness_father_name: app.witness1_female_father_name,
-                witness_date_of_birth: app.witness1_female_date_of_birth,
-                witness_place_of_birth: app.witness1_female_place_of_birth,
-                witness_address: app.witness1_female_address,
-                witness_order: 2
-              } : null,
-              // Witness 2 Male (order 3)
-              witness2Male: app.witness2_male_name ? {
-                witness_name: app.witness2_male_name,
-                witness_father_name: app.witness2_male_father_name,
-                witness_date_of_birth: app.witness2_male_date_of_birth,
-                witness_place_of_birth: app.witness2_male_place_of_birth,
-                witness_address: app.witness2_male_address,
-                witness_order: 3
-              } : null,
-              // Witness 2 Female (order 4)
-              witness2Female: app.witness2_female_name ? {
-                witness_name: app.witness2_female_name,
-                witness_father_name: app.witness2_female_father_name,
-                witness_date_of_birth: app.witness2_female_date_of_birth,
-                witness_place_of_birth: app.witness2_female_place_of_birth,
-                witness_address: app.witness2_female_address,
-                witness_order: 4
-              } : null
-            };
-            
-            // Merge witnesses from table with fallback from applications table
-            // Use witnesses table data if available, otherwise use applications table data
+            // Use witnesses from witnesses table only (sorted by witness_order)
             const finalWitnesses = [];
             for (let i = 0; i < 4; i++) {
               const order = i + 1;
               const witnessFromTable = sortedWitnesses.find(w => w.witness_order === order);
-              
-              if (witnessFromTable) {
-                finalWitnesses[i] = witnessFromTable;
-              } else {
-                // Fallback to applications table columns
-                if (order === 1) finalWitnesses[i] = witnessFromApp.witness1Male;
-                else if (order === 2) finalWitnesses[i] = witnessFromApp.witness1Female;
-                else if (order === 3) finalWitnesses[i] = witnessFromApp.witness2Male;
-                else if (order === 4) finalWitnesses[i] = witnessFromApp.witness2Female;
-              }
+              finalWitnesses[i] = witnessFromTable || null;
             }
             
             // Format dates for input fields (YYYY-MM-DD)
