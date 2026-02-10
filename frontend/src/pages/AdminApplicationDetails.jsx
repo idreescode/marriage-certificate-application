@@ -913,6 +913,7 @@ export default function AdminApplicationDetails() {
             {/* Dynamic numbering: Show witnesses in order (1, 2, 3, 4) based on witness_order */}
             {(() => {
               // Use witnesses from API response (witnesses table) sorted by witness_order
+              // Fallback to applications table columns if witnesses table is incomplete
               const witnessColors = [
                 { bgClass: "bg-witness-amber", iconClass: "icon-box-amber" },
                 { bgClass: "bg-witness-violet", iconClass: "icon-box-violet" },
@@ -922,7 +923,7 @@ export default function AdminApplicationDetails() {
               
               let displayWitnesses = [];
               
-              // Use witnesses from witnesses table (sorted by witness_order)
+              // First, try to use witnesses from witnesses table (sorted by witness_order)
               if (witnesses && witnesses.length > 0) {
                 const sortedWitnesses = [...witnesses].sort((a, b) => {
                   if (a.witness_order !== null && b.witness_order !== null) {
@@ -944,7 +945,63 @@ export default function AdminApplicationDetails() {
                 }));
               }
               
-              if (displayWitnesses.length === 0) {
+              // Build fallback from applications table columns if needed
+              const witnessesFromApp = [];
+              if (application.witness1_male_name) {
+                witnessesFromApp.push({
+                  name: application.witness1_male_name,
+                  fatherName: application.witness1_male_father_name,
+                  dateOfBirth: application.witness1_male_date_of_birth,
+                  placeOfBirth: application.witness1_male_place_of_birth,
+                  address: application.witness1_male_address
+                });
+              }
+              if (application.witness1_female_name) {
+                witnessesFromApp.push({
+                  name: application.witness1_female_name,
+                  fatherName: application.witness1_female_father_name,
+                  dateOfBirth: application.witness1_female_date_of_birth,
+                  placeOfBirth: application.witness1_female_place_of_birth,
+                  address: application.witness1_female_address
+                });
+              }
+              if (application.witness2_male_name) {
+                witnessesFromApp.push({
+                  name: application.witness2_male_name,
+                  fatherName: application.witness2_male_father_name,
+                  dateOfBirth: application.witness2_male_date_of_birth,
+                  placeOfBirth: application.witness2_male_place_of_birth,
+                  address: application.witness2_male_address
+                });
+              }
+              if (application.witness2_female_name) {
+                witnessesFromApp.push({
+                  name: application.witness2_female_name,
+                  fatherName: application.witness2_female_father_name,
+                  dateOfBirth: application.witness2_female_date_of_birth,
+                  placeOfBirth: application.witness2_female_place_of_birth,
+                  address: application.witness2_female_address
+                });
+              }
+              
+              // Merge: Use witnesses table data if available, otherwise use applications table data
+              const finalWitnesses = [];
+              for (let i = 0; i < 4; i++) {
+                if (displayWitnesses[i] && displayWitnesses[i].name) {
+                  finalWitnesses.push(displayWitnesses[i]);
+                } else if (witnessesFromApp[i] && witnessesFromApp[i].name) {
+                  finalWitnesses.push({
+                    ...witnessesFromApp[i],
+                    bgClass: witnessColors[finalWitnesses.length % witnessColors.length]?.bgClass || "bg-witness-card",
+                    iconClass: witnessColors[finalWitnesses.length % witnessColors.length]?.iconClass || "icon-box-blue"
+                  });
+                }
+              }
+              
+              // Filter out null/empty witnesses (only show witnesses with name)
+              const validWitnesses = finalWitnesses.filter(w => w && w.name && w.name.trim());
+              
+              if (validWitnesses.length === 0) {
                 return (
                   <div className="details-card bg-white border-dashed text-center py-12">
                     <p className="text-slate-400 font-medium">
@@ -956,7 +1013,7 @@ export default function AdminApplicationDetails() {
               
               return (
                 <div className="grid-2-cols">
-                  {displayWitnesses.map((witness, index) => (
+                  {validWitnesses.map((witness, index) => (
                     <div key={index} className={`details-card ${witness.bgClass}`}>
                       <div className="card-title-row">
                         <div className={`icon-box ${witness.iconClass}`}>
