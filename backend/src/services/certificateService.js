@@ -366,18 +366,18 @@ const generateCertificatePDF = async (applicationData, witnesses) => {
       witness2_signature: (witnesses && witnesses[1] && witnesses[1].witness_name) ? sigCell : '—',
 
       // Witness 3
-      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name) ? toUpperCase(witnesses[2].witness_name) : '—',
-      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name) ? toUpperCase(witnesses[2].witness_father_name) : '—',
+      witness3_name: (witnesses && witnesses[2] && witnesses[2].witness_name && witnesses[2].witness_name.trim()) ? toUpperCase(witnesses[2].witness_name) : '—',
+      witness3_father_name: (witnesses && witnesses[2] && witnesses[2].witness_father_name && witnesses[2].witness_father_name.trim()) ? toUpperCase(witnesses[2].witness_father_name) : '—',
       witness3_date_place_of_birth: (() => {
-        if (!witnesses || !witnesses[2]) return '—';
+        if (!witnesses || !witnesses[2] || !witnesses[2].witness_name || !witnesses[2].witness_name.trim()) return '—';
         const dob = formatDate(witnesses[2].witness_date_of_birth);
         const pob = toUpperCase(witnesses[2].witness_place_of_birth || '');
         if (!dob && !pob) return '—';
         if (dob && pob) return `${dob}<br/>${pob}`;
         return dob || pob;
       })(),
-      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address) ? toUpperCase(witnesses[2].witness_address) : '—',
-      witness3_signature: (witnesses && witnesses[2] && witnesses[2].witness_name) ? sigCell : '—',
+      witness3_address: (witnesses && witnesses[2] && witnesses[2].witness_address && witnesses[2].witness_address.trim()) ? toUpperCase(witnesses[2].witness_address) : '—',
+      witness3_signature: (witnesses && witnesses[2] && witnesses[2].witness_name && witnesses[2].witness_name.trim()) ? sigCell : '—',
 
       // Witness 4
       witness4_name: (witnesses && witnesses[3] && witnesses[3].witness_name) ? toUpperCase(witnesses[3].witness_name) : '—',
