@@ -548,6 +548,7 @@ const submitApplication = async (req, res) => {
       }
 
       // Insert witnesses with extended fields
+      // Order: Male 1, Male 2, Female 1, Female 2 (pehle male phir female)
       const witnessesData = [
         {
           name: witness1MaleName,
@@ -557,18 +558,18 @@ const submitApplication = async (req, res) => {
           address: witness1MaleAddress,
         },
         {
-          name: witness1FemaleName,
-          fatherName: witness1FemaleFatherName,
-          dob: witness1FemaleDateOfBirth,
-          pob: witness1FemalePlaceOfBirth,
-          address: witness1FemaleAddress,
-        },
-        {
           name: witness2MaleName,
           fatherName: witness2MaleFatherName,
           dob: witness2MaleDateOfBirth,
           pob: witness2MalePlaceOfBirth,
           address: witness2MaleAddress,
+        },
+        {
+          name: witness1FemaleName,
+          fatherName: witness1FemaleFatherName,
+          dob: witness1FemaleDateOfBirth,
+          pob: witness1FemalePlaceOfBirth,
+          address: witness1FemaleAddress,
         },
         {
           name: witness2FemaleName,
