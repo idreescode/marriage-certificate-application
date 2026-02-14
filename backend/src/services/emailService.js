@@ -354,7 +354,7 @@ const sendCertificateReadyEmail = async (applicationData) => {
   const mailOptions = {
     from: `"Jamiyat.org Nikah Services" <${process.env.EMAIL_USER}>`,
     to: portal_email,
-    subject: `Your Nikah Certificate is Ready - #${application_number}`,
+    subject: `Application Completed - #${application_number}`,
     html
     // No attachments - users must download from portal
   };
